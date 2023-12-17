@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Kreuzungen</title>
+    <!-- Metadata -->
+    <meta
+      property="og:description"
+      content="Upload a GPX file and see which rivers were crossed."
+    />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- External stylesheets and scripts -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css"
+    />
+    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
+
+    <!-- Inline styling -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body,
+      #map {
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- File input and map container -->
+    <input type="file" id="fileInput" />
+    <div id="map"></div>
+    <script>
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", handleFileChange, false);
+
+      let isMapCenteredToRoute = false;
+      let hoveredStateId = null;
+      const mapInstance = createMap();
+
+      function handleFileChange(e) {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) return;
+
+        const fileReader = new FileReader();
+        fileReader.readAsText(selectedFile);
+        fileReader.onload = async function (e) {
+          const fileContents = e.target.result;
+          const routeGeoJSON = parseGPXToGeoJSON(fileContents);
+
+          displayRoute(routeGeoJSON);
+          const routeBounds = turf.bbox(routeGeoJSON);
+          fitMapToBounds(routeBounds);
+          isMapCenteredToRoute = true;
+
+          const riversData = await fetchRivers(routeBounds);
+          const riversGeoJSON = parseOSMToGeoJSON(riversData);
+          const intersectingRivers = filterIntersectingRivers(
+            riversGeoJSON,
+            routeGeoJSON
+          );
+
+          // displayAllRivers(riversGeoJSON);
+          displayIntersectingRivers(intersectingRivers);
+        };
+      }
+
+      function createMap() {
+        return new maplibregl.Map({
+          container: "map",
+          style:
+            "https://api.maptiler.com/maps/outdoor-v2/style.json?key=ykqGqGPMAYuYgedgpBOY",
+          center: [0, 51.4769], // Greenwich meridian
+          zoom: 10,
+        });
+      }
+
+      function parseGPXToGeoJSON(contents) {
+        const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
+        return toGeoJSON.gpx(gpxDom);
+      }
+
+      function displayRoute(routeGeoJSON) {
+        mapInstance.addSource("route", { type: "geojson", data: routeGeoJSON });
+        mapInstance.addLayer({
+          id: "route",
+          type: "line",
+          source: "route",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#fc03ca", "line-width": 5 },
+        });
+      }
+
+      function fitMapToBounds(bbox) {
+        mapInstance.fitBounds(bbox, { padding: 50 });
+      }
+
+      async function fetchRivers(bbox) {
+        const response = await fetch(
+          "https://www.overpass-api.de/api/interpreter?",
+          {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+              "Content-Type": "application/json",
+            },
+            body: `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`,
+          }
+        );
+        return await response.text();
+      }
+
+      function parseOSMToGeoJSON(osmData) {
+        const riversDom = new DOMParser().parseFromString(osmData, "text/xml");
+        return osmtogeojson(riversDom);
+      }
+
+      function filterIntersectingRivers(riversGeoJSON, routeGeoJSON) {
+        return riversGeoJSON.features.filter((feature) =>
+          turf.booleanIntersects(feature, routeGeoJSON)
+        );
+      }
+
+      function displayIntersectingRivers(intersectingRivers) {
+        mapInstance.addSource("intersectingRivers", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: intersectingRivers,
+          },
+        });
+
+        mapInstance.addLayer({
+          id: "intersectingRivers",
+          type: "line",
+          source: "intersectingRivers",
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: {
+            "line-color": "#9B83AF",
+            "line-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              1,
+              0.5,
+            ],
+            "line-width": 3,
+          },
+        });
+
+        // Create a popup but don't add it to the map yet
+        const popup = new maplibregl.Popup({
+          closeButton: false,
+          closeOnClick: false,
+        });
+
+        // Show popup on mouseenter event
+        mapInstance.on("mouseenter", "intersectingRivers", (e) => {
+          const riverName = e.features[0].properties.name;
+          const coordinates = e.lngLat;
+
+          const popupContent = `${riverName}`;
+          popup.setLngLat(coordinates).setHTML(popupContent).addTo(mapInstance);
+        });
+
+        // Hide popup on mouseleave event
+        mapInstance.on("mouseleave", "intersectingRivers", () => {
+          popup.remove();
+          if (hoveredStateId) {
+            map.setFeatureState(
+              { source: "states", id: hoveredStateId },
+              { hover: false }
+            );
+          }
+          hoveredStateId = null;
+        });
+
+        // Update popup location on mousemove event
+        mapInstance.on("mousemove", "intersectingRivers", (e) => {
+          if (e.features.length > 0) {
+            if (hoveredStateId) {
+              map.setFeatureState(
+                { source: "intersectingRivers", id: hoveredStateId },
+                { hover: false }
+              );
+            }
+            hoveredStateId = e.features[0].id;
+            map.setFeatureState(
+              { source: "intersectingRivers", id: hoveredStateId },
+              { hover: true }
+            );
+          }
+
+          const coordinates = e.lngLat;
+          popup.setLngLat(coordinates);
+        });
+      }
+
+      function setMapCenter(pos) {
+        if (!isMapCenteredToRoute)
+          mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
+      }
+
+      navigator.geolocation.getCurrentPosition(setMapCenter);
+
+      mapInstance.on("load", async () => {});
+    </script>
+  </body>
+</html>
