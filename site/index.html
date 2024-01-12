@@ -31,13 +31,30 @@
       #map {
         height: 100%;
       }
+      .info-container {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.5);
+        color: #fff;
+        font-size: 11px;
+        line-height: 18px;
+        display: block;
+        margin: 0;
+        border-radius: 3px;
+        padding: 5px 10px;
+      }
     </style>
   </head>
 
   <body>
     <!-- File input and map container -->
     <input type="file" id="fileInput" />
-    <div id="map"></div>
+    <div id="map">
+      <div id="info" class="info-container" style="display: none"></div>
+    </div>
     <script>
       document
         .getElementById("fileInput")
@@ -69,7 +86,17 @@
             routeGeoJSON
           );
 
-          // displayAllRivers(riversGeoJSON);
+          // Display all the river names in the info-container
+          const riverNames = intersectingRivers.map(
+            (feature) => feature.properties.name
+          );
+          document.getElementById(
+            "info"
+          ).innerHTML = `<strong>Waterways's crossed:</strong><br>  ${riverNames.join(
+            "<br> "
+          )}`;
+          document.getElementById("info").style.display = "block";
+
           displayIntersectingRivers(intersectingRivers);
         };
       }
@@ -175,8 +202,8 @@
         mapInstance.on("mouseleave", "intersectingRivers", () => {
           popup.remove();
           if (hoveredStateId) {
-            map.setFeatureState(
-              { source: "states", id: hoveredStateId },
+            mapInstance.setFeatureState(
+              { source: "intersectingRivers", id: hoveredStateId },
               { hover: false }
             );
           }
@@ -187,13 +214,13 @@
         mapInstance.on("mousemove", "intersectingRivers", (e) => {
           if (e.features.length > 0) {
             if (hoveredStateId) {
-              map.setFeatureState(
+              mapInstance.setFeatureState(
                 { source: "intersectingRivers", id: hoveredStateId },
                 { hover: false }
               );
             }
             hoveredStateId = e.features[0].id;
-            map.setFeatureState(
+            mapInstance.setFeatureState(
               { source: "intersectingRivers", id: hoveredStateId },
               { hover: true }
             );
