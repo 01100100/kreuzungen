@@ -164,6 +164,7 @@
             type: "FeatureCollection",
             features: intersectingRivers,
           },
+          promoteId: "id",
         });
 
         mapInstance.addLayer({
@@ -172,12 +173,12 @@
           source: "intersectingRivers",
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
-            "line-color": "#9B83AF",
+            "line-color": "#0080ff",
             "line-opacity": [
               "case",
               ["boolean", ["feature-state", "hover"], false],
               1,
-              0.5,
+              0.7,
             ],
             "line-width": 3,
           },
