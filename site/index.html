@@ -64,7 +64,7 @@
       let isRouteDisplayed = null;
       let isIntersectingRiversDisplayed = null;
       let isMapCenteredToRoute = false;
-      let hoveredStateId = null;
+      let hoveredFeatureId = null;
       const mapInstance = createMap();
 
       function handleFileChange(e) {
@@ -222,27 +222,27 @@
         // Hide popup on mouseleave event
         mapInstance.on("mouseleave", "intersectingRivers", () => {
           popup.remove();
-          if (hoveredStateId) {
+          if (hoveredFeatureId) {
             mapInstance.setFeatureState(
-              { source: "intersectingRivers", id: hoveredStateId },
+              { source: "intersectingRivers", id: hoveredFeatureId },
               { hover: false }
             );
           }
-          hoveredStateId = null;
+          hoveredFeatureId = null;
         });
 
         // Update popup location on mousemove event
         mapInstance.on("mousemove", "intersectingRivers", (e) => {
           if (e.features.length > 0) {
-            if (hoveredStateId) {
+            if (hoveredFeatureId) {
               mapInstance.setFeatureState(
-                { source: "intersectingRivers", id: hoveredStateId },
+                { source: "intersectingRivers", id: hoveredFeatureId },
                 { hover: false }
               );
             }
-            hoveredStateId = e.features[0].id;
+            hoveredFeatureId = e.features[0].id;
             mapInstance.setFeatureState(
-              { source: "intersectingRivers", id: hoveredStateId },
+              { source: "intersectingRivers", id: hoveredFeatureId },
               { hover: true }
             );
           }
