@@ -60,11 +60,30 @@
         .getElementById("fileInput")
         .addEventListener("change", handleFileChange, false);
 
+      // Define global variables
+      let isRouteDisplayed = null;
+      let isIntersectingRiversDisplayed = null;
       let isMapCenteredToRoute = false;
       let hoveredStateId = null;
       const mapInstance = createMap();
 
       function handleFileChange(e) {
+        // Clear existing info and reset map state
+        if (isRouteDisplayed) {
+          mapInstance.removeLayer("route");
+          mapInstance.removeSource("route");
+        }
+        if (isIntersectingRiversDisplayed) {
+          mapInstance.removeLayer("intersectingRivers");
+          mapInstance.removeSource("intersectingRivers");
+        }
+        document.getElementById("info").innerHTML = "";
+        document.getElementById("info").style.display = "none";
+
+        processFileUpload(e);
+      }
+
+      function processFileUpload(e) {
         const selectedFile = e.target.files[0];
         if (!selectedFile) return;
 
@@ -125,6 +144,7 @@
           layout: { "line-join": "round", "line-cap": "round" },
           paint: { "line-color": "#fc03ca", "line-width": 5 },
         });
+        isRouteDisplayed = true;
       }
 
       function fitMapToBounds(bbox) {
@@ -230,6 +250,7 @@
           const coordinates = e.lngLat;
           popup.setLngLat(coordinates);
         });
+        isIntersectingRiversDisplayed = true;
       }
 
       function setMapCenter(pos) {
