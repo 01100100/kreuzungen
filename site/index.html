@@ -59,6 +59,7 @@
     <div id="map">
       <div id="info" class="info-container" style="display: none"></div>
     </div>
+
     <script>
       document
         .getElementById("fileInput")
@@ -96,30 +97,19 @@
         fileReader.onload = async function (e) {
           const fileContents = e.target.result;
           const routeGeoJSON = parseGPXToGeoJSON(fileContents);
-
           displayRoute(routeGeoJSON);
-          const routeBounds = turf.bbox(routeGeoJSON);
-          fitMapToBounds(routeBounds);
-          isMapCenteredToRoute = true;
 
-          const riversData = await fetchRivers(routeBounds);
+          const routeBoundingBox = turf.bbox(routeGeoJSON);
+          fitMapToBoundingBox(routeBoundingBox);
+
+          const riversData = await fetchRivers(routeBoundingBox);
           const riversGeoJSON = parseOSMToGeoJSON(riversData);
           const intersectingRivers = filterIntersectingRivers(
             riversGeoJSON,
             routeGeoJSON
           );
 
-          // Display all the river names in the info-container
-          const riverNames = intersectingRivers.map(
-            (feature) => feature.properties.name
-          );
-          document.getElementById(
-            "info"
-          ).innerHTML = `<strong>Waterways's crossed:</strong><br>  ${riverNames.join(
-            "<br> "
-          )}`;
-          document.getElementById("info").style.display = "block";
-
+          displayRiverNames(intersectingRivers);
           displayIntersectingRivers(intersectingRivers);
         };
       }
@@ -151,8 +141,9 @@
         isRouteDisplayed = true;
       }
 
-      function fitMapToBounds(bbox) {
+      function fitMapToBoundingBox(bbox) {
         mapInstance.fitBounds(bbox, { padding: 50 });
+        isMapCenteredToRoute = true;
       }
 
       async function fetchRivers(bbox) {
@@ -255,6 +246,19 @@
           popup.setLngLat(coordinates);
         });
         isIntersectingRiversDisplayed = true;
+      }
+
+      function displayRiverNames(intersectingRivers) {
+        // Display all the river names in the info-container
+        const riverNames = intersectingRivers.map(
+          (feature) => feature.properties.name
+        );
+        const infoElement = document.getElementById("info");
+
+        infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>${riverNames.join(
+          "<br>"
+        )}`;
+        infoElement.style.cssText = "display: block";
       }
 
       function setMapCenter(pos) {
