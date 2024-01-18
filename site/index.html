@@ -5,7 +5,7 @@
     <!-- Metadata -->
     <meta
       property="og:description"
-      content="Upload a GPX file and see which rivers were crossed."
+      content="Upload a GPX file and see which waterways were crossed."
     />
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -67,7 +67,7 @@
 
       // Define global variables
       let isRouteDisplayed = null;
-      let isIntersectingRiversDisplayed = null;
+      let isIntersectingWaterwaysDisplayed = null;
       let isMapCenteredToRoute = false;
       let hoveredFeatureId = null;
       const mapInstance = createMap();
@@ -78,9 +78,9 @@
           mapInstance.removeLayer("route");
           mapInstance.removeSource("route");
         }
-        if (isIntersectingRiversDisplayed) {
-          mapInstance.removeLayer("intersectingRivers");
-          mapInstance.removeSource("intersectingRivers");
+        if (isIntersectingWaterwaysDisplayed) {
+          mapInstance.removeLayer("intersectingWaterways");
+          mapInstance.removeSource("intersectingWaterways");
         }
         document.getElementById("info").innerHTML = "";
         document.getElementById("info").style.display = "none";
@@ -102,15 +102,15 @@
           const routeBoundingBox = turf.bbox(routeGeoJSON);
           fitMapToBoundingBox(routeBoundingBox);
 
-          const riversData = await fetchRivers(routeBoundingBox);
-          const riversGeoJSON = parseOSMToGeoJSON(riversData);
-          const intersectingRivers = filterIntersectingRivers(
-            riversGeoJSON,
+          const waterwaysData = await fetchWaterways(routeBoundingBox);
+          const waterwaysGeoJSON = parseOSMToGeoJSON(waterwaysData);
+          const intersectingWaterways = filterIntersectingWaterways(
+            waterwaysGeoJSON,
             routeGeoJSON
           );
 
-          displayRiverNames(intersectingRivers);
-          displayIntersectingRivers(intersectingRivers);
+          displayWaterwayNames(intersectingWaterways);
+          displayIntersectingWaterways(intersectingWaterways);
         };
       }
 
@@ -146,7 +146,7 @@
         isMapCenteredToRoute = true;
       }
 
-      async function fetchRivers(bbox) {
+      async function fetchWaterways(bbox) {
         const response = await fetch(
           "https://www.overpass-api.de/api/interpreter?",
           {
@@ -162,30 +162,30 @@
       }
 
       function parseOSMToGeoJSON(osmData) {
-        const riversDom = new DOMParser().parseFromString(osmData, "text/xml");
-        return osmtogeojson(riversDom);
+        const dom = new DOMParser().parseFromString(osmData, "text/xml");
+        return osmtogeojson(dom);
       }
 
-      function filterIntersectingRivers(riversGeoJSON, routeGeoJSON) {
-        return riversGeoJSON.features.filter((feature) =>
+      function filterIntersectingWaterways(waterwaysGeoJSON, routeGeoJSON) {
+        return waterwaysGeoJSON.features.filter((feature) =>
           turf.booleanIntersects(feature, routeGeoJSON)
         );
       }
 
-      function displayIntersectingRivers(intersectingRivers) {
-        mapInstance.addSource("intersectingRivers", {
+      function displayIntersectingWaterways(intersectingWaterways) {
+        mapInstance.addSource("intersectingWaterways", {
           type: "geojson",
           data: {
             type: "FeatureCollection",
-            features: intersectingRivers,
+            features: intersectingWaterways,
           },
           promoteId: "id",
         });
 
         mapInstance.addLayer({
-          id: "intersectingRivers",
+          id: "intersectingWaterways",
           type: "line",
-          source: "intersectingRivers",
+          source: "intersectingWaterways",
           layout: { "line-join": "round", "line-cap": "round" },
           paint: {
             "line-color": "#0080ff",
@@ -206,7 +206,7 @@
         });
 
         // Show popup on mouseenter event
-        mapInstance.on("mouseenter", "intersectingRivers", (e) => {
+        mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
           const riverName = e.features[0].properties.name;
           const coordinates = e.lngLat;
 
@@ -215,11 +215,11 @@
         });
 
         // Hide popup on mouseleave event
-        mapInstance.on("mouseleave", "intersectingRivers", () => {
+        mapInstance.on("mouseleave", "intersectingWaterways", () => {
           popup.remove();
           if (hoveredFeatureId) {
             mapInstance.setFeatureState(
-              { source: "intersectingRivers", id: hoveredFeatureId },
+              { source: "intersectingWaterways", id: hoveredFeatureId },
               { hover: false }
             );
           }
@@ -227,17 +227,17 @@
         });
 
         // Update popup location on mousemove event
-        mapInstance.on("mousemove", "intersectingRivers", (e) => {
+        mapInstance.on("mousemove", "intersectingWaterways", (e) => {
           if (e.features.length > 0) {
             if (hoveredFeatureId) {
               mapInstance.setFeatureState(
-                { source: "intersectingRivers", id: hoveredFeatureId },
+                { source: "intersectingWaterways", id: hoveredFeatureId },
                 { hover: false }
               );
             }
             hoveredFeatureId = e.features[0].id;
             mapInstance.setFeatureState(
-              { source: "intersectingRivers", id: hoveredFeatureId },
+              { source: "intersectingWaterways", id: hoveredFeatureId },
               { hover: true }
             );
           }
@@ -245,12 +245,12 @@
           const coordinates = e.lngLat;
           popup.setLngLat(coordinates);
         });
-        isIntersectingRiversDisplayed = true;
+        isIntersectingWaterwaysDisplayed = true;
       }
 
-      function displayRiverNames(intersectingRivers) {
+      function displayWaterwayNames(intersectingWaterways) {
         // Display all the river names in the info-container
-        const riverNames = intersectingRivers.map(
+        const riverNames = intersectingWaterways.map(
           (feature) => feature.properties.name
         );
         const infoElement = document.getElementById("info");
