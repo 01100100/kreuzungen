@@ -23,14 +23,18 @@
     <!-- Inline styling -->
     <style>
       body {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        min-height: 100vh;
         margin: 0;
         padding: 0;
       }
-      html,
-      body,
+
       #map {
-        height: 100%;
+        flex-grow: 1;
       }
+
       .info-container {
         position: absolute;
         top: 10px;
