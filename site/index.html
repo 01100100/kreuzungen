@@ -38,9 +38,11 @@
       .info-container {
         position: absolute;
         top: 10px;
+        max-height: calc(100% - 30px);
         left: 10px;
         z-index: 1;
-        overflow: auto;
+        overflow-x: auto;
+        overflow-y: scroll;
         background-color: rgba(0, 0, 0, 0.5);
         color: #fff;
         font-size: 11px;
