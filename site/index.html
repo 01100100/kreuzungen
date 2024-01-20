@@ -104,8 +104,10 @@
 
           const waterwaysData = await fetchWaterways(routeBoundingBox);
           const waterwaysGeoJSON = parseOSMToGeoJSON(waterwaysData);
+          const combinedWaterwaysGeoJSON =
+            combineGeometriesForFeaturesWithTheSameName(waterwaysGeoJSON);
           const intersectingWaterways = filterIntersectingWaterways(
-            waterwaysGeoJSON,
+            combinedWaterwaysGeoJSON,
             routeGeoJSON
           );
 
@@ -156,9 +158,53 @@
               "Content-Type": "application/json",
             },
             body: `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`,
+            body: `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`,
           }
         );
         return await response.text();
+      }
+
+      function combineGeometriesForFeaturesWithTheSameName(featureCollection) {
+        const uniqueFeatures = {};
+
+        featureCollection.features.forEach((feature) => {
+          if (feature.properties && feature.properties.name) {
+            const name = feature.properties.name;
+
+            if (!uniqueFeatures[name]) {
+              uniqueFeatures[name] = [feature];
+            } else {
+              uniqueFeatures[name].push(feature);
+            }
+          }
+        });
+        featuresArray = [];
+        Object.values(uniqueFeatures).forEach((features) => {
+          if (features.length === 1) {
+            featuresArray.push(features[0]);
+          } else {
+            const combinedFeature = turf.combine(
+              turf.featureCollection(features)
+            ).features[0];
+
+            // set the id combinedFeature.properties.name to be the unique name of the feature
+            combinedFeature.properties.name =
+              combinedFeature.properties.collectedProperties[0].name;
+
+            // set the id combinedFeature.id to be a concatenation of combinedFeature.properties.collectedProperties.[all].id
+            const collectedProperties =
+              combinedFeature.properties.collectedProperties;
+            const ids = collectedProperties.map((property) =>
+              property.id.replace("way/", "")
+            );
+            combinedId = `way/${ids.join("_")}`;
+            combinedFeature.properties.id = combinedId;
+            featuresArray.push(combinedFeature);
+          }
+        });
+
+        const output = turf.featureCollection(featuresArray);
+        return output;
       }
 
       function parseOSMToGeoJSON(osmData) {
@@ -193,7 +239,7 @@
               "case",
               ["boolean", ["feature-state", "hover"], false],
               1,
-              0.7,
+              0.6,
             ],
             "line-width": 3,
           },
@@ -250,9 +296,10 @@
 
       function displayWaterwayNames(intersectingWaterways) {
         // Display all the river names in the info-container
-        const riverNames = intersectingWaterways.map(
-          (feature) => feature.properties.name
-        );
+        const riverNames = intersectingWaterways
+          .map((feature) => feature.properties.name)
+          .filter((name) => name);
+
         const infoElement = document.getElementById("info");
 
         infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>${riverNames.join(
