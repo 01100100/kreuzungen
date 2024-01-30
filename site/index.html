@@ -151,13 +151,13 @@
           type: "line",
           source: "route",
           layout: { "line-join": "round", "line-cap": "round" },
-          paint: { "line-color": "#fc03ca", "line-width": 5 },
+          paint: { "line-color": "#fc03ca", "line-width": 7 },
         });
         isRouteDisplayed = true;
       }
 
       function fitMapToBoundingBox(bbox) {
-        mapInstance.fitBounds(bbox, { padding: 50 });
+        mapInstance.fitBounds(bbox, { padding: 50, animate: true });
         isMapCenteredToRoute = true;
       }
 
@@ -264,28 +264,43 @@
               1,
               0.6,
             ],
-            "line-width": 3,
+            "line-width": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false],
+              6,
+              4,
+            ],
           },
         });
 
-        // Create a popup but don't add it to the map yet
-        const popup = new maplibregl.Popup({
-          closeButton: false,
-          closeOnClick: false,
-        });
-
         // Show popup on mouseenter event
-        mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
+        mapInstance.on("click", "intersectingWaterways", (e) => {
           const riverName = e.features[0].properties.name;
+          const osm_url = `https://www.openstreetmap.org/${e.features[0].id}`;
           const coordinates = e.lngLat;
 
-          const popupContent = `${riverName}`;
-          popup.setLngLat(coordinates).setHTML(popupContent).addTo(mapInstance);
+          const popupContent = `${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>`;
+          new maplibregl.Popup({
+            closeButton: true,
+            closeOnClick: true,
+          })
+            .setLngLat(coordinates)
+            .setHTML(popupContent)
+            .addTo(mapInstance);
+        });
+
+        mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
+          mapInstance.getCanvas().style.cursor = "pointer";
+          hoveredFeatureId = e.features[0].id;
+          mapInstance.setFeatureState(
+            { source: "intersectingWaterways", id: hoveredFeatureId },
+            { hover: true }
+          );
         });
 
         // Hide popup on mouseleave event
         mapInstance.on("mouseleave", "intersectingWaterways", () => {
-          popup.remove();
+          mapInstance.getCanvas().style.cursor = "";
           if (hoveredFeatureId) {
             mapInstance.setFeatureState(
               { source: "intersectingWaterways", id: hoveredFeatureId },
@@ -310,9 +325,6 @@
               { hover: true }
             );
           }
-
-          const coordinates = e.lngLat;
-          popup.setLngLat(coordinates);
         });
         isIntersectingWaterwaysDisplayed = true;
       }
@@ -320,15 +332,50 @@
       function displayWaterwayNames(intersectingWaterways) {
         // Display all the river names in the info-container
         const riverNames = intersectingWaterways
-          .map((feature) => feature.properties.name)
-          .filter((name) => name);
+          .map((feature) => ({
+            name: feature.properties.name,
+            id: feature.id,
+            geometry: feature.geometry,
+          }))
+          .filter((item) => item.name);
 
         const infoElement = document.getElementById("info");
 
-        infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>${riverNames.join(
-          "<br>"
-        )}`;
-        infoElement.style.cssText = "display: block";
+        infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>`;
+
+        // Create a list of clickable items for each waterway name
+        riverNames.forEach((item) => {
+          const riverElement = document.createElement("div");
+          riverElement.textContent = item.name;
+          riverElement.style.cursor = "pointer"; // Change cursor style to indicate interactiveness
+
+          // Event listener when mouse enters over the element
+          riverElement.addEventListener("mouseenter", () => {
+            // Set line-opacity to 1 when hovered.
+            mapInstance.setFeatureState(
+              { source: "intersectingWaterways", id: item.id },
+              { hover: true }
+            );
+          });
+
+          // Event listener when mouse leaves the element
+          riverElement.addEventListener("mouseleave", () => {
+            mapInstance.setFeatureState(
+              { source: "intersectingWaterways", id: item.id },
+              { hover: false }
+            );
+          });
+          // Event listener for click event to fit the map to the bounding box
+          riverElement.addEventListener("click", () => {
+            // Use turf to calculate the bounding box of the feature's geometry
+            const routeBoundingBox = turf.bbox(item.geometry);
+            fitMapToBoundingBox(routeBoundingBox);
+          });
+
+          // Append the waterway name element to info container
+          infoElement.appendChild(riverElement);
+        });
+        infoElement.style.display = "block";
       }
 
       function setMapCenter(pos) {
