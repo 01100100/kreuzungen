@@ -40,6 +40,7 @@
         top: 10px;
         max-height: calc(100% - 30px);
         left: 10px;
+        max-width: calc(100% - 40px);
         z-index: 1;
         overflow-x: auto;
         overflow-y: scroll;
@@ -59,7 +60,22 @@
     <!-- File input and map container -->
     <input type="file" id="fileInput" />
     <div id="map">
-      <div id="info" class="info-container" style="display: none"></div>
+      <div id="info" class="info-container">
+        <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
+        <p></p>
+        <ol>
+          <li>Upload the `.gpx` file from your device.</li>
+          <li>
+            See your journey with all the rivers and streams you crossed.
+          </li>
+        </ol>
+        <h5 style="text-align: center">
+          ❤️ Powered by data from
+          <a href="https://www.openstreetmap.org/about" target="_blank"
+            >OpenStreetMap</a
+          >
+          ❤️
+      </div>
     </div>
 
     <script>
