@@ -63,31 +63,35 @@
     </div>
 
     <script>
-      document
-        .getElementById("fileInput")
-        .addEventListener("change", handleFileChange, false);
-
       // Define global variables
       let isRouteDisplayed = null;
       let isIntersectingWaterwaysDisplayed = null;
       let isMapCenteredToRoute = false;
       let hoveredFeatureId = null;
-      let bboxSizeLimit_m2 = 500000000;
       let isBigBbox = null;
+      const bboxSizeLimit_m2 = 500000000;
       const mapInstance = createMap();
+
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", handleFileChange, false);
+
+      mapInstance.removeLayerAndSource = function (name) {
+        this.removeLayer(name);
+        this.removeSource(name);
+      };
 
       function handleFileChange(e) {
         // Clear existing info and reset map state
         if (isRouteDisplayed) {
-          mapInstance.removeLayer("route");
-          mapInstance.removeSource("route");
+          mapInstance.removeLayerAndSource("route");
         }
         if (isIntersectingWaterwaysDisplayed) {
-          mapInstance.removeLayer("intersectingWaterways");
-          mapInstance.removeSource("intersectingWaterways");
+          mapInstance.removeLayerAndSource("intersectingWaterways");
         }
-        document.getElementById("info").innerHTML = "";
-        document.getElementById("info").style.display = "none";
+        const infoElement = document.getElementById("info");
+        infoElement.innerHTML = "";
+        infoElement.style.display = "none";
 
         processFileUpload(e);
       }
@@ -112,7 +116,7 @@
           const waterwaysData = await fetchWaterways(routeBoundingBox);
           const waterwaysGeoJSON = parseOSMToGeoJSON(waterwaysData);
           let intersectingWaterways = {};
-          if (isBigBbox) {
+          if (!isBigBbox) {
             intersectingWaterways = filterIntersectingWaterways(
               combineGeometriesForFeaturesWithTheSameName(waterwaysGeoJSON),
               routeGeoJSON
@@ -164,7 +168,7 @@
       async function fetchWaterways(bbox) {
         if (isBigBbox) {
           console.log(
-            "The Bbox is too big. To reduce the computation on the client size the fetch only relations and not way from the OSM overpass api."
+            "The Bbox is too big. To reduce the computation on the client size the fetch only bigger waterways (OSM relations) and ignore smaller streams (OSM ways) from the OSM overpass api."
           );
           console.log(
             `${turf.area(turf.bboxPolygon(bbox))} m**2 > ${bboxSizeLimit_m2}`
@@ -201,7 +205,8 @@
             }
           }
         });
-        featuresArray = [];
+
+        const featuresArray = [];
         Object.values(uniqueFeatures).forEach((features) => {
           if (features.length === 1) {
             featuresArray.push(features[0]);
@@ -209,10 +214,6 @@
             const combinedFeature = turf.combine(
               turf.featureCollection(features)
             ).features[0];
-
-            // set the id combinedFeature.properties.name to be the unique name of the feature
-            combinedFeature.properties.name =
-              combinedFeature.properties.collectedProperties[0].name;
 
             // set the id combinedFeature.id to be a concatenation of combinedFeature.properties.collectedProperties.[all].id
             const collectedProperties =
@@ -222,12 +223,14 @@
             );
             combinedId = `way/${ids.join("_")}`;
             combinedFeature.properties.id = combinedId;
+            combinedFeature.id = combinedId;
+            // set the id combinedFeature.properties.name to be the unique name of the feature
+            combinedFeature.properties.name = collectedProperties[0].name;
             featuresArray.push(combinedFeature);
           }
         });
 
-        const output = turf.featureCollection(featuresArray);
-        return output;
+        return turf.featureCollection(featuresArray);
       }
 
       function parseOSMToGeoJSON(osmData) {
@@ -273,13 +276,33 @@
           },
         });
 
-        // Show popup on mouseenter event
+        // Show popup on click
         mapInstance.on("click", "intersectingWaterways", (e) => {
           const riverName = e.features[0].properties.name;
-          const osm_url = `https://www.openstreetmap.org/${e.features[0].id}`;
+
+          // if MultiLineString/combined way then output a url for all way parts
+          if (e.features[0].properties.collectedProperties) {
+            console.log("inside");
+            const collectedProps = JSON.parse(
+              e.features[0].properties.collectedProperties
+            );
+            console.log(collectedProps);
+            let urls = collectedProps.map((property) => {
+              const id = property.id; // Assuming the 'id' field exists within the 'property' object
+              return `<a href="https://www.openstreetmap.org/${id}" target="_blank">https://www.openstreetmap.org/${id}</a>`;
+            });
+
+            // Join all the URLs with a <br> tag to display each on a new line
+            popupContent = `${riverName}<br>${urls.join("<br>")}`;
+          }
+          // else single lineString/relation url for relation
+          else {
+            const osm_url = `https://www.openstreetmap.org/${e.features[0].id}`;
+            popupContent = `${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>`;
+          }
+
           const coordinates = e.lngLat;
 
-          const popupContent = `${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>`;
           new maplibregl.Popup({
             closeButton: true,
             closeOnClick: true,
