@@ -42,5 +42,26 @@ def oauth_callback():
     return response.json()
 
 
+@app.route("/reoauth", methods=["POST"])
+def refresh_token():
+    refresh_token = request.form.get("refreshToken")
+    response = requests.post(
+        f"{CONFIG.STRAVA_API_URL}/oauth/token",
+        data={
+            "client_id": CONFIG.STRAVA_CLIENT_ID,
+            "client_secret": CONFIG.STRAVA_API_CLIENT_SECRET,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        },
+    )
+    if response.status_code != 200:
+        raise Exception(
+            f"Error refreshing access token, status code {response.status_code}"
+        )
+    response.json()
+
+    return response.json()
+
+
 if __name__ == "__main__":
     serve(app, listen="*:8080")
