@@ -19,6 +19,8 @@
     <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
     <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
     <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 
     <!-- Inline styling -->
     <style>
@@ -75,6 +77,16 @@
             >OpenStreetMap</a
           >
           ❤️
+          <div style="text-align: center">
+            <a
+              class="stravaButton"
+              href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=http://localhost:8000/index.html?exchange_token&approval_prompt=force&scope=read_all,activity:read_all"
+              ><img
+                id="strava-button-img"
+                class="stravaButton"
+                src="img/btn_strava_connect.png"
+            /></a>
+          </div>
       </div>
     </div>
 
@@ -427,5 +439,8 @@
 
       mapInstance.on("load", async () => {});
     </script>
+    <script src="js/strava_api.js"></script>
+    <script src="js/polyline.js"></script>
+
   </body>
 </html>
