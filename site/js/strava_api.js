@@ -48,7 +48,7 @@ else { // we have a code because they logged in and authorized. the code can be 
 function get_token(){
     // use code from authorization to get user token
     $.ajax({
-        url: 'http://localhost:8080/oauth',
+        url: 'https://kreuzungen.fly.dev/oauth',
         type: "POST",
         dataType:'json', 
         data: ({'code':code}),
@@ -80,7 +80,7 @@ function reAuthorize(refreshToken){
 
     // use code from authorization to get user token
     $.ajax({
-        url: 'http://localhost:8080/reoauth',
+        url: 'https://kreuzungen.fly.dev/reoauth',
         type: "POST",
         dataType:'json', 
         data: ({'refreshToken':refreshToken}),
