@@ -180,13 +180,16 @@
     }
 
     function createMap() {
-      return new maplibregl.Map({
+      const map = new maplibregl.Map({
         container: "map",
         style:
           "https://api.maptiler.com/maps/topo-v2/style.json?key=ykqGqGPMAYuYgedgpBOY",
         center: [0, 51.4769], // Greenwich meridian
         zoom: 10,
       });
+
+      map.addControl(new maplibregl.FullscreenControl())
+      return map
     }
 
     function parseGPXToGeoJSON(contents) {
