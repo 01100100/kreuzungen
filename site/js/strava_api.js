@@ -25,7 +25,6 @@ else if (token_exists & (new Date().getTime() / 1000) >= expires_at) { // their 
     console.log("Previous authorization detected; access token is expired");
 
     var refreshToken = JSON.parse(localStorage.getItem("strava_data")).refresh_token;
-    console.log(refreshToken)
     reAuthorize(refreshToken);
 }
 else if (queryString == "" || queryString == "?state=&error=access_denied"){ // we don't have a code. They still need to log in and authorize
@@ -61,7 +60,6 @@ function get_token(){
             // save data to local storage - important for refresh token in the future for reauthorization
             localStorage.setItem("strava_data", response);
 
-            console.log(response)
             // convert string to json
             response = JSON.parse(response);
 
@@ -76,7 +74,6 @@ function get_token(){
 
 
 function reAuthorize(refreshToken){
-    console.log("bere")
 
     // use code from authorization to get user token
     $.ajax({
@@ -173,14 +170,12 @@ function getActivities(pageNum) {
                 x.coordinates = polyline.decode(x.map.summary_polyline);
             });
 
-            console.log(strava_data)
             // some data prep
             strava_data.forEach(function(x){ 
                 // Have to flip between lat/long and long/lat
                 x.geojson =  turf.flip(turf.lineString(x.coordinates, {name: x.name}));
             });
 
-            console.log(strava_data);
             displayActivities(1)
         }
     })

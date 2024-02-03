@@ -331,11 +331,9 @@
 
         // if MultiLineString/combined way then output a url for all way parts
         if (e.features[0].properties.collectedProperties) {
-          console.log("inside");
           const collectedProps = JSON.parse(
             e.features[0].properties.collectedProperties
           );
-          console.log(collectedProps);
           let urls = collectedProps.map((property) => {
             const id = property.id; // Assuming the 'id' field exists within the 'property' object
             return `<a href="https://www.openstreetmap.org/${id}" target="_blank">https://www.openstreetmap.org/${id}</a>`;
