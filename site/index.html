@@ -1,431 +1,464 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Kreuzungen</title>
-    <!-- Metadata -->
-    <meta
-      property="og:description"
-      content="Upload a GPX file and see which waterways were crossed."
-    />
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- External stylesheets and scripts -->
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css"
-    />
-    <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
-    <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
-    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
-    <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
+<head>
+  <title>Kreuzungen</title>
+  <!-- Metadata -->
+  <meta property="og:description" content="Upload a GPX file and see which waterways were crossed." />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <!-- Inline styling -->
-    <style>
-      body {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-      }
+  <!-- External stylesheets and scripts -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
+  <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
+  <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+  <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-      #map {
-        flex-grow: 1;
-      }
 
-      .info-container {
-        position: absolute;
-        top: 10px;
-        max-height: calc(100% - 30px);
-        left: 10px;
-        max-width: calc(100% - 40px);
-        z-index: 1;
-        overflow-x: auto;
-        overflow-y: scroll;
-        background-color: rgba(0, 0, 0, 0.5);
-        color: #fff;
-        font-size: 11px;
-        line-height: 18px;
-        display: block;
-        margin: 0;
-        border-radius: 3px;
-        padding: 5px 10px;
-      }
-    </style>
-  </head>
+  <!-- Inline styling -->
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      min-height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
 
-  <body>
-    <!-- File input and map container -->
-    <input type="file" id="fileInput" />
-    <div id="map">
-      <div id="info" class="info-container">
-        <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
-        <p></p>
-        <ol>
-          <li>Upload the `.gpx` file from your device.</li>
-          <li>
-            See your journey with all the rivers and streams you crossed.
-          </li>
-        </ol>
-        <h5 style="text-align: center">
-          ❤️ Powered by data from
-          <a href="https://www.openstreetmap.org/about" target="_blank"
-            >OpenStreetMap</a
-          >
-          ❤️
-      </div>
+    #map {
+      flex-grow: 1;
+    }
+
+    .info-container {
+      position: absolute;
+      top: 10px;
+      max-height: calc(100% - 30px);
+      left: 10px;
+      max-width: calc(100% - 40px);
+      z-index: 1;
+      overflow-x: auto;
+      overflow-y: scroll;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      display: block;
+      margin: 0;
+      border-radius: 3px;
+      padding: 5px 10px;
+    }
+
+    .activities-container {
+      position: absolute;
+      bottom: 10px;
+      max-height: calc(100% - 30px);
+      left: 10px;
+      max-width: calc(100% - 40px);
+      z-index: 1;
+      overflow-x: auto;
+      overflow-y: scroll;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      display: block;
+      margin: 0;
+      border-radius: 3px;
+      padding: 5px 10px;
+    }
+
+    #strava-button-img {
+      width: 193px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- File input and map container -->
+  <input type="file" id="fileInput" />
+  <div id="map">
+    <div id="info" class="info-container">
+      <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
+      <p></p>
+      <ol>
+        <li>Upload the `.gpx` file from your device.</li>
+        <li>
+          See your journey with all the rivers and streams you crossed.
+        </li>
+      </ol>
+      <h5 style="text-align: center">
+        ❤️ Powered by data from
+        <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
+        ❤️
+        <br>
+        <br>
+        <div id="strava" style="text-align: center; display: none">
+          <a class="stravaButton"
+            href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://01100100.github.io/kreuzungen/index.html?exchange_token&approval_prompt=force&scope=read_all,activity:read_all"><img
+              id="strava-button-img" class="stravaButton" src="img/btn_strava_connect.png" /></a>
+        </div>
     </div>
+    <div id="activities" class="activities-container" style="display: none">
+    </div>
+  </div>
 
-    <script>
-      // Define global variables
-      let isRouteDisplayed = null;
-      let isIntersectingWaterwaysDisplayed = null;
-      let isMapCenteredToRoute = false;
-      let hoveredFeatureId = null;
-      let isBigBbox = null;
-      const bboxSizeLimit_m2 = 500000000;
-      const mapInstance = createMap();
+  <script>
+    // Define global variables
+    let isRouteDisplayed = null;
+    let isIntersectingWaterwaysDisplayed = null;
+    let isMapCenteredToRoute = false;
+    let hoveredFeatureId = null;
+    let isBigBbox = null;
+    const bboxSizeLimit_m2 = 500000000;
+    const mapInstance = createMap();
 
-      document
-        .getElementById("fileInput")
-        .addEventListener("change", handleFileChange, false);
+    document
+      .getElementById("fileInput")
+      .addEventListener("change", processFileUpload, false);
 
-      mapInstance.removeLayerAndSource = function (name) {
-        this.removeLayer(name);
-        this.removeSource(name);
+    mapInstance.removeLayerAndSource = function (name) {
+      this.removeLayer(name);
+      this.removeSource(name);
+    };
+
+    function clearRoute() {
+      // Clear existing info and reset map state
+      if (isRouteDisplayed) {
+        mapInstance.removeLayerAndSource("route");
+      }
+      if (isIntersectingWaterwaysDisplayed) {
+        mapInstance.removeLayerAndSource("intersectingWaterways");
+      }
+      const infoElement = document.getElementById("info");
+      infoElement.innerHTML = "";
+      infoElement.style.display = "none";
+    }
+
+    function processFileUpload(e) {
+      const selectedFile = e.target.files[0];
+      if (!selectedFile) return;
+
+      const fileReader = new FileReader();
+      fileReader.readAsText(selectedFile);
+      fileReader.onload = async function (e) {
+        const fileContents = e.target.result;
+        const routeGeoJSON = parseGPXToGeoJSON(fileContents);
+        processGeojson(routeGeoJSON)
       };
+    }
 
-      function handleFileChange(e) {
-        // Clear existing info and reset map state
-        if (isRouteDisplayed) {
-          mapInstance.removeLayerAndSource("route");
-        }
-        if (isIntersectingWaterwaysDisplayed) {
-          mapInstance.removeLayerAndSource("intersectingWaterways");
-        }
-        const infoElement = document.getElementById("info");
-        infoElement.innerHTML = "";
-        infoElement.style.display = "none";
+    async function processGeojson(routeGeoJSON) {
+      clearRoute()
+      addRoute(routeGeoJSON);
 
-        processFileUpload(e);
+      const routeBoundingBox = turf.bbox(routeGeoJSON);
+      fitMapToBoundingBox(routeBoundingBox);
+
+      isBigBbox =
+        turf.area(turf.bboxPolygon(routeBoundingBox)) > bboxSizeLimit_m2;
+
+      const waterwaysData = await fetchWaterways(routeBoundingBox);
+      const waterwaysGeoJSON = parseOSMToGeoJSON(waterwaysData);
+      let intersectingWaterways = {};
+      if (!isBigBbox) {
+        intersectingWaterways = filterIntersectingWaterways(
+          combineGeometriesForFeaturesWithTheSameName(waterwaysGeoJSON),
+          routeGeoJSON
+        );
+      } else {
+        intersectingWaterways = filterIntersectingWaterways(
+          waterwaysGeoJSON,
+          routeGeoJSON
+        );
       }
 
-      function processFileUpload(e) {
-        const selectedFile = e.target.files[0];
-        if (!selectedFile) return;
+      displayWaterwayNames(intersectingWaterways);
+      displayIntersectingWaterways(intersectingWaterways);
+    }
 
-        const fileReader = new FileReader();
-        fileReader.readAsText(selectedFile);
-        fileReader.onload = async function (e) {
-          const fileContents = e.target.result;
-          const routeGeoJSON = parseGPXToGeoJSON(fileContents);
-          displayRoute(routeGeoJSON);
+    function createMap() {
+      return new maplibregl.Map({
+        container: "map",
+        style:
+          "https://api.maptiler.com/maps/topo-v2/style.json?key=ykqGqGPMAYuYgedgpBOY",
+        center: [0, 51.4769], // Greenwich meridian
+        zoom: 10,
+      });
+    }
 
-          const routeBoundingBox = turf.bbox(routeGeoJSON);
-          fitMapToBoundingBox(routeBoundingBox);
+    function parseGPXToGeoJSON(contents) {
+      const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
+      return toGeoJSON.gpx(gpxDom);
+    }
 
-          isBigBbox =
-            turf.area(turf.bboxPolygon(routeBoundingBox)) > bboxSizeLimit_m2;
+    function addRoute(routeGeoJSON) {
+      mapInstance.addSource("route", { type: "geojson", data: routeGeoJSON });
+      mapInstance.addLayer({
+        id: "route",
+        type: "line",
+        source: "route",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: { "line-color": "#fc03ca", "line-width": 7 },
+      });
+      isRouteDisplayed = true;
+    }
 
-          const waterwaysData = await fetchWaterways(routeBoundingBox);
-          const waterwaysGeoJSON = parseOSMToGeoJSON(waterwaysData);
-          let intersectingWaterways = {};
-          if (!isBigBbox) {
-            intersectingWaterways = filterIntersectingWaterways(
-              combineGeometriesForFeaturesWithTheSameName(waterwaysGeoJSON),
-              routeGeoJSON
-            );
+    function fitMapToBoundingBox(bbox) {
+      mapInstance.fitBounds(bbox, { padding: 50, animate: true });
+      isMapCenteredToRoute = true;
+    }
+
+    async function fetchWaterways(bbox) {
+      if (isBigBbox) {
+        console.log(
+          "The Bbox is too big. To reduce the computation on the client size the fetch only bigger waterways (OSM relations) and ignore smaller streams (OSM ways) from the OSM overpass api."
+        );
+        console.log(
+          `${turf.area(turf.bboxPolygon(bbox))} m**2 > ${bboxSizeLimit_m2}`
+        );
+        waterwaysQuery = `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
+      } else {
+        waterwaysQuery = `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
+        waterwaysQuery = `(rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});)->._;out geom;`;
+      }
+      const response = await fetch(
+        "https://www.overpass-api.de/api/interpreter?",
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: waterwaysQuery,
+        }
+      );
+      return await response.text();
+    }
+
+    function combineGeometriesForFeaturesWithTheSameName(featureCollection) {
+      const uniqueFeatures = {};
+
+      featureCollection.features.forEach((feature) => {
+        if (feature.properties && feature.properties.name) {
+          const name = feature.properties.name;
+
+          if (!uniqueFeatures[name]) {
+            uniqueFeatures[name] = [feature];
           } else {
-            intersectingWaterways = filterIntersectingWaterways(
-              waterwaysGeoJSON,
-              routeGeoJSON
-            );
+            uniqueFeatures[name].push(feature);
           }
+        }
+      });
 
-          displayWaterwayNames(intersectingWaterways);
-          displayIntersectingWaterways(intersectingWaterways);
-        };
-      }
-
-      function createMap() {
-        return new maplibregl.Map({
-          container: "map",
-          style:
-            "https://api.maptiler.com/maps/topo-v2/style.json?key=ykqGqGPMAYuYgedgpBOY",
-          center: [0, 51.4769], // Greenwich meridian
-          zoom: 10,
-        });
-      }
-
-      function parseGPXToGeoJSON(contents) {
-        const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
-        return toGeoJSON.gpx(gpxDom);
-      }
-
-      function displayRoute(routeGeoJSON) {
-        mapInstance.addSource("route", { type: "geojson", data: routeGeoJSON });
-        mapInstance.addLayer({
-          id: "route",
-          type: "line",
-          source: "route",
-          layout: { "line-join": "round", "line-cap": "round" },
-          paint: { "line-color": "#fc03ca", "line-width": 7 },
-        });
-        isRouteDisplayed = true;
-      }
-
-      function fitMapToBoundingBox(bbox) {
-        mapInstance.fitBounds(bbox, { padding: 50, animate: true });
-        isMapCenteredToRoute = true;
-      }
-
-      async function fetchWaterways(bbox) {
-        if (isBigBbox) {
-          console.log(
-            "The Bbox is too big. To reduce the computation on the client size the fetch only bigger waterways (OSM relations) and ignore smaller streams (OSM ways) from the OSM overpass api."
-          );
-          console.log(
-            `${turf.area(turf.bboxPolygon(bbox))} m**2 > ${bboxSizeLimit_m2}`
-          );
-          waterwaysQuery = `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
+      const featuresArray = [];
+      Object.values(uniqueFeatures).forEach((features) => {
+        if (features.length === 1) {
+          featuresArray.push(features[0]);
         } else {
-          waterwaysQuery = `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
-          waterwaysQuery = `(rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});)->._;out geom;`;
+          const combinedFeature = turf.combine(
+            turf.featureCollection(features)
+          ).features[0];
+
+          // set the id combinedFeature.id to be a concatenation of combinedFeature.properties.collectedProperties.[all].id
+          const collectedProperties =
+            combinedFeature.properties.collectedProperties;
+          const ids = collectedProperties.map((property) =>
+            property.id.replace("way/", "")
+          );
+          combinedId = `way/${ids.join("_")}`;
+          combinedFeature.properties.id = combinedId;
+          combinedFeature.id = combinedId;
+          // set the id combinedFeature.properties.name to be the unique name of the feature
+          combinedFeature.properties.name = collectedProperties[0].name;
+          featuresArray.push(combinedFeature);
         }
-        const response = await fetch(
-          "https://www.overpass-api.de/api/interpreter?",
-          {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            body: waterwaysQuery,
-          }
+      });
+
+      return turf.featureCollection(featuresArray);
+    }
+
+    function parseOSMToGeoJSON(osmData) {
+      const dom = new DOMParser().parseFromString(osmData, "text/xml");
+      return osmtogeojson(dom);
+    }
+
+    function filterIntersectingWaterways(waterwaysGeoJSON, routeGeoJSON) {
+      return waterwaysGeoJSON.features.filter((feature) =>
+        turf.booleanIntersects(feature, routeGeoJSON)
+      );
+    }
+
+    function displayIntersectingWaterways(intersectingWaterways) {
+      mapInstance.addSource("intersectingWaterways", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: intersectingWaterways,
+        },
+        promoteId: "id",
+      });
+      isIntersectingWaterwaysDisplayed = true;
+
+
+      mapInstance.addLayer({
+        id: "intersectingWaterways",
+        type: "line",
+        source: "intersectingWaterways",
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "#0080ff",
+          "line-opacity": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            1,
+            0.6,
+          ],
+          "line-width": [
+            "case",
+            ["boolean", ["feature-state", "hover"], false],
+            6,
+            4,
+          ],
+        },
+      });
+
+      // Show popup on click
+      mapInstance.on("click", "intersectingWaterways", (e) => {
+        const riverName = e.features[0].properties.name;
+
+        // if MultiLineString/combined way then output a url for all way parts
+        if (e.features[0].properties.collectedProperties) {
+          const collectedProps = JSON.parse(
+            e.features[0].properties.collectedProperties
+          );
+          let urls = collectedProps.map((property) => {
+            const id = property.id; // Assuming the 'id' field exists within the 'property' object
+            return `<a href="https://www.openstreetmap.org/${id}" target="_blank">https://www.openstreetmap.org/${id}</a>`;
+          });
+
+          // Join all the URLs with a <br> tag to display each on a new line
+          popupContent = `${riverName}<br>${urls.join("<br>")}`;
+        }
+        // else single lineString/relation url for relation
+        else {
+          const osm_url = `https://www.openstreetmap.org/${e.features[0].id}`;
+          popupContent = `${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>`;
+        }
+
+        const coordinates = e.lngLat;
+
+        new maplibregl.Popup({
+          closeButton: true,
+          closeOnClick: true,
+        })
+          .setLngLat(coordinates)
+          .setHTML(popupContent)
+          .addTo(mapInstance);
+      });
+
+      mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
+        mapInstance.getCanvas().style.cursor = "pointer";
+        hoveredFeatureId = e.features[0].id;
+        mapInstance.setFeatureState(
+          { source: "intersectingWaterways", id: hoveredFeatureId },
+          { hover: true }
         );
-        return await response.text();
-      }
+      });
 
-      function combineGeometriesForFeaturesWithTheSameName(featureCollection) {
-        const uniqueFeatures = {};
-
-        featureCollection.features.forEach((feature) => {
-          if (feature.properties && feature.properties.name) {
-            const name = feature.properties.name;
-
-            if (!uniqueFeatures[name]) {
-              uniqueFeatures[name] = [feature];
-            } else {
-              uniqueFeatures[name].push(feature);
-            }
-          }
-        });
-
-        const featuresArray = [];
-        Object.values(uniqueFeatures).forEach((features) => {
-          if (features.length === 1) {
-            featuresArray.push(features[0]);
-          } else {
-            const combinedFeature = turf.combine(
-              turf.featureCollection(features)
-            ).features[0];
-
-            // set the id combinedFeature.id to be a concatenation of combinedFeature.properties.collectedProperties.[all].id
-            const collectedProperties =
-              combinedFeature.properties.collectedProperties;
-            const ids = collectedProperties.map((property) =>
-              property.id.replace("way/", "")
-            );
-            combinedId = `way/${ids.join("_")}`;
-            combinedFeature.properties.id = combinedId;
-            combinedFeature.id = combinedId;
-            // set the id combinedFeature.properties.name to be the unique name of the feature
-            combinedFeature.properties.name = collectedProperties[0].name;
-            featuresArray.push(combinedFeature);
-          }
-        });
-
-        return turf.featureCollection(featuresArray);
-      }
-
-      function parseOSMToGeoJSON(osmData) {
-        const dom = new DOMParser().parseFromString(osmData, "text/xml");
-        return osmtogeojson(dom);
-      }
-
-      function filterIntersectingWaterways(waterwaysGeoJSON, routeGeoJSON) {
-        return waterwaysGeoJSON.features.filter((feature) =>
-          turf.booleanIntersects(feature, routeGeoJSON)
-        );
-      }
-
-      function displayIntersectingWaterways(intersectingWaterways) {
-        mapInstance.addSource("intersectingWaterways", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: intersectingWaterways,
-          },
-          promoteId: "id",
-        });
-
-        mapInstance.addLayer({
-          id: "intersectingWaterways",
-          type: "line",
-          source: "intersectingWaterways",
-          layout: { "line-join": "round", "line-cap": "round" },
-          paint: {
-            "line-color": "#0080ff",
-            "line-opacity": [
-              "case",
-              ["boolean", ["feature-state", "hover"], false],
-              1,
-              0.6,
-            ],
-            "line-width": [
-              "case",
-              ["boolean", ["feature-state", "hover"], false],
-              6,
-              4,
-            ],
-          },
-        });
-
-        // Show popup on click
-        mapInstance.on("click", "intersectingWaterways", (e) => {
-          const riverName = e.features[0].properties.name;
-
-          // if MultiLineString/combined way then output a url for all way parts
-          if (e.features[0].properties.collectedProperties) {
-            console.log("inside");
-            const collectedProps = JSON.parse(
-              e.features[0].properties.collectedProperties
-            );
-            console.log(collectedProps);
-            let urls = collectedProps.map((property) => {
-              const id = property.id; // Assuming the 'id' field exists within the 'property' object
-              return `<a href="https://www.openstreetmap.org/${id}" target="_blank">https://www.openstreetmap.org/${id}</a>`;
-            });
-
-            // Join all the URLs with a <br> tag to display each on a new line
-            popupContent = `${riverName}<br>${urls.join("<br>")}`;
-          }
-          // else single lineString/relation url for relation
-          else {
-            const osm_url = `https://www.openstreetmap.org/${e.features[0].id}`;
-            popupContent = `${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>`;
-          }
-
-          const coordinates = e.lngLat;
-
-          new maplibregl.Popup({
-            closeButton: true,
-            closeOnClick: true,
-          })
-            .setLngLat(coordinates)
-            .setHTML(popupContent)
-            .addTo(mapInstance);
-        });
-
-        mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
-          mapInstance.getCanvas().style.cursor = "pointer";
-          hoveredFeatureId = e.features[0].id;
+      // Hide popup on mouseleave event
+      mapInstance.on("mouseleave", "intersectingWaterways", () => {
+        mapInstance.getCanvas().style.cursor = "";
+        if (hoveredFeatureId) {
           mapInstance.setFeatureState(
             { source: "intersectingWaterways", id: hoveredFeatureId },
-            { hover: true }
+            { hover: false }
           );
-        });
+        }
+        hoveredFeatureId = null;
+      });
 
-        // Hide popup on mouseleave event
-        mapInstance.on("mouseleave", "intersectingWaterways", () => {
-          mapInstance.getCanvas().style.cursor = "";
+      // Update popup location on mousemove event
+      mapInstance.on("mousemove", "intersectingWaterways", (e) => {
+        if (e.features.length > 0) {
           if (hoveredFeatureId) {
             mapInstance.setFeatureState(
               { source: "intersectingWaterways", id: hoveredFeatureId },
               { hover: false }
             );
           }
-          hoveredFeatureId = null;
+          hoveredFeatureId = e.features[0].id;
+          mapInstance.setFeatureState(
+            { source: "intersectingWaterways", id: hoveredFeatureId },
+            { hover: true }
+          );
+        }
+      });
+    }
+
+    function displayWaterwayNames(intersectingWaterways) {
+      // Display all the river names in the info-container
+      const riverNames = intersectingWaterways
+        .map((feature) => ({
+          name: feature.properties.name,
+          id: feature.id,
+          geometry: feature.geometry,
+        }))
+        .filter((item) => item.name);
+
+      const infoElement = document.getElementById("info");
+
+      infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>`;
+
+      // Create a list of clickable items for each waterway name
+      riverNames.forEach((item) => {
+        const riverElement = document.createElement("div");
+        riverElement.textContent = item.name;
+        riverElement.style.cursor = "pointer"; // Change cursor style to indicate interactiveness
+
+        // Event listener when mouse enters over the element
+        riverElement.addEventListener("mouseenter", () => {
+          // Set line-opacity to 1 when hovered.
+          mapInstance.setFeatureState(
+            { source: "intersectingWaterways", id: item.id },
+            { hover: true }
+          );
         });
 
-        // Update popup location on mousemove event
-        mapInstance.on("mousemove", "intersectingWaterways", (e) => {
-          if (e.features.length > 0) {
-            if (hoveredFeatureId) {
-              mapInstance.setFeatureState(
-                { source: "intersectingWaterways", id: hoveredFeatureId },
-                { hover: false }
-              );
-            }
-            hoveredFeatureId = e.features[0].id;
-            mapInstance.setFeatureState(
-              { source: "intersectingWaterways", id: hoveredFeatureId },
-              { hover: true }
-            );
-          }
+        // Event listener when mouse leaves the element
+        riverElement.addEventListener("mouseleave", () => {
+          mapInstance.setFeatureState(
+            { source: "intersectingWaterways", id: item.id },
+            { hover: false }
+          );
         });
-        isIntersectingWaterwaysDisplayed = true;
-      }
-
-      function displayWaterwayNames(intersectingWaterways) {
-        // Display all the river names in the info-container
-        const riverNames = intersectingWaterways
-          .map((feature) => ({
-            name: feature.properties.name,
-            id: feature.id,
-            geometry: feature.geometry,
-          }))
-          .filter((item) => item.name);
-
-        const infoElement = document.getElementById("info");
-
-        infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>`;
-
-        // Create a list of clickable items for each waterway name
-        riverNames.forEach((item) => {
-          const riverElement = document.createElement("div");
-          riverElement.textContent = item.name;
-          riverElement.style.cursor = "pointer"; // Change cursor style to indicate interactiveness
-
-          // Event listener when mouse enters over the element
-          riverElement.addEventListener("mouseenter", () => {
-            // Set line-opacity to 1 when hovered.
-            mapInstance.setFeatureState(
-              { source: "intersectingWaterways", id: item.id },
-              { hover: true }
-            );
-          });
-
-          // Event listener when mouse leaves the element
-          riverElement.addEventListener("mouseleave", () => {
-            mapInstance.setFeatureState(
-              { source: "intersectingWaterways", id: item.id },
-              { hover: false }
-            );
-          });
-          // Event listener for click event to fit the map to the bounding box
-          riverElement.addEventListener("click", () => {
-            // Use turf to calculate the bounding box of the feature's geometry
-            const routeBoundingBox = turf.bbox(item.geometry);
-            fitMapToBoundingBox(routeBoundingBox);
-          });
-
-          // Append the waterway name element to info container
-          infoElement.appendChild(riverElement);
+        // Event listener for click event to fit the map to the bounding box
+        riverElement.addEventListener("click", () => {
+          // Use turf to calculate the bounding box of the feature's geometry
+          const routeBoundingBox = turf.bbox(item.geometry);
+          fitMapToBoundingBox(routeBoundingBox);
         });
-        infoElement.style.display = "block";
-      }
 
-      function setMapCenter(pos) {
-        if (!isMapCenteredToRoute)
-          mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
-      }
+        // Append the waterway name element to info container
+        infoElement.appendChild(riverElement);
+      });
+      infoElement.style.display = "block";
+    }
 
-      navigator.geolocation.getCurrentPosition(setMapCenter);
+    function setMapCenter(pos) {
+      if (!isMapCenteredToRoute)
+        mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
+    }
 
-      mapInstance.on("load", async () => {});
-    </script>
-  </body>
+    navigator.geolocation.getCurrentPosition(setMapCenter);
+
+    mapInstance.on("load", async () => { });
+  </script>
+  <script src="js/strava_api.js"></script>
+  <script src="js/polyline.js"></script>
+
+</body>
+
 </html>
