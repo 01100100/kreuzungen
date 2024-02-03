@@ -25,29 +25,30 @@ else if (token_exists & (new Date().getTime() / 1000) >= expires_at) { // their 
     console.log("Previous authorization detected; access token is expired");
 
     var refreshToken = JSON.parse(localStorage.getItem("strava_data")).refresh_token;
+    console.log(refreshToken)
     reAuthorize(refreshToken);
 }
 else if (queryString == "" || queryString == "?state=&error=access_denied"){ // we don't have a code. They still need to log in and authorize
     // encourage them to log in and authorize
     console.log("No token in local storage, no authorization code");
-    document.getElementById("logInModal").style.display = "block";
-    // show some mock data loaded underneath log in modal
-    d3.json("data/data.json", function(error, data) {
-        renderDashboard(data);
-    });
+    document.getElementById("strava").style.display = "block";
+
 }
 else { // we have a code because they logged in and authorized. the code can be found in the URL params
     console.log("Authorization code retrieved");
+
     var urlParams = new URLSearchParams(queryString);
     var code = urlParams.get('code');
+
     get_token();
 }
+
 
 ////////////////////////////////// the functions /////////////////////////////////////////////////////////////
 function get_token(){
     // use code from authorization to get user token
     $.ajax({
-        url: 'https://kreuzungen.fly.dev/oauth',
+        url: 'http://localhost:8080/oauth',
         type: "POST",
         dataType:'json', 
         data: ({'code':code}),
@@ -60,17 +61,94 @@ function get_token(){
             // save data to local storage - important for refresh token in the future for reauthorization
             localStorage.setItem("strava_data", response);
 
+            console.log(response)
             // convert string to json
             response = JSON.parse(response);
 
             // save token
             token = response.access_token;
 
-            // get 30 activities
+            // get activities
             getActivities(1);   
         }
     });
+}
 
+
+function reAuthorize(refreshToken){
+    console.log("bere")
+
+    // use code from authorization to get user token
+    $.ajax({
+        url: 'http://localhost:8080/reoauth',
+        type: "POST",
+        dataType:'json', 
+        data: ({'refreshToken':refreshToken}),
+        complete: function(resp){
+            response = resp.responseText;
+
+            // response came in string with a weird '1' in the last position
+            response = JSON.parse(response.slice(0,-1));
+
+            // save token
+            token = response.access_token;
+
+            // get activities
+            getActivities(1);
+        }
+    });  
+}
+
+function displayActivities(pageNum) {
+    // Calculate the number of activities to display per page
+    const activitiesPerPage = 3;
+    
+    // Calculate the starting index for the current page
+    const startIndex = (pageNum - 1) * activitiesPerPage;
+
+    // Get the activities for the current page
+    const currentPageActivities = strava_data.slice(startIndex, startIndex + activitiesPerPage);
+
+    const infoElement = document.getElementById("activities");
+
+    // Clear previous content
+    infoElement.innerHTML = "";
+
+    // Display activity names in the info container for the current page
+    currentPageActivities.forEach(function(x) {
+        const nameElement = document.createElement("div");
+        nameElement.innerHTML = x.name;
+
+        // Add click event listener to load the activity on the map
+        nameElement.addEventListener("click", function() {
+            processGeojson(x.geojson);
+        });
+
+        infoElement.appendChild(nameElement);
+    });
+
+    infoElement.style.cursor = "pointer";
+    infoElement.style.display = "block";
+
+    // Display pagination arrows
+    if (pageNum > 1) {
+        const previousLink = document.createElement("a");
+        previousLink.innerHTML = "<";
+        previousLink.addEventListener("click", function() {
+            displayActivities(pageNum - 1);
+        });
+        infoElement.appendChild(previousLink);
+    }
+
+    if (strava_data.length > (startIndex + activitiesPerPage)) {
+        const nextLink = document.createElement("a");
+        nextLink.innerHTML = ">";
+        nextLink.style.float = "right";
+        nextLink.addEventListener("click", function() {
+            displayActivities(pageNum + 1);
+        });
+        infoElement.appendChild(nextLink);
+    }
 }
 
 function getActivities(pageNum) {
@@ -103,8 +181,7 @@ function getActivities(pageNum) {
             });
 
             console.log(strava_data);
-
-            // TODO: save result and display it. 
+            displayActivities(1)
         }
     })
 }
