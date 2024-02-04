@@ -129,7 +129,6 @@ function displayActivities(pageNum) {
     });
 
     infoElement.style.cursor = "pointer";
-    infoElement.style.display = "block";
 
     // Display pagination arrows
     if (pageNum > 1) {

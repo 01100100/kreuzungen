@@ -136,6 +136,7 @@
         button.onclick = () => {
           // Triggering the hidden file input click event
           this._fileInput.click();
+          this.hideinfoContainer()
         };
 
         const icon = document.createElement('i');
@@ -151,6 +152,13 @@
         this._container.parentNode.removeChild(this._container);
         this._fileInput.removeEventListener("change", this._processFileUpload, false);
         this._map = undefined;
+      }
+
+      hideinfoContainer() {
+        const infoContainer = document.getElementById("info");
+        if (infoContainer) {
+          infoContainer.style.display = 'none';
+        }
       }
     }
 
@@ -169,6 +177,7 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
+          this.hideinfoContainer()
           this.showActivitiesContainer();
         };
 
@@ -195,6 +204,13 @@
         const activitiesContainer = document.getElementById("activities");
         if (activitiesContainer) {
           activitiesContainer.style.display = 'none';
+        }
+      }
+
+      hideinfoContainer() {
+        const infoContainer = document.getElementById("info");
+        if (infoContainer) {
+          infoContainer.style.display = 'none';
         }
       }
 
