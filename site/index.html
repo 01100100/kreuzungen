@@ -10,13 +10,13 @@
 
   <!-- External stylesheets and scripts -->
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
-  <link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css">
+  <script src="https://kit.fontawesome.com/85c45c397d.js" crossorigin="anonymous"></script>
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
   <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
   <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  
+
 
 
   <!-- Inline styling -->
@@ -55,18 +55,16 @@
 
     .activities-container {
       position: absolute;
-      bottom: 10px;
-      max-height: calc(100% - 30px);
-      left: 10px;
-      max-width: calc(100% - 40px);
-      z-index: 1;
+      display: none;
+      z-index: 2;
+      top: 10px;
+      right: 49px;
       overflow-x: auto;
       overflow-y: scroll;
       background-color: rgba(0, 0, 0, 0.5);
       color: #fff;
       font-size: 11px;
       line-height: 18px;
-      display: block;
       margin: 0;
       border-radius: 3px;
       padding: 5px 10px;
@@ -74,19 +72,20 @@
 
     #strava-button-img {
       width: 193px;
+      height: 48px;
     }
   </style>
 </head>
 
 <body>
   <!-- File input and map container -->
-  <input type="file" id="fileInput" style="display: none;"/>
+  <input type="file" id="fileInput" style="display: none;" />
   <div id="map">
     <div id="info" class="info-container">
       <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
       <p></p>
       <ol>
-        <li>Upload the <code>.gpx</code> file from your device ( <i class="fa fa-upload"> )</i>.</li>
+        <li>Upload the <code>.gpx</code> file from your device ( <i class="fa-solid fa-upload"> )</i>.</li>
         <li>
           See your journey with all the rivers and streams you crossed.
         </li>
@@ -95,15 +94,13 @@
         ❤️ Powered by data from
         <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
         ❤️
-        <br>
-        <br>
-        <div id="strava" style="text-align: center; display: none">
-          <a class="stravaButton"
-            href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://01100100.github.io/kreuzungen/index.html?exchange_token&approval_prompt=force&scope=read_all,activity:read_all"><img
-              id="strava-button-img" class="stravaButton" src="img/btn_strava_connect.png" /></a>
-        </div>
     </div>
-    <div id="activities" class="activities-container" style="display: none">
+    <div id="activities" class="activities-container">
+      <div id="stravaConnect" style="display: none;">
+        <a style="height: 0;"
+          href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://01100100.github.io/kreuzungen/index.html?exchange_token&approval_prompt=force&scope=read_all,activity:read_all">
+          <img id="strava-button-img" class="stravaButton" src="img/btn_strava_connect.png" /></a>
+      </div>
     </div>
   </div>
 
@@ -126,7 +123,7 @@
         this._map = map;
         this._container = document.createElement('div');
         this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
-        
+
         const button = document.createElement('button');
         button.type = 'button';
         button.title = 'Upload File';
@@ -151,6 +148,56 @@
       }
     }
 
+    class StravaControl {
+      constructor() {
+      }
+      onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.title = 'Strava activities';
+        button.style.backgroundColor = "#fc4c02";
+        button.style.color = "white";
+        button.style.borderRadius = "4px";
+        button.onclick = () => {
+          this.showActivitiesContainer();
+        };
+
+        const icon = document.createElement('i');
+        icon.className = 'fa-brands fa-strava'; // Assuming you are using FontAwesome for icons
+        button.appendChild(icon);
+
+        this._container.appendChild(button);
+
+        // Event to hide activities-container when map is interacted with
+        this._map.on('mousedown', () => {
+          this.hideActivitiesContainer();
+        });
+
+        return this._container;
+      }
+
+      showActivitiesContainer() {
+        const activitiesContainer = document.getElementById("activities");
+        activitiesContainer.style.display = 'block';
+      }
+
+      hideActivitiesContainer() {
+        const activitiesContainer = document.getElementById("activities");
+        if (activitiesContainer) {
+          activitiesContainer.style.display = 'none';
+        }
+      }
+
+      onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._map.off('mousedown', this.hideActivitiesContainer); // Remove the event listener
+        this._map = undefined;
+      }
+    }
     const bboxSizeLimit_m2 = 500000000;
     const mapInstance = createMap();
 
@@ -218,7 +265,7 @@
       displayIntersectingWaterways(intersectingWaterways);
     }
 
-    
+
 
     function createMap() {
       const map = new maplibregl.Map({
@@ -233,7 +280,9 @@
 
       map.addControl(new maplibregl.FullscreenControl())
       const uploadControl = new UploadControl('fileInput', processFileUpload);
-      map.addControl(uploadControl, 'top-right'); 
+      map.addControl(uploadControl, 'top-right');
+      const stravaControl = new StravaControl();
+      map.addControl(stravaControl, 'top-right');
       return map
     }
 
