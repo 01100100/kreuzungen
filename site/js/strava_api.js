@@ -30,7 +30,7 @@ else if (token_exists & (new Date().getTime() / 1000) >= expires_at) { // their 
 else if (queryString == "" || queryString == "?state=&error=access_denied"){ // we don't have a code. They still need to log in and authorize
     // encourage them to log in and authorize
     console.log("No token in local storage, no authorization code");
-    document.getElementById("strava").style.display = "block";
+    document.getElementById("stravaConnect").style.display = "block";
 
 }
 else { // we have a code because they logged in and authorized. the code can be found in the URL params
@@ -98,7 +98,7 @@ function reAuthorize(refreshToken){
 
 function displayActivities(pageNum) {
     // Calculate the number of activities to display per page
-    const activitiesPerPage = 3;
+    const activitiesPerPage = 6;
     
     // Calculate the starting index for the current page
     const startIndex = (pageNum - 1) * activitiesPerPage;

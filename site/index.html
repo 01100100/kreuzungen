@@ -39,7 +39,7 @@
       top: 10px;
       max-height: calc(100% - 30px);
       left: 10px;
-      max-width: calc(100% - 40px);
+      max-width: calc(100% - 79px);
       z-index: 1;
       overflow-x: auto;
       overflow-y: scroll;
@@ -85,9 +85,12 @@
       <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
       <p></p>
       <ol>
-        <li>Upload the <code>.gpx</code> file from your device ( <i class="fa-solid fa-upload"> )</i>.</li>
-        <li>
-          See your journey with all the rivers and streams you crossed.
+        <li>Select the tour activity.
+
+          <br>- Upload <code>.gpx</code> file from your device ( <i class="fa fa-upload"></i> )
+          <br>- Sync your activity from Strava ( <i class="fa-brands fa-strava"></i> )
+        </li>
+        <li> See your journey with all the rivers and streams you crossed.
         </li>
       </ol>
       <h5 style="text-align: center">
@@ -127,6 +130,9 @@
         const button = document.createElement('button');
         button.type = 'button';
         button.title = 'Upload File';
+        button.style.backgroundColor = "#34c6eb";
+        button.style.color = "white";
+        button.style.borderRadius = "4px";
         button.onclick = () => {
           // Triggering the hidden file input click event
           this._fileInput.click();
