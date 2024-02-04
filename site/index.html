@@ -10,11 +10,13 @@
 
   <!-- External stylesheets and scripts -->
   <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.css" />
+  <link rel="stylesheet" href="https://unpkg.com/font-awesome@4.7.0/css/font-awesome.css">
   <script src="https://unpkg.com/maplibre-gl@3.6.2/dist/maplibre-gl.js"></script>
   <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
   <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
   <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  
 
 
   <!-- Inline styling -->
@@ -78,13 +80,13 @@
 
 <body>
   <!-- File input and map container -->
-  <input type="file" id="fileInput" />
+  <input type="file" id="fileInput" style="display: none;"/>
   <div id="map">
     <div id="info" class="info-container">
       <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
       <p></p>
       <ol>
-        <li>Upload the `.gpx` file from your device.</li>
+        <li>Upload the <code>.gpx</code> file from your device ( <i class="fa fa-upload"> )</i>.</li>
         <li>
           See your journey with all the rivers and streams you crossed.
         </li>
@@ -112,6 +114,43 @@
     let isMapCenteredToRoute = false;
     let hoveredFeatureId = null;
     let isBigBbox = null;
+
+    class UploadControl {
+      constructor(fileInputId, processFileUpload) {
+        this._fileInput = document.getElementById(fileInputId);
+        this._processFileUpload = processFileUpload;
+        this._fileInput.addEventListener("change", this._processFileUpload, false);
+      }
+
+      onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.title = 'Upload File';
+        button.onclick = () => {
+          // Triggering the hidden file input click event
+          this._fileInput.click();
+        };
+
+        const icon = document.createElement('i');
+        icon.className = 'fa fa-upload'; // Assuming you are using FontAwesome for icons
+        button.appendChild(icon);
+
+        this._container.appendChild(button);
+
+        return this._container;
+      }
+
+      onRemove() {
+        this._container.parentNode.removeChild(this._container);
+        this._fileInput.removeEventListener("change", this._processFileUpload, false);
+        this._map = undefined;
+      }
+    }
+
     const bboxSizeLimit_m2 = 500000000;
     const mapInstance = createMap();
 
@@ -179,6 +218,8 @@
       displayIntersectingWaterways(intersectingWaterways);
     }
 
+    
+
     function createMap() {
       const map = new maplibregl.Map({
         container: "map",
@@ -191,6 +232,8 @@
       });
 
       map.addControl(new maplibregl.FullscreenControl())
+      const uploadControl = new UploadControl('fileInput', processFileUpload);
+      map.addControl(uploadControl, 'top-right'); 
       return map
     }
 
