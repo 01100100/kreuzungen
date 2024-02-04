@@ -118,6 +118,10 @@ function displayActivities(pageNum) {
 
         // Add click event listener to load the activity on the map
         nameElement.addEventListener("click", function() {
+            const activitiesContainer = document.getElementById("activities");
+            if (activitiesContainer) {
+                activitiesContainer.style.display = 'none';
+            }
             processGeojson(x.geojson);
         });
 
