@@ -31,6 +31,7 @@ else if (queryString == "" || queryString == "?state=&error=access_denied"){ // 
     // encourage them to log in and authorize
     console.log("No token in local storage, no authorization code");
     document.getElementById("stravaConnect").style.display = "flex";
+    document.getElementById("stravaPowered").style.display = "none"
 
 }
 else { // we have a code because they logged in and authorized. the code can be found in the URL params
@@ -56,6 +57,9 @@ function get_token(){
 
             // response came in string with a weird '1' in the last position
             response = response.slice(0,-1);
+
+            // TODO: check for 200 code before persisting response.
+            // TODO: check scopes before storing token, if they are not set, then inform the user.
 
             // save data to local storage - important for refresh token in the future for reauthorization
             localStorage.setItem("strava_data", response);
@@ -85,9 +89,17 @@ function reAuthorize(refreshToken){
             response = resp.responseText;
 
             // response came in string with a weird '1' in the last position
-            response = JSON.parse(response.slice(0,-1));
+            response = response.slice(0,-1);
 
-            // save token
+            // TODO: check for 200 code before persisting response.
+
+            // save data to local storage - update persisted access_token
+            localStorage.setItem("strava_data", response);
+
+            // convert string to json
+            response = JSON.parse(response);
+
+            // set token
             token = response.access_token;
 
             // get activities
@@ -118,6 +130,7 @@ function displayActivities(pageNum) {
 
         // Add click event listener to load the activity on the map
         nameElement.addEventListener("click", function() {
+            console.log(x)
             const activitiesContainer = document.getElementById("activities");
             if (activitiesContainer) {
                 activitiesContainer.style.display = 'none';
@@ -133,7 +146,8 @@ function displayActivities(pageNum) {
     // Display pagination arrows
     if (pageNum > 1) {
         const previousLink = document.createElement("a");
-        previousLink.innerHTML = "<";
+        previousLink.innerHTML = '<i class="fa-solid fa-circle-left"></i>';
+        previousLink.style.float = "left"
         previousLink.addEventListener("click", function() {
             displayActivities(pageNum - 1);
         });
@@ -142,7 +156,7 @@ function displayActivities(pageNum) {
 
     if (strava_data.length > (startIndex + activitiesPerPage)) {
         const nextLink = document.createElement("a");
-        nextLink.innerHTML = ">";
+        nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
         nextLink.style.float = "right";
         nextLink.addEventListener("click", function() {
             displayActivities(pageNum + 1);
@@ -160,7 +174,7 @@ function getActivities(pageNum) {
         const spinnerElement = document.createElement("div")
         spinnerElement.id = "spinner"
         spinnerElement.style.textAlign = "center" 
-        spinnerElement.innerHTML = '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i><span class="sr-only">Loading...</span>'
+        spinnerElement.innerHTML = '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>'
         infoElement.appendChild(spinnerElement)       
     }
 
@@ -179,16 +193,13 @@ function getActivities(pageNum) {
                 // Filter out the activities that do not have coordinates
                 return x.map.summary_polyline && x.map.summary_polyline.length > 0;
             });; // save final page's activities to main data array and move on
-
+            
             // some data prep
             strava_data.forEach(function(x){ 
                 x.coordinates = polyline.decode(x.map.summary_polyline);
-            });
-
-            // some data prep
-            strava_data.forEach(function(x){ 
                 // Have to flip between lat/long and long/lat
                 x.geojson =  turf.flip(turf.lineString(x.coordinates, {name: x.name}));
+                x.geojson.properties.url = `https://www.strava.com/activities/${x.id}`
             });
 
             displayActivities(1)
