@@ -37,9 +37,9 @@
     .info-container {
       position: absolute;
       top: 10px;
-      max-height: calc(100% - 30px);
+      max-height: calc(50% - 30px);
       left: 10px;
-      max-width: calc(100% - 79px);
+      max-width: calc(100% - 69px);
       z-index: 1;
       overflow-x: auto;
       overflow-y: scroll;
@@ -50,7 +50,7 @@
       display: block;
       margin: 0;
       border-radius: 3px;
-      padding: 5px 10px;
+      padding: 5px 5px;
     }
 
     .activities-container {
@@ -59,6 +59,7 @@
       z-index: 2;
       top: 10px;
       right: 49px;
+      max-width: calc(100% - 69px);
       overflow-x: auto;
       overflow-y: scroll;
       background-color: rgba(0, 0, 0, 0.5);
@@ -67,12 +68,7 @@
       line-height: 18px;
       margin: 0;
       border-radius: 3px;
-      padding: 5px 10px;
-    }
-
-    #strava-button-img {
-      width: 193px;
-      height: 48px;
+      padding: 5px 5px;
     }
   </style>
 </head>
@@ -85,10 +81,10 @@
       <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
       <p></p>
       <ol>
-        <li>Select the tour activity.
+        <li>Select the tour activity by using the controls on the right ↝
 
-          <br>- Upload <code>.gpx</code> file from your device ( <i class="fa fa-upload"></i> )
-          <br>- Sync your activity from Strava ( <i class="fa-brands fa-strava"></i> )
+          <br>- Upload <code>.gpx</code> file from your device <i class="fa fa-upload"></i>
+          <br>- Sync your activity from Strava <i class="fa-brands fa-strava"></i>
         </li>
         <li> See your journey with all the rivers and streams you crossed.
         </li>
@@ -99,11 +95,21 @@
         ❤️
     </div>
     <div id="activities" class="activities-container">
-      <div id="stravaConnect" style="display: none;">
-        <a style="height: 0;"
-          href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://01100100.github.io/kreuzungen/index.html?exchange_token&approval_prompt=force&scope=read_all,activity:read_all">
-          <img id="strava-button-img" class="stravaButton" src="img/btn_strava_connect.png" /></a>
+
+      <a id="stravaConnect" style="display: none;"
+        href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://01100100.github.io/kreuzungen/index.html?exchange_token&approval_prompt=force&scope=read_all,activity:read_all">
+        <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava">
+      </a>
+
+
+      <div id="activitiesList">
+
       </div>
+      <div style="text-align: center;">
+        <img src="img/api_logo_pwrdBy_strava_horiz_white.svg" width="100" alt="Powered by Strava"
+          style="text-align: center;">
+      </div>
+
     </div>
   </div>
 
@@ -134,9 +140,11 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
+          this.hideActivitiesContainer();
+          this.hideInfoContainer();
           // Triggering the hidden file input click event
           this._fileInput.click();
-          this.hideinfoContainer()
+
         };
 
         const icon = document.createElement('i');
@@ -154,7 +162,14 @@
         this._map = undefined;
       }
 
-      hideinfoContainer() {
+      hideActivitiesContainer() {
+        const activitiesContainer = document.getElementById("activities");
+        if (activitiesContainer) {
+          activitiesContainer.style.display = 'none';
+        }
+      }
+
+      hideInfoContainer() {
         const infoContainer = document.getElementById("info");
         if (infoContainer) {
           infoContainer.style.display = 'none';
@@ -177,7 +192,7 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
-          this.hideinfoContainer()
+          this.hideInfoContainer()
           this.showActivitiesContainer();
         };
 
@@ -190,6 +205,7 @@
         // Event to hide activities-container when map is interacted with
         this._map.on('mousedown', () => {
           this.hideActivitiesContainer();
+          this.showInfoContainer();
         });
 
         return this._container;
@@ -200,6 +216,11 @@
         activitiesContainer.style.display = 'block';
       }
 
+      showInfoContainer() {
+        const infoContainer = document.getElementById("info");
+        infoContainer.style.display = 'block';
+      }
+
       hideActivitiesContainer() {
         const activitiesContainer = document.getElementById("activities");
         if (activitiesContainer) {
@@ -207,7 +228,7 @@
         }
       }
 
-      hideinfoContainer() {
+      hideInfoContainer() {
         const infoContainer = document.getElementById("info");
         if (infoContainer) {
           infoContainer.style.display = 'none';
@@ -246,6 +267,7 @@
     }
 
     function processFileUpload(e) {
+      // TODO: showActivityContainer again if no files are present...
       const selectedFile = e.target.files[0];
       if (!selectedFile) return;
 
@@ -529,7 +551,7 @@
 
       const infoElement = document.getElementById("info");
 
-      infoElement.innerHTML = `<strong>Waterways crossed:</strong><br>`;
+      infoElement.innerHTML = `<strong>Waterways crossed: ${riverNames.length}</strong><br>`;
 
       // Create a list of clickable items for each waterway name
       riverNames.forEach((item) => {

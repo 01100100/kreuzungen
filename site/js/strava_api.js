@@ -30,7 +30,7 @@ else if (token_exists & (new Date().getTime() / 1000) >= expires_at) { // their 
 else if (queryString == "" || queryString == "?state=&error=access_denied"){ // we don't have a code. They still need to log in and authorize
     // encourage them to log in and authorize
     console.log("No token in local storage, no authorization code");
-    document.getElementById("stravaConnect").style.display = "block";
+    document.getElementById("stravaConnect").style.display = "flex";
 
 }
 else { // we have a code because they logged in and authorized. the code can be found in the URL params
@@ -106,7 +106,7 @@ function displayActivities(pageNum) {
     // Get the activities for the current page
     const currentPageActivities = strava_data.slice(startIndex, startIndex + activitiesPerPage);
 
-    const infoElement = document.getElementById("activities");
+    const infoElement = document.getElementById("activitiesList");
 
     // Clear previous content
     infoElement.innerHTML = "";
@@ -152,6 +152,18 @@ function displayActivities(pageNum) {
 }
 
 function getActivities(pageNum) {
+    // show loading spinner
+    const infoElement = document.getElementById("activitiesList");
+
+    const spinnerContainer = document.getElementById("spinner");
+    if (!spinnerContainer) {
+        const spinnerElement = document.createElement("div")
+        spinnerElement.id = "spinner"
+        spinnerElement.style.textAlign = "center" 
+        spinnerElement.innerHTML = '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i><span class="sr-only">Loading...</span>'
+        infoElement.appendChild(spinnerElement)       
+    }
+
     const activities_link = `https://www.strava.com/api/v3/activities?per_page=200&access_token=` + token + "&page=" + pageNum;
     fetch(activities_link)
     .then(response => response.json())
@@ -182,4 +194,6 @@ function getActivities(pageNum) {
             displayActivities(1)
         }
     })
+
+    // spinnerElement.remove()
 }
