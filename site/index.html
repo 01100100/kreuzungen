@@ -140,8 +140,8 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
-          this.hideActivitiesContainer();
-          this.hideInfoContainer();
+          hideActivitiesContainer();
+          hideInfoContainer();
           // Triggering the hidden file input click event
           this._fileInput.click();
 
@@ -162,19 +162,7 @@
         this._map = undefined;
       }
 
-      hideActivitiesContainer() {
-        const activitiesContainer = document.getElementById("activities");
-        if (activitiesContainer) {
-          activitiesContainer.style.display = 'none';
-        }
-      }
 
-      hideInfoContainer() {
-        const infoContainer = document.getElementById("info");
-        if (infoContainer) {
-          infoContainer.style.display = 'none';
-        }
-      }
     }
 
     class StravaControl {
@@ -192,8 +180,8 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
-          this.hideInfoContainer()
-          this.showActivitiesContainer();
+          hideInfoContainer()
+          showActivitiesContainer();
         };
 
         const icon = document.createElement('i');
@@ -204,35 +192,11 @@
 
         // Event to hide activities-container when map is interacted with
         this._map.on('mousedown', () => {
-          this.hideActivitiesContainer();
-          this.showInfoContainer();
+          hideActivitiesContainer();
+          showInfoContainer();
         });
 
         return this._container;
-      }
-
-      showActivitiesContainer() {
-        const activitiesContainer = document.getElementById("activities");
-        activitiesContainer.style.display = 'block';
-      }
-
-      showInfoContainer() {
-        const infoContainer = document.getElementById("info");
-        infoContainer.style.display = 'block';
-      }
-
-      hideActivitiesContainer() {
-        const activitiesContainer = document.getElementById("activities");
-        if (activitiesContainer) {
-          activitiesContainer.style.display = 'none';
-        }
-      }
-
-      hideInfoContainer() {
-        const infoContainer = document.getElementById("info");
-        if (infoContainer) {
-          infoContainer.style.display = 'none';
-        }
       }
 
       onRemove() {
@@ -244,14 +208,41 @@
     const bboxSizeLimit_m2 = 500000000;
     const mapInstance = createMap();
 
-    document
-      .getElementById("fileInput")
-      .addEventListener("change", processFileUpload, false);
+    fileInput = document.getElementById("fileInput")
+    fileInput.addEventListener("change", processFileUpload, false);
+    document.querySelector("input").addEventListener("cancel", (evt) => {
+      showInfoContainer();
+    });
 
+    // functions
     mapInstance.removeLayerAndSource = function (name) {
       this.removeLayer(name);
       this.removeSource(name);
     };
+
+    function hideInfoContainer() {
+      const infoContainer = document.getElementById("info");
+      if (infoContainer) {
+        infoContainer.style.display = 'none';
+      }
+    }
+
+    function showInfoContainer() {
+      const infoContainer = document.getElementById("info");
+      infoContainer.style.display = 'block';
+    }
+
+    function hideActivitiesContainer() {
+      const activitiesContainer = document.getElementById("activities");
+      if (activitiesContainer) {
+        activitiesContainer.style.display = 'none';
+      }
+    }
+
+    function showActivitiesContainer() {
+      const activitiesContainer = document.getElementById("activities");
+      activitiesContainer.style.display = 'block';
+    }
 
     function clearRoute() {
       // Clear existing info and reset map state
