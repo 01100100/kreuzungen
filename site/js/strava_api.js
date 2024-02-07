@@ -38,9 +38,26 @@ else { // we have a code because they logged in and authorized. the code can be 
     console.log("Authorization code retrieved");
 
     var urlParams = new URLSearchParams(queryString);
-    var code = urlParams.get('code');
 
-    get_token();
+    //check the required scopes have been approved.
+    var approvedScopes = urlParams.get('scope')
+    var requiredScopes = ['activity', 'activity:read_all'];
+
+    var hasRequiredScopes = requiredScopes.some(function(scope) {
+        return approvedScopes.includes(scope);
+    });
+
+    if (hasRequiredScopes) {
+        var code = urlParams.get('code');
+        get_token();
+    } else {
+        console.log('Missing required scopes');
+        alert("For this app to work with strava, you need to authorize it to view activity data. Please authenticate again and authorize the app.")
+        document.getElementById("stravaConnect").style.display = "flex";
+        document.getElementById("stravaPowered").style.display = "none"
+    }
+    
+
 }
 
 
@@ -59,7 +76,6 @@ function get_token(){
             response = response.slice(0,-1);
 
             // TODO: check for 200 code before persisting response.
-            // TODO: check scopes before storing token, if they are not set, then inform the user.
 
             // save data to local storage - important for refresh token in the future for reauthorization
             localStorage.setItem("strava_data", response);
@@ -130,7 +146,6 @@ function displayActivities(pageNum) {
 
         // Add click event listener to load the activity on the map
         nameElement.addEventListener("click", function() {
-            console.log(x)
             const activitiesContainer = document.getElementById("activities");
             if (activitiesContainer) {
                 activitiesContainer.style.display = 'none';
