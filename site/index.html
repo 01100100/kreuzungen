@@ -59,6 +59,25 @@
       padding: 5px 5px;
     }
 
+    .source-container {
+      position: absolute;
+      bottom: 10px;
+      max-height: calc(50% - 30px);
+      left: 10px;
+      max-width: calc(100% - 69px);
+      z-index: 1;
+      overflow-x: auto;
+      overflow-y: scroll;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      display: none;
+      margin: 0;
+      border-radius: 3px;
+      padding: 5px 5px;
+    }
+
     .activities-container {
       position: absolute;
       display: none;
@@ -118,6 +137,9 @@
       </div>
 
     </div>
+    <div id="source" class="source-container">
+
+    </div>
   </div>
 
   <script>
@@ -129,10 +151,9 @@
     let isBigBbox = null;
 
     class UploadControl {
-      constructor(fileInputId, processFileUpload) {
+      constructor(fileInputId) {
         this._fileInput = document.getElementById(fileInputId);
-        this._processFileUpload = processFileUpload;
-        this._fileInput.addEventListener("change", this._processFileUpload, false);
+        this._fileInput.addEventListener("change", processFileUpload, false);
       }
 
       onAdd(map) {
@@ -148,7 +169,7 @@
         button.style.borderRadius = "4px";
         button.onclick = () => {
           hideActivitiesContainer();
-          hideInfoContainer();
+          hideInfo();
           // Triggering the hidden file input click event
           this._fileInput.click();
 
@@ -165,7 +186,7 @@
 
       onRemove() {
         this._container.parentNode.removeChild(this._container);
-        this._fileInput.removeEventListener("change", this._processFileUpload, false);
+        this._fileInput.removeEventListener("change", processFileUpload, false);
         this._map = undefined;
       }
 
@@ -187,7 +208,7 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
-          hideInfoContainer()
+          hideInfo()
           showActivitiesContainer();
         };
 
@@ -200,7 +221,7 @@
         // Event to hide activities-container when map is interacted with
         this._map.on('mousedown', () => {
           hideActivitiesContainer();
-          showInfoContainer();
+          showInfo();
         });
 
         return this._container;
@@ -218,7 +239,7 @@
     fileInput = document.getElementById("fileInput")
     fileInput.addEventListener("change", processFileUpload, false);
     document.querySelector("input").addEventListener("cancel", (evt) => {
-      showInfoContainer();
+      showInfo();
     });
 
     // functions
@@ -227,16 +248,24 @@
       this.removeSource(name);
     };
 
-    function hideInfoContainer() {
+    function hideInfo() {
       const infoContainer = document.getElementById("info");
       if (infoContainer) {
         infoContainer.style.display = 'none';
       }
+      const sourceContainer = document.getElementById("source");
+      if (source) {
+        source.style.display = 'none';
+      }
     }
 
-    function showInfoContainer() {
+    function showInfo() {
       const infoContainer = document.getElementById("info");
       infoContainer.style.display = 'block';
+      const sourceContainer = document.getElementById("source");
+      if (source) {
+        source.style.display = 'block';
+      }
     }
 
     function hideActivitiesContainer() {
@@ -273,9 +302,8 @@
       fileReader.readAsText(selectedFile);
       fileReader.onload = async function (e) {
         const fileContents = e.target.result;
-        const routeGeoJSON = parseGPXToGeoJSON(fileContents);
-        // TODO: select just the first feature.
-        processGeojson(routeGeoJSON)
+        const routeGeoJSON = await parseGPXToGeoJSON(fileContents);
+        processGeojson(routeGeoJSON.features[0])
       };
     }
 
@@ -344,7 +372,35 @@
         paint: { "line-color": "#fc03ca", "line-width": 7 },
       });
       isRouteDisplayed = true;
-      // TODO: add info to popup.. Name, date, length km and altitude. + url to strava.
+
+
+      const sourceElement = document.getElementById("source");
+
+      sourceElement.style.display = "block"
+      sourceElement.innerHTML = `<i class="fa-solid fa-route"></i> ${routeGeoJSON.properties.name}`;
+
+      if (routeGeoJSON.properties.url) {
+
+        const urlElement = document.createElement("a");
+        urlElement.href = routeGeoJSON.properties.url;
+        urlElement.innerHTML = 'View on Strava <i class="fa-brands fa-strava"></i>';
+        urlElement.style.fontWeight = "bold";
+        urlElement.style.color = "#fff"
+
+        // Create a new div element to contain the icon and link
+        const linkContainer = document.createElement("div");
+
+        // Add the icon to the link container
+        linkContainer.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> ';
+
+        // Append the link element to the link container
+        linkContainer.appendChild(urlElement);
+
+        sourceElement.appendChild(linkContainer);
+      }
+
+
+      // TODO: add more info.. date, length km and altitude gained.
     }
 
     function fitMapToBoundingBox(bbox) {
