@@ -21,17 +21,23 @@
 
   <!-- Inline styling -->
   <style>
+    html {
+      height: 100%
+    }
+
     body {
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      min-height: 100vh;
       margin: 0;
       padding: 0;
     }
 
     #map {
       flex-grow: 1;
+      min-height: 100%;
+      max-height: 100%
     }
 
     .info-container {
@@ -105,6 +111,7 @@
       <div id="activitiesList">
 
       </div>
+      <div id="activitiesControl"></div>
       <div id="stravaPowered" style="text-align: center;">
         <img src="img/api_logo_pwrdBy_strava_horiz_white.svg" width="100" alt="Powered by Strava"
           style="text-align: center;">
@@ -267,6 +274,7 @@
       fileReader.onload = async function (e) {
         const fileContents = e.target.result;
         const routeGeoJSON = parseGPXToGeoJSON(fileContents);
+        // TODO: select just the first feature.
         processGeojson(routeGeoJSON)
       };
     }
@@ -321,12 +329,12 @@
       return map
     }
 
-    function parseGPXToGeoJSON(contents) {
+    async function parseGPXToGeoJSON(contents) {
       const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
       return toGeoJSON.gpx(gpxDom);
     }
 
-    function addRoute(routeGeoJSON) {
+    async function addRoute(routeGeoJSON) {
       mapInstance.addSource("route", { type: "geojson", data: routeGeoJSON });
       mapInstance.addLayer({
         id: "route",
@@ -336,6 +344,7 @@
         paint: { "line-color": "#fc03ca", "line-width": 7 },
       });
       isRouteDisplayed = true;
+      // TODO: add info to popup.. Name, date, length km and altitude. + url to strava.
     }
 
     function fitMapToBoundingBox(bbox) {
@@ -458,6 +467,7 @@
       });
 
       // Show popup on click
+      // TODO: improve the ui by recducing the sensitivity.
       mapInstance.on("click", "intersectingWaterways", (e) => {
         const riverName = e.features[0].properties.name;
 
@@ -490,6 +500,8 @@
           .setHTML(popupContent)
           .addTo(mapInstance);
       });
+      // TODO: add any of data from OSM (wiki? length...? what is avaliable)
+      // TODO: condense the multiple links to OSM ways, by having a expandable section with a source icon. 
 
       mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
         mapInstance.getCanvas().style.cursor = "pointer";
