@@ -150,6 +150,29 @@
     let hoveredFeatureId = null;
     let isBigBbox = null;
 
+    class CustomAttributionControl extends maplibregl.AttributionControl {
+
+      _toggleAttribution = () => {
+        if (this._container.classList.contains('maplibregl-compact')) {
+          if (this._container.classList.contains('maplibregl-compact-show')) {
+            this._container.setAttribute('open', '');
+            this._container.classList.remove('maplibregl-compact-show');
+            const sourceContainer = document.getElementById("source");
+            if (isRouteDisplayed) {
+              sourceContainer.style.display = 'block';
+            }
+          } else {
+            this._container.classList.add('maplibregl-compact-show');
+            this._container.removeAttribute('open');
+            const sourceContainer = document.getElementById("source");
+            if (sourceContainer) {
+              sourceContainer.style.display = 'none';
+            }
+          }
+        }
+      };
+    };
+
     class UploadControl {
       constructor(fileInputId) {
         this._fileInput = document.getElementById(fileInputId);
@@ -347,8 +370,12 @@
         zoom: 10,
         maxZoom: 15,
         minZoom: 5,
+        attributionControl: false
       });
-
+      const attributionControl = new CustomAttributionControl({
+        compact: true
+      });
+      map.addControl(attributionControl)
       map.addControl(new maplibregl.FullscreenControl())
       const uploadControl = new UploadControl('fileInput', processFileUpload);
       map.addControl(uploadControl, 'top-right');
@@ -376,6 +403,8 @@
 
       const sourceElement = document.getElementById("source");
 
+      // minimize the attribution on a compact screen
+      mapInstance._controls[0]._updateCompactMinimize()
       sourceElement.style.display = "block"
       sourceElement.innerHTML = `<i class="fa-solid fa-route"></i> ${routeGeoJSON.properties.name}`;
 
