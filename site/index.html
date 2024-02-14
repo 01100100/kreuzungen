@@ -145,6 +145,7 @@
   <script>
     // Define global variables
     let isRouteDisplayed = null;
+    let isActivitiesDisplayed = null
     let isIntersectingWaterwaysDisplayed = null;
     let isMapCenteredToRoute = false;
     let hoveredFeatureId = null;
@@ -157,20 +158,29 @@
           if (this._container.classList.contains('maplibregl-compact-show')) {
             this._container.setAttribute('open', '');
             this._container.classList.remove('maplibregl-compact-show');
-            const sourceContainer = document.getElementById("source");
-            if (isRouteDisplayed) {
-              sourceContainer.style.display = 'block';
-            }
+            showSourceInfo()
           } else {
             this._container.classList.add('maplibregl-compact-show');
             this._container.removeAttribute('open');
-            const sourceContainer = document.getElementById("source");
-            if (sourceContainer) {
-              sourceContainer.style.display = 'none';
-            }
+            hideSourceInfo()
           }
         }
       };
+
+      _updateCompactMinimize = () => {
+        if (this._container.classList.contains('maplibregl-compact')) {
+          if (this._container.classList.contains('maplibregl-compact-show')) {
+            this._container.classList.remove('maplibregl-compact-show');
+            showSourceInfo()
+          }
+        }
+      };
+
+      onAdd(map) {
+        const container = super.onAdd(map)
+        this._map.on('mousedown', this._updateCompactMinimize);
+        return container
+      }
     };
 
     class UploadControl {
@@ -231,8 +241,17 @@
         button.style.color = "white";
         button.style.borderRadius = "4px";
         button.onclick = () => {
-          hideInfo()
-          showActivitiesContainer();
+          // toggle the Activities-container
+          if (isActivitiesDisplayed) {
+            showInfo();
+            hideActivitiesContainer();
+            isActivitiesDisplayed = false
+          }
+          else {
+            hideInfo()
+            showActivitiesContainer();
+            isActivitiesDisplayed = true
+          }
         };
 
         const icon = document.createElement('i');
@@ -276,15 +295,21 @@
       if (infoContainer) {
         infoContainer.style.display = 'none';
       }
+    }
+
+    function hideSourceInfo() {
       const sourceContainer = document.getElementById("source");
-      if (source) {
-        source.style.display = 'none';
+      if (sourceContainer) {
+        sourceContainer.style.display = 'none';
       }
     }
 
     function showInfo() {
       const infoContainer = document.getElementById("info");
       infoContainer.style.display = 'block';
+    }
+
+    function showSourceInfo() {
       const sourceContainer = document.getElementById("source");
       if (isRouteDisplayed) {
         source.style.display = 'block';
@@ -317,7 +342,6 @@
     }
 
     function processFileUpload(e) {
-      // TODO: showActivityContainer again if no files are present...
       const selectedFile = e.target.files[0];
       if (!selectedFile) return;
 
