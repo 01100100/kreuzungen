@@ -163,6 +163,7 @@
     let isActivitiesDisplayed = null
     let isIntersectingWaterwaysDisplayed = null;
     let isMapCenteredToRoute = false;
+    let isShareExpanded = false;
     let hoveredFeatureId = null;
     let isBigBbox = null;
 
@@ -287,6 +288,113 @@
       onRemove() {
         this._container.parentNode.removeChild(this._container);
         this._map.off('mousedown', this.hideActivitiesContainer); // Remove the event listener
+        this._map = undefined;
+      }
+    }
+    class ShareControl {
+      onAdd(map) {
+        this._map = map;
+        this._container = document.createElement('div');
+        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        this._container.style.margin = '0 10px'
+
+        const urlButton = document.createElement('button');
+        urlButton.id = 'urlButton'
+        urlButton.type = 'button';
+        urlButton.style.display = 'none'
+        urlButton.title = 'Copy url to clipboard';
+        urlButton.style.borderRadius = "4px";
+        urlButton.onclick = () => {
+          const urlToCopy = 'https://01100100.github.io/kreuzungen';
+          navigator.clipboard.writeText(urlToCopy)
+            .then(() => {
+              // TODO: give some feedback to the user that this has happend.
+              console.log('URL copied to clipboard: ' + urlToCopy);
+            })
+            .catch(err => {
+              console.error('Unable to copy URL to clipboard', err);
+            });
+        };
+
+        const urlIcon = document.createElement('i');
+        urlIcon.className = 'fa-solid fa-link';
+        urlButton.appendChild(urlIcon);
+
+        const emailButton = this.createShareButton('email', 'fa-solid fa-envelope', 'mailto:?subject=Check out the waters I have crossed on my latest adventure!&amp;body=Check out this site https://01100100.github.io/kreuzungen');
+        const whatsappButton = this.createShareButton('whatsapp', 'fa-brands fa-whatsapp', 'https://wa.me/?text=https%3A%2F%2F01100100.github.io%2Fkreuzungen');
+        const facebookButton = this.createShareButton('facebook', 'fa-brands fa-facebook', 'https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F01100100.github.io%2Fkreuzungen');
+        const twitterButton = this.createShareButton('twitter', 'fa-brands fa-twitter', 'http://www.twitter.com/share?url=https://github.com/01100100/kreuzungen');
+
+        this._container.appendChild(urlButton);
+        this._container.appendChild(emailButton);
+        this._container.appendChild(whatsappButton);
+        this._container.appendChild(facebookButton);
+        this._container.appendChild(twitterButton);
+
+        const shareButton = document.createElement('button');
+        shareButton.type = 'button';
+        shareButton.title = 'Share';
+        shareButton.style.borderRadius = "4px";
+        shareButton.onclick = () => {
+          if (isShareExpanded) { this.minimizeShareControl() } else { this.expandShareControl(); }
+        };
+
+        const shareIcon = document.createElement('i');
+        shareIcon.className = 'fa-solid fa-share-nodes'; // Assuming you are using FontAwesome for icons
+        shareButton.appendChild(shareIcon);
+
+        this._container.appendChild(shareButton);
+
+        return this._container;
+      }
+
+      createShareButton(id, faIcon, shareURL) {
+        const button = document.createElement('button');
+        button.id = `${id}Button`
+        button.type = 'button';
+        button.style.display = 'none'
+        button.title = id;
+        button.style.borderRadius = "4px";
+        button.addEventListener('click', () => {
+          window.open(shareURL, '_blank');
+        });
+
+        const icon = document.createElement('i');
+        icon.className = faIcon;
+        button.appendChild(icon);
+        return button;
+      }
+
+      minimizeShareControl() {
+        const urlButton = document.getElementById("urlButton");
+        urlButton.style.display = 'none';
+        const emailButton = document.getElementById("emailButton");
+        emailButton.style.display = 'none';
+        const whatsappButton = document.getElementById("whatsappButton");
+        whatsappButton.style.display = 'none';
+        const twitterButton = document.getElementById("twitterButton");
+        twitterButton.style.display = 'none';
+        const facebookButton = document.getElementById("facebookButton");
+        facebookButton.style.display = 'none';
+        isShareExpanded = false
+      }
+
+      expandShareControl() {
+        const urlButton = document.getElementById("urlButton");
+        urlButton.style.display = 'block';
+        const emailButton = document.getElementById("emailButton");
+        emailButton.style.display = 'block';
+        const whatsappButton = document.getElementById("whatsappButton");
+        whatsappButton.style.display = 'block';
+        const twitterButton = document.getElementById("twitterButton");
+        twitterButton.style.display = 'block';
+        const facebookButton = document.getElementById("facebookButton");
+        facebookButton.style.display = 'block';
+        isShareExpanded = true
+      }
+
+      onRemove() {
+        this._container.parentNode.removeChild(this._container);
         this._map = undefined;
       }
     }
@@ -420,6 +528,8 @@
       map.addControl(uploadControl, 'top-right');
       const stravaControl = new StravaControl();
       map.addControl(stravaControl, 'top-right');
+      const shareControl = new ShareControl();
+      map.addControl(shareControl, 'bottom-right');
       return map
     }
 
@@ -591,7 +701,8 @@
       });
 
       // Show popup on click
-      // TODO: improve the ui by recducing the sensitivity.
+      // TODO: improve the ui by reducing the sensitivity.
+      // https://github.com/acalcutt/maplibre-gl-inspect/blob/main/lib/MaplibreInspect.js#L159C1-L176C6
       mapInstance.on("click", "intersectingWaterways", (e) => {
         const riverName = e.features[0].properties.name;
 
