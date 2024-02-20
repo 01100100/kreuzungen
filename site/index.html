@@ -149,6 +149,8 @@
         </li>
         <li> See your journey with all the rivers and streams you crossed.
         </li>
+        <li> Share the results to your favorite people <i class="fa-solid fa-share-nodes"></i>
+        </li>
       </ol>
       <h5 style="text-align: center">
         ❤️ Powered by data from
@@ -181,12 +183,15 @@
   <script>
     // Define global variables
     let isRouteDisplayed = null;
+    let displayedRouteGeoJSON = null;
     let isActivitiesDisplayed = null
     let isIntersectingWaterwaysDisplayed = null;
     let isMapCenteredToRoute = false;
     let isShareExpanded = false;
     let hoveredFeatureId = null;
     let isBigBbox = null;
+    let shareableUrl = "https://01100100.github.io/kreuzungen";
+    let shareableUrlEncoded = encodeURIComponent(shareableUrl)
 
     class CustomAttributionControl extends maplibregl.AttributionControl {
 
@@ -326,10 +331,9 @@
         urlButton.title = 'Copy url to clipboard';
         urlButton.style.borderRadius = "4px";
         urlButton.onclick = () => {
-          const urlToCopy = 'https://01100100.github.io/kreuzungen';
-          navigator.clipboard.writeText(urlToCopy)
+          navigator.clipboard.writeText(shareableUrl)
             .then(() => {
-              console.log('URL copied to clipboard: ' + urlToCopy);
+              console.log('URL copied to clipboard: ' + shareableUrl);
               const mapContainer = document.getElementById("map");
               const messageContainer = document.createElement("div");
               messageContainer.className = "url-copied-message";
@@ -357,11 +361,22 @@
         urlIcon.className = 'fa-solid fa-link';
         urlButton.appendChild(urlIcon);
 
-        const emailButton = this.createShareButton('email', 'fa-solid fa-envelope', 'mailto:?subject=Check out the waters I have crossed on my latest adventure!&amp;body=Check out this site https://01100100.github.io/kreuzungen');
-        const whatsappButton = this.createShareButton('whatsapp', 'fa-brands fa-whatsapp', 'https://wa.me/?text=https%3A%2F%2F01100100.github.io%2Fkreuzungen');
-        const facebookButton = this.createShareButton('facebook', 'fa-brands fa-facebook', 'https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2F01100100.github.io%2Fkreuzungen');
-        const twitterButton = this.createShareButton('twitter', 'fa-brands fa-twitter', 'http://www.twitter.com/share?url=https://github.com/01100100/kreuzungen');
-
+        const emailButton = this.createShareButton('email', 'fa-solid fa-envelope');
+        emailButton.addEventListener('click', () => {
+          window.open(`mailto:?subject=Check out the waters I have crossed on my latest adventure!&amp;body=Check out this site ${shareableUrl}`, '_blank');
+        });
+        const whatsappButton = this.createShareButton('whatsapp', 'fa-brands fa-whatsapp');
+        whatsappButton.addEventListener('click', () => {
+          window.open(`https://wa.me/?text=${shareableUrlEncoded}`, '_blank');
+        });
+        const facebookButton = this.createShareButton('facebook', 'fa-brands fa-facebook');
+        facebookButton.addEventListener('click', () => {
+          window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareableUrlEncoded}`, '_blank');
+        });
+        const twitterButton = this.createShareButton('twitter', 'fa-brands fa-twitter');
+        twitterButton.addEventListener('click', () => {
+          window.open(`http://www.twitter.com/share?url=${shareableUrlEncoded}`, '_blank');
+        });
         this._container.appendChild(urlButton);
         this._container.appendChild(emailButton);
         this._container.appendChild(whatsappButton);
@@ -385,17 +400,13 @@
         return this._container;
       }
 
-      createShareButton(id, faIcon, shareURL) {
+      createShareButton(id, faIcon) {
         const button = document.createElement('button');
         button.id = `${id}Button`
         button.type = 'button';
         button.style.display = 'none'
         button.title = id;
         button.style.borderRadius = "4px";
-        button.addEventListener('click', () => {
-          window.open(shareURL, '_blank');
-        });
-
         const icon = document.createElement('i');
         icon.className = faIcon;
         button.appendChild(icon);
@@ -492,9 +503,14 @@
       // Clear existing info and reset map state
       if (isRouteDisplayed) {
         mapInstance.removeLayerAndSource("route");
+        isRouteDisplayed = null;
+        displayedRouteGeoJSON = null;
+        shareableUrl = null
+        shareableUrlEncoded = null
       }
       if (isIntersectingWaterwaysDisplayed) {
         mapInstance.removeLayerAndSource("intersectingWaterways");
+        isIntersectingWaterwaysDisplayed = null;
       }
       const infoElement = document.getElementById("info");
       infoElement.innerHTML = "";
@@ -585,7 +601,9 @@
         paint: { "line-color": "#fc03ca", "line-width": 7 },
       });
       isRouteDisplayed = true;
-
+      displayedRouteGeoJSON = routeGeoJSON;
+      shareableUrl = `https://01100100.github.io/kreuzungen/index.html?route=${encodeURIComponent(polyline.fromGeoJSON(displayedRouteGeoJSON))}`
+      shareableUrlEncoded = encodeURIComponent(shareableUrl)
 
       const sourceElement = document.getElementById("source");
 
@@ -872,8 +890,8 @@
 
     mapInstance.on("load", async () => { });
   </script>
-  <script src="js/strava_api.js"></script>
   <script src="js/polyline.js"></script>
+  <script src="js/strava_api.js"></script>
 
 </body>
 

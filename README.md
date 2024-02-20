@@ -13,6 +13,7 @@ Kreuzungen is a web application that allows users to upload a local GPX file or 
 - Highlight all the waterways crossed during the tour.
 - Integration with Strava to fetch activities.
 - Information about each crossed waterway accessible through map interaction.
+- Share routes with a url containing the encoded data.
 
 ## Powered By Open Data
 
