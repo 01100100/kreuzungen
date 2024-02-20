@@ -363,19 +363,28 @@
 
         const emailButton = this.createShareButton('email', 'fa-solid fa-envelope');
         emailButton.addEventListener('click', () => {
-          window.open(`mailto:?subject=Check out the waters I have crossed on my latest adventure!&amp;body=Check out this site ${shareableUrl}`, '_blank');
+          window.open(`mailto:?subject=Check out what has been crossed on my latest adventure!&amp;body=Check out this site ${shareableUrl}`, '_blank');
         });
         const whatsappButton = this.createShareButton('whatsapp', 'fa-brands fa-whatsapp');
         whatsappButton.addEventListener('click', () => {
-          window.open(`https://wa.me/?text=${shareableUrlEncoded}`, '_blank');
+          // https://faq.whatsapp.com/5913398998672934
+          if (isRouteDisplayed) {
+            var whatsappMessage = `Check out the waters I crossed on a recent adventure.. ${shareableUrl}`
+          } else { var whatsappMessage = `Check out this site for you recent adventures.. ${shareableUrl}` }
+          let whatsappShareLink = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`
+          window.open(whatsappShareLink, '_blank');
         });
         const facebookButton = this.createShareButton('facebook', 'fa-brands fa-facebook');
         facebookButton.addEventListener('click', () => {
           window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareableUrlEncoded}`, '_blank');
         });
         const twitterButton = this.createShareButton('twitter', 'fa-brands fa-twitter');
+        // https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/guides/web-intent
         twitterButton.addEventListener('click', () => {
-          window.open(`http://www.twitter.com/share?url=${shareableUrlEncoded}`, '_blank');
+          if (isRouteDisplayed) {
+            var twitterMessage = `Check out the waters I crossed on a recent adventure..`
+          } else { var twitterMessage = `Check out this site for you recent adventures..` }
+          window.open(`https://twitter.com/intent/tweet?url=${shareableUrlEncoded}&text=${twitterMessage}`, '_blank');
         });
         this._container.appendChild(urlButton);
         this._container.appendChild(emailButton);
