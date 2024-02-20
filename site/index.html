@@ -110,6 +110,27 @@
       border-radius: 3px;
       padding: 5px 5px;
     }
+
+
+    .url-copied-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      padding: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      transition: opacity 1s;
+      opacity: 1;
+    }
+
+    .url-copied-message i {
+      margin-right: 5px;
+    }
   </style>
 </head>
 
@@ -308,8 +329,24 @@
           const urlToCopy = 'https://01100100.github.io/kreuzungen';
           navigator.clipboard.writeText(urlToCopy)
             .then(() => {
-              // TODO: give some feedback to the user that this has happend.
               console.log('URL copied to clipboard: ' + urlToCopy);
+              const mapContainer = document.getElementById("map");
+              const messageContainer = document.createElement("div");
+              messageContainer.className = "url-copied-message";
+              const icon = document.createElement("i");
+              icon.className = "fa-solid fa-link";
+              const text = document.createTextNode("URL copied to clipboard.");
+              messageContainer.appendChild(icon);
+              messageContainer.appendChild(text);
+              mapContainer.appendChild(messageContainer);
+
+              // Fade out the message by setting opacity to 0
+              setTimeout(() => {
+                messageContainer.style.opacity = 0;
+                setTimeout(() => {
+                  mapContainer.removeChild(messageContainer);
+                }, 500); // Fade out for 500 milliseconds
+              }, 500); // Displayed solid for 500 milliseconds
             })
             .catch(err => {
               console.error('Unable to copy URL to clipboard', err);
