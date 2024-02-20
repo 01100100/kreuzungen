@@ -3,7 +3,7 @@ strava_data = [];
 ///////////////////////////////////// API token setting up ///////////////////////////////////////////////////
 // check for URL params
 var queryString = window.location.search;
-
+var urlParams = new URLSearchParams(queryString);
 // search local storage for a possible access token
 try {
     var token_exists = JSON.parse(localStorage.getItem("strava_data")).access_token != null;
@@ -12,6 +12,21 @@ try {
 catch {
     var token_exists = false;
     var expires_at = 0;
+}
+
+if (urlParams.has('route')) {
+    var route = urlParams.get('route')
+    coordinates = polyline.decode(route);
+    // Have to flip between lat/long and long/lat
+    geojson =  turf.flip(turf.lineString(coordinates, {name: "✨ Route shared with magic link ✨"}));
+    // Ensure the map style is loaded before processing the route.
+    if (mapInstance.isStyleLoaded()) {
+        processGeojson(geojson);
+      } else {
+        mapInstance.once('style.load', () => {
+          processGeojson(geojson);
+        });
+      }
 }
 
 // 4 possible scenarios: token in local storage, expired token in local storage, no token and no oauth code, no token but oauth code
@@ -27,7 +42,7 @@ else if (token_exists & (new Date().getTime() / 1000) >= expires_at) { // their 
     var refreshToken = JSON.parse(localStorage.getItem("strava_data")).refresh_token;
     reAuthorize(refreshToken);
 }
-else if (queryString == "" || queryString == "?state=&error=access_denied"){ // we don't have a code. They still need to log in and authorize
+else if (!urlParams.has('exchange_token') || urlParams.get('error') === 'access_denied'){ // we don't have a code. They still need to log in and authorize
     // encourage them to log in and authorize
     console.log("No token in local storage, no authorization code");
     document.getElementById("stravaConnect").style.display = "flex";
@@ -36,8 +51,6 @@ else if (queryString == "" || queryString == "?state=&error=access_denied"){ // 
 }
 else { // we have a code because they logged in and authorized. the code can be found in the URL params
     console.log("Authorization code retrieved");
-
-    var urlParams = new URLSearchParams(queryString);
 
     //check the required scopes have been approved.
     var approvedScopes = urlParams.get('scope')
@@ -49,7 +62,7 @@ else { // we have a code because they logged in and authorized. the code can be 
 
     if (hasRequiredScopes) {
         var code = urlParams.get('code');
-        get_token();
+        authorize();
     } else {
         console.log('Missing required scopes');
         alert("For this app to work with strava, you need to authorize it to view activity data. Please authenticate again and authorize the app.")
@@ -62,7 +75,7 @@ else { // we have a code because they logged in and authorized. the code can be 
 
 
 ////////////////////////////////// the functions /////////////////////////////////////////////////////////////
-function get_token(){
+function authorize(){
     // use code from authorization to get user token
     $.ajax({
         url: 'https://kreuzungen.fly.dev/oauth',
@@ -221,5 +234,4 @@ function getActivities(pageNum) {
         }
     })
 
-    // spinnerElement.remove()
 }
