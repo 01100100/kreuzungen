@@ -220,6 +220,7 @@
 
       onAdd(map) {
         const container = super.onAdd(map)
+        container.classList.add('maplibregl-compact');
         this._map.on('mousedown', this._updateCompactMinimize);
         return container
       }
