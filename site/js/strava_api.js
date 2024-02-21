@@ -163,6 +163,8 @@ function displayActivities(pageNum) {
             if (activitiesContainer) {
                 activitiesContainer.style.display = 'none';
             }
+            x.geojson = polyline.toGeoJSON(x.map.summary_polyline)
+            x.geojson.properties = { "name": x.name,"url": `https://www.strava.com/activities/${x.id}`}
             processGeojson(x.geojson);
         });
 
@@ -222,13 +224,6 @@ function getActivities(pageNum) {
                 return x.map.summary_polyline && x.map.summary_polyline.length > 0;
             });; // save final page's activities to main data array and move on
             
-            // some data prep
-            strava_data.forEach(function(x){ 
-                x.coordinates = polyline.decode(x.map.summary_polyline);
-                x.geojson = polyline.toGeoJSON(x.map.summary_polyline)
-                x.geojson.properties = { "name": x.name,"url": `https://www.strava.com/activities/${x.id}`}
-            });
-
             displayActivities(1)
         }
     })
