@@ -128,6 +128,11 @@
       opacity: 1;
     }
 
+    .osm-details {
+      max-height: 100px;
+      overflow-y: auto;
+    }
+
     .url-copied-message i {
       margin-right: 5px;
     }
@@ -780,38 +785,74 @@
       // https://github.com/acalcutt/maplibre-gl-inspect/blob/main/lib/MaplibreInspect.js#L159C1-L176C6
       mapInstance.on("click", "intersectingWaterways", (e) => {
         const riverName = e.features[0].properties.name;
+        const destination = e.features[0].properties.destination || "";
+        const wikipedia = e.features[0].properties.wikipedia || "";
+        const wikidata = e.features[0].properties.wikidata || "";
+        const type = e.features[0].properties.type || "";
+
+        let osmUrlsContent = "";
 
         // if MultiLineString/combined way then output a url for all way parts
         if (e.features[0].properties.collectedProperties) {
           const collectedProps = JSON.parse(
             e.features[0].properties.collectedProperties
           );
-          let urls = collectedProps.map((property) => {
+          const urls = collectedProps.map((property) => {
             const id = property.id; // Assuming the 'id' field exists within the 'property' object
             return `<a href="https://www.openstreetmap.org/${id}" target="_blank">https://www.openstreetmap.org/${id}</a>`;
           });
 
-          // Join all the URLs with a <br> tag to display each on a new line
-          popupContent = `${riverName}<br>${urls.join("<br>")}`;
-        }
-        // else single lineString/relation url for relation
-        else {
+          osmUrlsContent = `
+      <br>
+      <details class="osm-details">
+        <summary>OSM data</summary>
+        <ul>
+          ${urls.map((url) => `<li>${url}</li>`).join("")}
+        </ul>
+      </details>
+    `;
+        } else {
           const osm_url = `https://www.openstreetmap.org/${e.features[0].id}`;
-          popupContent = `${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>`;
+          osmUrlsContent = `
+      <br>
+      <details>
+        <summary>OSM data source's</summary>
+        <ul>
+          ${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>
+        </ul>
+      </details>
+    `;
         }
+
+        let popupContent = `Name: ${riverName}`;
+
+        if (destination) {
+          popupContent += `<br>Destination: ${destination}`;
+        }
+
+        if (wikipedia) {
+          const wikipediaUrl = `https://www.wikipedia.org/wiki/${wikipedia}`;
+          popupContent += `<br>Wikipedia: <a href="${wikipediaUrl}" target="_blank">${wikipedia}</a>`;
+        }
+
+        if (wikidata) {
+          const wikidataUrl = `https://www.wikidata.org/wiki/${wikidata}`;
+          popupContent += `<br>Wikidata: <a href="${wikidataUrl}" target="_blank">${wikidata}</a>`;
+        }
+
+        if (type) {
+          popupContent += `<br>Type: ${type}`;
+        }
+
+        popupContent += osmUrlsContent;
 
         const coordinates = e.lngLat;
 
-        new maplibregl.Popup({
-          closeButton: true,
-          closeOnClick: true,
-        })
+        new maplibregl.Popup({ closeButton: true, closeOnClick: true })
           .setLngLat(coordinates)
           .setHTML(popupContent)
           .addTo(mapInstance);
       });
-      // TODO: add any of data from OSM (wiki? length...? what is avaliable)
-      // TODO: condense the multiple links to OSM ways, by having a expandable section with a source icon. 
 
       mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
         mapInstance.getCanvas().style.cursor = "pointer";
