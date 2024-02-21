@@ -689,47 +689,33 @@
       featureCollection.features.forEach((feature) => {
         if (feature.properties && feature.properties.name) {
           const name = feature.properties.name;
-
           if (!uniqueFeatures[name]) {
-            uniqueFeatures[name] = [feature];
-          } else {
-            uniqueFeatures[name].push(feature);
+            uniqueFeatures[name] = [];
           }
+          uniqueFeatures[name].push(feature);
         }
       });
 
-      const featuresArray = [];
-      Object.values(uniqueFeatures).forEach((features) => {
+      const featuresArray = Object.entries(uniqueFeatures).map(([name, features]) => {
         if (features.length === 1) {
-          featuresArray.push(features[0]);
+          return features[0];
         } else {
-          const combinedFeature = turf.combine(
-            turf.featureCollection(features)
-          ).features[0];
+          const combinedGeometry = turf.combine(turf.featureCollection(features));
+          const collectedProperties = [...new Set(features.map(f => f.properties))];
+          const relationProperties = collectedProperties.find(prop => prop.id && prop.id.startsWith("relation/")) || {};
 
-          // set the id combinedFeature.id to be a concatenation of combinedFeature.properties.collectedProperties.[all].id
-          const collectedProperties = combinedFeature.properties.collectedProperties;
-          const ids = collectedProperties.map((property) =>
-            property.id.replace("way/", "")
-          );
-          const combinedId = `way/${ids.join("_")}`;
-          combinedFeature.properties.id = combinedId;
-          combinedFeature.id = combinedId;
-          // set the id combinedFeature.properties.name to be the unique name of the feature
-          combinedFeature.properties.name = collectedProperties[0].name;
-          // set combinedFeature.properties.* to the properties from any of combinedFeature.properties.collectedProperties.[all] to the properties of the `relation/`
-          for (let property of collectedProperties) {
-            if (property.id.startsWith("relation/")) {
-              for (let key in property) {
-                if (key !== "id" && key !== "name") {
-                  combinedFeature.properties[key] = property[key];
-                }
-              }
-              break;
-            }
-          }
+          // Create a combined feature with properties from the 'relation/' where applicable
+          const combinedFeature = {
+            type: "Feature",
+            properties: {
+              ...relationProperties,
+              id: `combined/${collectedProperties.map(prop => prop.id.replace("way/", "")).join("_")}`,
+              name: name
+            },
+            geometry: combinedGeometry.features[0].geometry
+          };
 
-          featuresArray.push(combinedFeature);
+          return combinedFeature;
         }
       });
 
@@ -950,7 +936,6 @@
 
     navigator.geolocation.getCurrentPosition(setMapCenter);
 
-    mapInstance.on("load", async () => { });
   </script>
   <script src="js/polyline.js"></script>
   <script src="js/strava_api.js"></script>
