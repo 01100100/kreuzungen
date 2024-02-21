@@ -702,16 +702,27 @@
           ).features[0];
 
           // set the id combinedFeature.id to be a concatenation of combinedFeature.properties.collectedProperties.[all].id
-          const collectedProperties =
-            combinedFeature.properties.collectedProperties;
+          const collectedProperties = combinedFeature.properties.collectedProperties;
           const ids = collectedProperties.map((property) =>
             property.id.replace("way/", "")
           );
-          combinedId = `way/${ids.join("_")}`;
+          const combinedId = `way/${ids.join("_")}`;
           combinedFeature.properties.id = combinedId;
           combinedFeature.id = combinedId;
           // set the id combinedFeature.properties.name to be the unique name of the feature
           combinedFeature.properties.name = collectedProperties[0].name;
+          // set combinedFeature.properties.* to the properties from any of combinedFeature.properties.collectedProperties.[all] to the properties of the `relation/`
+          for (let property of collectedProperties) {
+            if (property.id.startsWith("relation/")) {
+              for (let key in property) {
+                if (key !== "id" && key !== "name") {
+                  combinedFeature.properties[key] = property[key];
+                }
+              }
+              break;
+            }
+          }
+
           featuresArray.push(combinedFeature);
         }
       });
