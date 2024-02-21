@@ -2,7 +2,7 @@
 
 **[https://01100100.github.io/kreuzungen](https://01100100.github.io/kreuzungen)**
 
-![Screenshot](site/img/screenshot.jpg)
+![Screenshot](https://01100100.github.io/kreuzungen/img/screenshot.png)
 
 Kreuzungen is a web application that allows users to upload a local GPX file or fetch an activity from Strava and visualize which waterways their route has crossed. It provides an interactive map for users to explore their journey in detail, highlighting the rivers and streams they've encountered.
 
