@@ -311,6 +311,7 @@
         // Event to hide activities-container when map is interacted with
         this._map.on('mousedown', () => {
           hideActivitiesContainer();
+          isActivitiesDisplayed = false
           showInfo();
         });
 
