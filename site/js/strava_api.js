@@ -17,8 +17,8 @@ catch {
 if (urlParams.has('route')) {
     var route = urlParams.get('route')
     coordinates = polyline.decode(route);
-    // Have to flip between lat/long and long/lat
-    geojson =  turf.flip(turf.lineString(coordinates, {name: "✨ Route shared with magic link ✨"}));
+    geojson =  polyline.toGeoJSON(route)
+    geojson.properties = { "name":  "✨ Route shared with magic link ✨"};
     // Ensure the map style is loaded before processing the route.
     if (mapInstance.isStyleLoaded()) {
         processGeojson(geojson);
@@ -225,9 +225,8 @@ function getActivities(pageNum) {
             // some data prep
             strava_data.forEach(function(x){ 
                 x.coordinates = polyline.decode(x.map.summary_polyline);
-                // Have to flip between lat/long and long/lat
-                x.geojson =  turf.flip(turf.lineString(x.coordinates, {name: x.name}));
-                x.geojson.properties.url = `https://www.strava.com/activities/${x.id}`
+                x.geojson = polyline.toGeoJSON(x.map.summary_polyline)
+                x.geojson.properties = { "name": x.name,"url": `https://www.strava.com/activities/${x.id}`}
             });
 
             displayActivities(1)
