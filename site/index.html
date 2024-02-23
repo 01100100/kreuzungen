@@ -404,7 +404,19 @@
         shareButton.title = 'Share';
         shareButton.style.borderRadius = "4px";
         shareButton.onclick = () => {
-          if (isShareExpanded) { this.minimizeShareControl() } else { this.expandShareControl(); }
+          if (navigator.share) {
+            navigator.share({
+              title: 'Kreuzungen 🗺️',
+              url: shareableUrl,
+              text: 'Reveal rivers crossed on recent adventures..'
+            }).then(() => {
+              console.log('Shared!');
+            })
+              .catch(console.error);
+          }
+          else {
+            if (isShareExpanded) { this.minimizeShareControl() } else { this.expandShareControl(); }
+          }
         };
 
         const shareIcon = document.createElement('i');
