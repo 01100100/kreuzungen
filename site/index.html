@@ -904,6 +904,10 @@
 
       infoElement.innerHTML = `<strong>Waterways crossed: ${riverNames.length}</strong><br>`;
 
+      // Create a separate container for the river names
+      const riverNamesContainer = document.createElement("div");
+      riverNamesContainer.style.overflowY = "auto";
+
       // Create a list of clickable items for each waterway name
       riverNames.forEach((item) => {
         const riverElement = document.createElement("div");
@@ -933,11 +937,16 @@
           fitMapToBoundingBox(routeBoundingBox);
         });
 
-        // Append the waterway name element to info container
-        infoElement.appendChild(riverElement);
+        // Append the waterway name element to the river names container
+        riverNamesContainer.appendChild(riverElement);
       });
+
+      // Append the river names container to the info container
+      infoElement.appendChild(riverNamesContainer);
+
       infoElement.style.display = "block";
     }
+
 
     function setMapCenter(pos) {
       if (!isMapCenteredToRoute)
