@@ -75,68 +75,66 @@ else { // we have a code because they logged in and authorized. the code can be 
 
 
 ////////////////////////////////// the functions /////////////////////////////////////////////////////////////
-function authorize(){
+function authorize() {
     // use code from authorization to get user token
-    $.ajax({
-        url: 'https://kreuzungen.fly.dev/oauth',
-        type: "POST",
-        dataType:'json', 
-        data: ({'code':code}),
-        complete: function(resp){
-            response = resp.responseText;
-
-            // response came in string with a weird '1' in the last position
-            response = response.slice(0,-1);
-
-            // TODO: check for 200 code before persisting response.
-
-            // save data to local storage - important for refresh token in the future for reauthorization
-            localStorage.setItem("strava_data", response);
-
-            // convert string to json
-            response = JSON.parse(response);
-
-            // save token
-            token = response.access_token;
-
-            // get activities
-            getActivities(1);   
+    fetch('https://kreuzungen.fly.dev/oauth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `code=${code}`
+    })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error('Request failed. Status: ' + resp.status);
         }
-    });
+        return resp.json();
+      })
+      .then(response => {
+        // save data to local storage - important for refresh token in the future for reauthorization
+        localStorage.setItem('strava_data', JSON.stringify(response));
+        
+        // save token
+        token = response.access_token;
+    
+        // get activities
+        getActivities(1);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
 }
 
-
-function reAuthorize(refreshToken){
-
+function reAuthorize(refreshToken) {
     // use code from authorization to get user token
-    $.ajax({
-        url: 'https://kreuzungen.fly.dev/reoauth',
-        type: "POST",
-        dataType:'json', 
-        data: ({'refreshToken':refreshToken}),
-        complete: function(resp){
-            response = resp.responseText;
-
-            // response came in string with a weird '1' in the last position
-            response = response.slice(0,-1);
-
-            // TODO: check for 200 code before persisting response.
-
-            // save data to local storage - update persisted access_token
-            localStorage.setItem("strava_data", response);
-
-            // convert string to json
-            response = JSON.parse(response);
-
-            // set token
-            token = response.access_token;
-
-            // get activities
-            getActivities(1);
+    fetch('https://kreuzungen.fly.dev/reoauth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      body: `refreshToken=${refreshToken}`
+    })
+      .then(resp => {
+        if (!resp.ok) {
+          throw new Error('Request failed. Status: ' + resp.status);
         }
-    });  
-}
-
+        return resp.json();
+      })
+      .then(response => {
+        // save data to local storage - update persisted access_token
+        localStorage.setItem('strava_data', JSON.stringify(response));
+        
+        // set token
+        token = response.access_token;
+  
+        // get activities
+        getActivities(1);
+      })
+      .catch(error => {
+        console.error('Error:', error);
+      });
+  }
+  
 function displayActivities(pageNum) {
     // Calculate the number of activities to display per page
     const activitiesPerPage = 6;
