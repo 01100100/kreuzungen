@@ -23,16 +23,14 @@ The application heavily relies on open data from [OpenStreetMap](https://www.ope
 
 Kreuzungen uses several external libraries and resources:
 
-- **maplibre-gl** for rendering interactive maps
-- **@turf/turf** for spatial analysis
-- **togeojson** for converting GPX data to GeoJSON
-- **osmtogeojson** for converting OpenStreetMap data to GeoJSON
-- **FontAwesome** for icons
-- **jQuery** for DOM manipulation and AJAX requests
-- **Strava API** for syncing Strava activities
+- **[maplibregl](https://maplibre.org/)** for rendering interactive maps
+- **[turf](https://turfjs.org/)** for spatial analysis
+- **[togeojson](https://github.com/mapbox/togeojson)** for converting GPX data to GeoJSON
+- **[osmtogeojson](https://github.com/tyrasd/osmtogeojson)** for converting OpenStreetMap data to GeoJSON
+- **[FontAwesome](https://fontawesome.com/)** for icons
+- **[Strava API](https://developers.strava.com/)** for syncing Strava activities
 
 ## Development
-
 
 ### Project Structure
 
