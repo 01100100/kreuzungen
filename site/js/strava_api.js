@@ -136,7 +136,7 @@ function reAuthorize(refreshToken) {
   }
 
 function displayActivities(pageNum) {
-  const activitiesPerPage = 6;
+  const activitiesPerPage = 5;
   const startIndex = (pageNum - 1) * activitiesPerPage;
   const currentPageActivities = strava_data.slice(startIndex, startIndex + activitiesPerPage);
   const infoElement = document.getElementById("activitiesList");
@@ -175,13 +175,18 @@ if (strava_data.length > (startIndex + activitiesPerPage)) {
 
 function createActivityElement(activity) {
   const activityElement = document.createElement("div");
+  activityElement.className = "text-white bg-gradient-to-r from-pink-500 to-orange-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 px-1 py-1";
   activityElement.style.display = "flex";
   activityElement.style.flexDirection = "column";
-  activityElement.style.marginBottom = "10px";
-
+  activityElement.style.marginBottom = "3px";
+  activityElement.style.borderRadius = "3px";
   const nameElement = document.createElement("div");
   nameElement.innerHTML = activity.name;
   nameElement.style.fontWeight = "bold";
+  nameElement.style.whiteSpace = "nowrap";
+  nameElement.style.overflow = "hidden";
+  nameElement.style.textOverflow = "ellipsis";
+  nameElement.style.maxWidth = "100%"; // Adjust the width as needed
   activityElement.appendChild(nameElement);
 
   const detailsElement = document.createElement("div");
