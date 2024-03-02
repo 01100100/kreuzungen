@@ -54,19 +54,18 @@
     }
 
     .info-container {
+      display: flex;
+      flex-direction: column;
       position: absolute;
       top: 10px;
       max-height: calc(50% - 30px);
       left: 10px;
       max-width: calc(100% - 69px);
       z-index: 1;
-      overflow-x: auto;
-      overflow-y: scroll;
       background-color: rgba(0, 0, 0, 0.5);
       color: #fff;
       font-size: 11px;
       line-height: 18px;
-      display: block;
       margin: 0;
       border-radius: 3px;
       padding: 5px 5px;
@@ -109,6 +108,19 @@
       padding: 5px 5px;
     }
 
+    .help-message {
+      max-height: 100%;
+      overflow-y: auto;
+    }
+
+    .river-names-container {
+      max-height: calc(100% - 13px);
+      overflow-y: auto;
+    }
+
+    .river-name {
+      cursor: pointer;
+    }
 
     .url-copied-message {
       position: absolute;
@@ -142,23 +154,25 @@
   <input type="file" id="fileInput" style="display: none;" />
   <div id="map">
     <div id="info" class="info-container">
-      <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
-      <p></p>
-      <ol>
-        <li>Select the tour activity by using the controls on the right ↝
+      <div class="help-message">
+        <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
+        <p></p>
+        <ol>
+          <li>Select the tour activity by using the controls on the right ↝
 
-          <br>- Upload <code>.gpx</code> file from your device <i class="fa fa-upload"></i>
-          <br>- Sync your activity from Strava <i class="fa-brands fa-strava"></i>
-        </li>
-        <li> See your journey with all the rivers and streams you crossed.
-        </li>
-        <li> Share the results to your favorite people <i class="fa-solid fa-share-nodes"></i>
-        </li>
-      </ol>
-      <h5 style="text-align: center">
-        ❤️ Powered by data from
-        <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
-        ❤️
+            <br>- Upload <code>.gpx</code> file from your device <i class="fa fa-upload"></i>
+            <br>- Sync your activity from Strava <i class="fa-brands fa-strava"></i>
+          </li>
+          <li> See your journey with all the rivers and streams you crossed.
+          </li>
+          <li> Share the results to your favorite people <i class="fa-solid fa-share-nodes"></i>
+          </li>
+        </ol>
+        <h5 style="text-align: center">
+          ❤️ Powered by data from
+          <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
+          ❤️
+      </div>
     </div>
     <div id="activities" class="activities-container">
 
@@ -503,7 +517,7 @@
 
     function showInfo() {
       const infoContainer = document.getElementById("info");
-      infoContainer.style.display = 'block';
+      infoContainer.style.display = 'flex';
     }
 
     function showSourceInfo() {
@@ -906,14 +920,13 @@
 
       // Create a separate container for the river names
       const riverNamesContainer = document.createElement("div");
-      riverNamesContainer.style.overflowY = "auto";
+      riverNamesContainer.className = "river-names-container";
 
       // Create a list of clickable items for each waterway name
       riverNames.forEach((item) => {
         const riverElement = document.createElement("div");
+        riverElement.className = "river-name";
         riverElement.textContent = item.name;
-        riverElement.style.cursor = "pointer"; // Change cursor style to indicate interactiveness
-
         // Event listener when mouse enters over the element
         riverElement.addEventListener("mouseenter", () => {
           // Set line-opacity to 1 when hovered.
@@ -944,7 +957,7 @@
       // Append the river names container to the info container
       infoElement.appendChild(riverNamesContainer);
 
-      infoElement.style.display = "block";
+      infoElement.style.display = "flex";
     }
 
 
