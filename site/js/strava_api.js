@@ -134,63 +134,82 @@ function reAuthorize(refreshToken) {
         console.error('Error:', error);
       });
   }
-  
+
 function displayActivities(pageNum) {
-    // Calculate the number of activities to display per page
-    const activitiesPerPage = 6;
-    
-    // Calculate the starting index for the current page
-    const startIndex = (pageNum - 1) * activitiesPerPage;
+  const activitiesPerPage = 6;
+  const startIndex = (pageNum - 1) * activitiesPerPage;
+  const currentPageActivities = strava_data.slice(startIndex, startIndex + activitiesPerPage);
+  const infoElement = document.getElementById("activitiesList");
+  infoElement.innerHTML = "";
 
-    // Get the activities for the current page
-    const currentPageActivities = strava_data.slice(startIndex, startIndex + activitiesPerPage);
-
-    const infoElement = document.getElementById("activitiesList");
-
-    // Clear previous content
-    infoElement.innerHTML = "";
-
-    // Display activity names in the info container for the current page
-    currentPageActivities.forEach(function(x) {
-        const nameElement = document.createElement("div");
-        nameElement.innerHTML = x.name;
-
-        // Add click event listener to load the activity on the map
-        nameElement.addEventListener("click", function() {
-            const activitiesContainer = document.getElementById("activities");
-            if (activitiesContainer) {
-                activitiesContainer.style.display = 'none';
-            }
-            x.geojson = polyline.toGeoJSON(x.map.summary_polyline)
-            x.geojson.properties = { "name": x.name,"url": `https://www.strava.com/activities/${x.id}`}
-            processGeojson(x.geojson);
-        });
-
-        infoElement.appendChild(nameElement);
+  currentPageActivities.forEach(function(activity) {
+    const activityElement = createActivityElement(activity);
+    activityElement.addEventListener("click", function() {
+      loadActivityOnMap(activity);
     });
+    infoElement.appendChild(activityElement);
+  });
 
-    infoElement.style.cursor = "pointer";
+  infoElement.style.cursor = "pointer";
 
-    // Display pagination arrows
-    if (pageNum > 1) {
-        const previousLink = document.createElement("a");
-        previousLink.innerHTML = '<i class="fa-solid fa-circle-left"></i>';
-        previousLink.style.float = "left"
-        previousLink.addEventListener("click", function() {
-            displayActivities(pageNum - 1);
-        });
-        infoElement.appendChild(previousLink);
-    }
+  if (pageNum > 1) {
+    const previousLink = document.createElement("a");
+    previousLink.innerHTML = '<i class="fa-solid fa-circle-left"></i>';
+    previousLink.style.float = "left"
+    previousLink.addEventListener("click", function() {
+        displayActivities(pageNum - 1);
+    });
+    infoElement.appendChild(previousLink);
+}
 
-    if (strava_data.length > (startIndex + activitiesPerPage)) {
-        const nextLink = document.createElement("a");
-        nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
-        nextLink.style.float = "right";
-        nextLink.addEventListener("click", function() {
-            displayActivities(pageNum + 1);
-        });
-        infoElement.appendChild(nextLink);
-    }
+if (strava_data.length > (startIndex + activitiesPerPage)) {
+    const nextLink = document.createElement("a");
+    nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
+    nextLink.style.float = "right";
+    nextLink.addEventListener("click", function() {
+        displayActivities(pageNum + 1);
+    });
+    infoElement.appendChild(nextLink);
+}
+}
+
+function createActivityElement(activity) {
+  const activityElement = document.createElement("div");
+  activityElement.style.display = "flex";
+  activityElement.style.flexDirection = "column";
+  activityElement.style.marginBottom = "10px";
+
+  const nameElement = document.createElement("div");
+  nameElement.innerHTML = activity.name;
+  nameElement.style.fontWeight = "bold";
+  activityElement.appendChild(nameElement);
+
+  const detailsElement = document.createElement("div");
+  detailsElement.style.display = "flex";
+  detailsElement.style.justifyContent = "space-between";
+  activityElement.appendChild(detailsElement);
+
+  const distanceElement = document.createElement("div");
+  distanceElement.innerHTML = (activity.distance / 1000).toFixed(2) + " km";
+  detailsElement.appendChild(distanceElement);
+
+  const dateElement = document.createElement("div");
+  const date = new Date(activity.start_date);
+  const formattedDate = date.toISOString().split('T')[0];
+  dateElement.innerHTML = formattedDate;
+  detailsElement.appendChild(dateElement);
+
+  return activityElement;
+}
+
+function loadActivityOnMap(activity) {
+  const activitiesContainer = document.getElementById("activities");
+  if (activitiesContainer) {
+    activitiesContainer.style.display = 'none';
+  }
+  const geojson = polyline.toGeoJSON(activity.map.summary_polyline);
+  geojson.properties = { "name": activity.name, "url": `https://www.strava.com/activities/${activity.id}` };
+  processGeojson(geojson);
 }
 
 function getActivities(pageNum) {
