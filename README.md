@@ -84,7 +84,8 @@ The backend is hosted on fly.io. To update the deployment you can run the comman
 ```bash
 # Ensure you set the correct values in the .env file
 source .env
+fly secrets set FRONTEND_HOST_URL=$FRONTEND_HOST_URL
 fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
-fly secrets set STRAVA_REDIRECT_URI=$STRAVA_REDIRECT_URI
+fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
 fly deploy
 ```
