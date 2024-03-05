@@ -79,7 +79,9 @@ The site gets deployed to [https://01100100.github.io/kreuzungen](https://011001
 
 ### Backend - fly.io
 
-The backend is hosted on fly.io. To update the deployment you can run the commands:
+The backend is hosted on fly.io. There is a github action in place to deploy the backend for the `main` branch
+
+Note: variables stored in the `.env` file must be set as fly secrets.
 
 ```bash
 # Ensure you set the correct values in the .env file
@@ -87,5 +89,4 @@ source .env
 fly secrets set FRONTEND_HOST_URL=$FRONTEND_HOST_URL
 fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
 fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
-fly deploy
 ```
