@@ -13,7 +13,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     STRAVA_API_CLIENT_SECRET: str
     STRAVA_API_URL: str
     STRAVA_CLIENT_ID: str
-    STRAVA_REDIRECT_URI: str
+    FRONTEND_HOST_URL: str
 
 
 @lru_cache
@@ -22,8 +22,8 @@ def get_config_values() -> Config:
         DEBUG_LEVEL="INFO",
         STRAVA_API_CLIENT_SECRET=os.environ["STRAVA_API_CLIENT_SECRET"],
         STRAVA_API_URL="https://www.strava.com/api/v3",
-        STRAVA_CLIENT_ID="56275",
-        STRAVA_REDIRECT_URI=os.environ["STRAVA_REDIRECT_URI"],
+        STRAVA_CLIENT_ID=os.environ["STRAVA_CLIENT_ID"],
+        FRONTEND_HOST_URL=os.environ["FRONTEND_HOST_URL"],
     )
 
 

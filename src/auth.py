@@ -13,11 +13,12 @@ app = Flask(__name__)
 
 @app.after_request
 def after_request(response):
-    # TODO: restrict this to only the hosted origin.
-    # https://01100100.github.io/kreuzungen/index.html
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    response.headers.add("Access-Control-Allow-Methods", "POST")
+    if request.headers.get("Origin") == CONFIG.FRONTEND_HOST_URL:
+        response.headers.add("Access-Control-Allow-Origin", CONFIG.FRONTEND_HOST_URL)
+    else:
+        pass
     return response
 
 
