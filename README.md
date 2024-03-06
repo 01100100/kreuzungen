@@ -90,3 +90,7 @@ fly secrets set FRONTEND_HOST_URL=$FRONTEND_HOST_URL
 fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
 fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
 ```
+
+## Shout outs
+
+Thanks to Oliver Gladfelter ([cultureplot.com](https://cultureplot.com)) for inspiring me with his [strava auth implementation](https://github.com/OGladfelter/strava-dashboard/blob/main/js/strava_api.js) and allowing me to use it in this project.
