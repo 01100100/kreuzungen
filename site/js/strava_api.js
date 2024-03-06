@@ -139,18 +139,19 @@ function displayActivities(pageNum) {
   const activitiesPerPage = 5;
   const startIndex = (pageNum - 1) * activitiesPerPage;
   const currentPageActivities = strava_data.slice(startIndex, startIndex + activitiesPerPage);
-  const infoElement = document.getElementById("activitiesList");
-  infoElement.innerHTML = "";
+  const activitiesList = document.getElementById("activitiesList");
+  activitiesList.style.width = "250px";
+  activitiesList.innerHTML = "";
 
   currentPageActivities.forEach(function(activity) {
     const activityElement = createActivityElement(activity);
     activityElement.addEventListener("click", function() {
       loadActivityOnMap(activity);
     });
-    infoElement.appendChild(activityElement);
+    activitiesList.appendChild(activityElement);
   });
 
-  infoElement.style.cursor = "pointer";
+  activitiesList.style.cursor = "pointer";
 
   if (pageNum > 1) {
     const previousLink = document.createElement("a");
@@ -159,7 +160,7 @@ function displayActivities(pageNum) {
     previousLink.addEventListener("click", function() {
         displayActivities(pageNum - 1);
     });
-    infoElement.appendChild(previousLink);
+    activitiesList.appendChild(previousLink);
 }
 
 if (strava_data.length > (startIndex + activitiesPerPage)) {
@@ -169,7 +170,7 @@ if (strava_data.length > (startIndex + activitiesPerPage)) {
     nextLink.addEventListener("click", function() {
         displayActivities(pageNum + 1);
     });
-    infoElement.appendChild(nextLink);
+    activitiesList.appendChild(nextLink);
 }
 }
 
@@ -186,7 +187,7 @@ function createActivityElement(activity) {
   nameElement.style.whiteSpace = "nowrap";
   nameElement.style.overflow = "hidden";
   nameElement.style.textOverflow = "ellipsis";
-  nameElement.style.maxWidth = "100%"; // Adjust the width as needed
+  nameElement.style.maxWidth = "100%";
   activityElement.appendChild(nameElement);
 
   const detailsElement = document.createElement("div");
