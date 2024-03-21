@@ -218,6 +218,8 @@
     let isShareExpanded = false;
     let hoveredFeatureId = null;
     let isBigBbox = null;
+    let shareableTitle = "Kreuzungen 🗺️"
+    let shareableDescription = "Reveal the waterways that shape your adventures!"
     let shareableUrl = "https://kreuzungen.world";
     let shareableUrlEncoded = encodeURIComponent(shareableUrl)
 
@@ -393,14 +395,13 @@
 
         const emailButton = this.createShareButton('email', 'fa-solid fa-envelope');
         emailButton.addEventListener('click', () => {
-          window.open(`mailto:?subject=Check out what has been crossed on my latest adventure!&amp;body=Check out this site ${shareableUrl}`, '_blank');
+          window.open(`
+          mailto:?subject=${encodeURIComponent(shareableTitle)}%20${encodeURIComponent(shareableDescription)}&body=I%20used%20the%20website%20kreuzungen.world%20to%20explore%20the%20waterways%20that%20shaped%20my%20recent%20adventure!!%0A%0AClick%20on%20the%20url%20below%20to%20access%20the%20route%20on%20a%20map%20and%20see%20for%20yourself.%20%0A%0A${shareableUrl}`, '_blank');
         });
         const whatsappButton = this.createShareButton('whatsapp', 'fa-brands fa-whatsapp');
         whatsappButton.addEventListener('click', () => {
           // https://faq.whatsapp.com/5913398998672934
-          if (isRouteDisplayed) {
-            var whatsappMessage = `Check out the waters I crossed on a recent adventure.. ${shareableUrl}`
-          } else { var whatsappMessage = `Check out this site for you recent adventures.. ${shareableUrl}` }
+          let whatsappMessage = `${shareableDescription}.. ${shareableUrl}`
           let whatsappShareLink = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`
           window.open(whatsappShareLink, '_blank');
         });
@@ -411,10 +412,7 @@
         const twitterButton = this.createShareButton('twitter', 'fa-brands fa-twitter');
         // https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/guides/web-intent
         twitterButton.addEventListener('click', () => {
-          if (isRouteDisplayed) {
-            var twitterMessage = `Check out the waters I crossed on a recent adventure..`
-          } else { var twitterMessage = `Check out this site for you recent adventures..` }
-          window.open(`https://twitter.com/intent/tweet?url=${shareableUrlEncoded}&text=${twitterMessage}`, '_blank');
+          window.open(`https://twitter.com/intent/tweet?url=${shareableUrlEncoded}&text=${encodeURIComponent(shareableDescription)}`, '_blank');
         });
         this._container.appendChild(urlButton);
         this._container.appendChild(emailButton);
@@ -429,9 +427,9 @@
         shareButton.onclick = () => {
           if (navigator.share) {
             navigator.share({
-              title: 'Kreuzungen 🗺️',
+              title: shareableTitle,
               url: shareableUrl,
-              text: 'Reveal rivers crossed on recent adventures..'
+              text: shareableDescription
             }).then(() => {
               console.log('Shared!');
             })
@@ -656,6 +654,7 @@
       displayedRouteGeoJSON = routeGeoJSON;
       shareableUrl = `https://kreuzungen.world/index.html?route=${encodeURIComponent(polyline.fromGeoJSON(displayedRouteGeoJSON))}`
       shareableUrlEncoded = encodeURIComponent(shareableUrl)
+      shareableDescription = `Check out the waterways that I crossed on my latest adventures!`
 
       const sourceElement = document.getElementById("source");
 
