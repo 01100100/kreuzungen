@@ -35,139 +35,17 @@
   <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>
   <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
   <script src="https://unpkg.com/osmtogeojson@3.0.0-beta.5/osmtogeojson.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
 
-  <!-- Inline styling -->
-  <style>
-    html {
-      height: 100%
-    }
-
-    body {
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-      margin: 0;
-      padding: 0;
-    }
-
-    #map {
-      flex-grow: 1;
-      min-height: 100%;
-      max-height: 100%
-    }
-
-    .info-container {
-      display: flex;
-      flex-direction: column;
-      position: absolute;
-      top: 10px;
-      max-height: calc(50% - 30px);
-      left: 10px;
-      max-width: calc(100% - 69px);
-      z-index: 1;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      font-size: 11px;
-      line-height: 18px;
-      margin: 0;
-      border-radius: 3px;
-      padding: 5px 5px;
-    }
-
-    .source-container {
-      position: absolute;
-      bottom: 10px;
-      max-height: calc(50% - 30px);
-      left: 10px;
-      max-width: calc(100% - 69px);
-      z-index: 1;
-      overflow-x: auto;
-      overflow-y: scroll;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      font-size: 11px;
-      line-height: 18px;
-      display: none;
-      margin: 0;
-      border-radius: 3px;
-      padding: 5px 5px;
-    }
-
-    .activities-container {
-      display: flex;
-      flex-direction: column;
-      max-height: calc(50% - 30px);
-      position: absolute;
-      display: none;
-      z-index: 2;
-      top: 10px;
-      right: 49px;
-      max-width: calc(100% - 69px);
-      overflow-x: auto;
-      overflow-y: scroll;
-      background-color: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      font-size: 11px;
-      line-height: 13px;
-      margin: 0;
-      border-radius: 3px;
-      padding: 5px 5px;
-    }
-
-    #activitiesList {
-      max-width: 100%;
-    }
-
-    .help-message {
-      max-height: 100%;
-      overflow-y: auto;
-    }
-
-    .river-names-container {
-      max-height: calc(100% - 13px);
-      overflow-y: auto;
-    }
-
-    .river-name {
-      cursor: pointer;
-    }
-
-    .url-copied-message {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(0, 0, 0, 0.5);
-      color: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      display: flex;
-      align-items: center;
-      transition: opacity 1s;
-      opacity: 1;
-    }
-
-    .osm-details {
-      max-height: 100px;
-      overflow-y: auto;
-    }
-
-    .url-copied-message i {
-      margin-right: 5px;
-    }
-  </style>
+  <link href="css/style.css" rel="stylesheet" />
 </head>
 
 <body>
   <!-- File input and map container -->
-  <input type="file" id="fileInput" style="display: none;" />
+  <input type="file" id="fileInput" />
   <div id="map">
     <div id="info" class="info-container">
       <div class="help-message">
-        <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
+        <h2 class="centered">Welcome! 🌍🚴‍♂️</h2>
         <p></p>
         <ol>
           <li>Select the tour activity by using the controls on the right ↝
@@ -180,7 +58,7 @@
           <li> Share the results to your favorite people <i class="fa-solid fa-share-nodes"></i>
           </li>
         </ol>
-        <h5 style="text-align: center">
+        <h5 class="centered">
           ❤️ Powered by data from
           <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
           ❤️
@@ -188,7 +66,7 @@
     </div>
     <div id="activities" class="activities-container">
 
-      <a id="stravaConnect" style="display: none;"
+      <a id="stravaConnect"
         href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all">
         <img src="img/btn_strava_connectwith_orange.svg" alt="Connect with Strava">
       </a>
@@ -198,9 +76,8 @@
 
       </div>
       <div id="activitiesControl"></div>
-      <div id="stravaPowered" style="text-align: center;">
-        <img src="img/api_logo_pwrdBy_strava_horiz_white.svg" width="100" alt="Powered by Strava"
-          style="text-align: center;">
+      <div id="stravaPowered" class="centered">
+        <img src="img/api_logo_pwrdBy_strava_horiz_white.svg" width="100" alt="Powered by Strava" class="centered">
       </div>
 
     </div>
@@ -266,14 +143,11 @@
       onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
-        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group upload-button';
 
         const button = document.createElement('button');
         button.type = 'button';
         button.title = 'Upload File';
-        button.style.backgroundColor = "#34c6eb";
-        button.style.color = "white";
-        button.style.borderRadius = "4px";
         button.onclick = () => {
           hideActivitiesContainer();
           hideInfo();
@@ -306,14 +180,11 @@
       onAdd(map) {
         this._map = map;
         this._container = document.createElement('div');
-        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+        this._container.className = 'maplibregl-ctrl maplibregl-ctrl-group strava-button';
 
         const button = document.createElement('button');
         button.type = 'button';
         button.title = 'Strava activities';
-        button.style.backgroundColor = "#fc4c02";
-        button.style.color = "white";
-        button.style.borderRadius = "4px";
         button.onclick = () => {
           // toggle the Activities-container
           if (isActivitiesDisplayed) {
@@ -350,6 +221,7 @@
         this._map = undefined;
       }
     }
+
     class ShareControl {
       onAdd(map) {
         this._map = map;
@@ -455,7 +327,7 @@
         button.id = `${id}Button`
         button.type = 'button';
         button.style.display = 'none'
-        button.title = id;
+        button.title = `Share with ${id}`;
         button.style.borderRadius = "4px";
         const icon = document.createElement('i');
         icon.className = faIcon;
@@ -628,7 +500,7 @@
       });
       map.addControl(attributionControl)
       map.addControl(new maplibregl.FullscreenControl())
-      const uploadControl = new UploadControl('fileInput', processFileUpload);
+      const uploadControl = new UploadControl('fileInput');
       map.addControl(uploadControl, 'top-right');
       const stravaControl = new StravaControl();
       map.addControl(stravaControl, 'top-right');

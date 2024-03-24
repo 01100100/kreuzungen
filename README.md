@@ -17,7 +17,7 @@ Kreuzungen is a web application that allows users to upload a local GPX file or 
 
 ## Powered By Open Data
 
-The application heavily relies on open data from [OpenStreetMap](https://www.openstreetmap.org/about).
+The application heavily relies on open data from [OpenStreetMap](https://www.openstreetmap.org/about) ❤️.
 
 ## External Libraries and Resources
 
@@ -29,6 +29,7 @@ Kreuzungen uses several external libraries and resources:
 - **[osmtogeojson](https://github.com/tyrasd/osmtogeojson)** for converting OpenStreetMap data to GeoJSON
 - **[FontAwesome](https://fontawesome.com/)** for icons
 - **[Strava API](https://developers.strava.com/)** for syncing Strava activities
+- **[Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API)** for querying OpenStreetMap data
 
 ## Development
 
