@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "kreuzungen"
+version = "0.1.0"
+description = ""
+authors = ["David Whittingham <davidwhittingham94@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+Flask = "^3.0.1"
+requests = "^2.31.0"
+structlog = "^24.1.0"
+waitress = "^2.1.2"
+redis = "^5.0.3"
+unique-names-generator = "^1.0.2"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.2.0"
+isort = "^5.13.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
