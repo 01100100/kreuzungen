@@ -89,6 +89,7 @@ source .env
 fly secrets set FRONTEND_HOST_URL=$FRONTEND_HOST_URL
 fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
 fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
+fly secrets set REDIS_URL=$REDIS_URL
 ```
 
 ## Shout outs

@@ -14,6 +14,7 @@ class Config:  # pylint: disable=too-many-instance-attributes
     STRAVA_API_URL: str
     STRAVA_CLIENT_ID: str
     FRONTEND_HOST_URL: str
+    REDIS_URL: str
 
 
 @lru_cache
@@ -24,6 +25,7 @@ def get_config_values() -> Config:
         STRAVA_API_URL="https://www.strava.com/api/v3",
         STRAVA_CLIENT_ID=os.environ["STRAVA_CLIENT_ID"],
         FRONTEND_HOST_URL=os.environ["FRONTEND_HOST_URL"],
+        REDIS_URL=os.environ["REDIS_URL"],
     )
 
 
