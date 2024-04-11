@@ -8,6 +8,7 @@ import osmtogeojson from 'osmtogeojson';
 import { DOMParser } from 'xmldom';
 import { FeatureCollection, Geometry, GeoJsonProperties, Feature } from 'geojson';
 import { getStravaAccessToken, getStravaActivity, updateStravaActivityDescription } from './strava'
+
 const app = express().use(bodyParser.json());
 
 const redisClient = createClient({ url: process.env.REDIS_URL });
@@ -21,7 +22,7 @@ const bboxSizeLimit_m2 = 500000000; // maximum size limit for a bounding box in 
 // Initialize variables
 let isBigBbox: boolean | null = null;
 
-// Define the main asynchronous function
+// The main asynchronous function 
 async function main() {
   try {
     await redisClient.connect();

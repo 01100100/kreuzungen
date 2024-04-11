@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import { createClient } from "redis";
 type RedisClientType = ReturnType<typeof createClient>;
 
-// Get the Strava refresh token for a user stored in redis
+// Get a Strava refresh token for a user stored in redis
 export async function getStravaRefreshToken(user_id: number, redisClient: RedisClientType): Promise<string> {
     try {
         const refreshToken = await redisClient.get(user_id.toString());
