@@ -1,34 +1,13 @@
 import express from "express";
 import bodyParser from "body-parser";
-import fetch from "node-fetch";
 import { createClient } from "redis";
-import polyline from "@mapbox/polyline";
-import {
-  bbox,
-  area,
-  bboxPolygon,
-  booleanIntersects,
-  combine,
-  featureCollection as makeFeatureCollection,
-  featureCollection,
-  multiLineString,
-} from "@turf/turf";
-import osmtogeojson from "osmtogeojson";
-import { DOMParser } from "xmldom";
-import { groupBy } from "lodash";
-import {
-  FeatureCollection,
-  Geometry,
-  GeoJsonProperties,
-  Feature,
-  LineString,
-  BBox,
-} from "geojson";
+import { FeatureCollection, Feature, BBox } from "geojson";
 import {
   getStravaAccessToken,
   getStravaActivity,
   updateStravaActivityDescription,
 } from "./strava";
+import { calculateIntersectingWaterways } from "./geo";
 
 const app = express().use(bodyParser.json());
 
@@ -36,9 +15,6 @@ const redisClient = createClient({ url: process.env.REDIS_URL });
 redisClient.on("error", (error) => {
   console.error(`Redis client error:`, error);
 });
-
-// Define Constants
-const bboxSizeLimit_m2 = 500000000; // maximum size limit for a bounding box in square meters
 
 // The main asynchronous function
 async function main() {
@@ -54,6 +30,24 @@ async function main() {
 
 // Run the async function
 main();
+
+// Define a GET route for '/webhook' to verify the webhook subscription with Strava
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = "STRAVA";
+
+  let mode = req.query["hub.mode"];
+  let token = req.query["hub.verify_token"];
+  let challenge = req.query["hub.challenge"];
+
+  if (mode && token) {
+    if (mode === "subscribe" && token === VERIFY_TOKEN) {
+      console.log("WEBHOOK_VERIFIED");
+      res.json({ "hub.challenge": challenge });
+    } else {
+      res.sendStatus(403);
+    }
+  }
+});
 
 // Define a POST route for '/webhook' to receive and process incoming events
 app.post("/webhook", async (req, res) => {
@@ -115,7 +109,6 @@ app.post("/webhook", async (req, res) => {
       });
 
       console.log("Intersecting waterways found");
-      console.log(intersectingWaterways);
 
       // create a message with the intersecting waterways
       const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
@@ -133,135 +126,6 @@ app.post("/webhook", async (req, res) => {
   }
   res.status(200).send("EVENT_RECEIVED");
 });
-
-// Define a GET route for '/webhook' to verify the webhook subscription with Strava
-app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "STRAVA";
-
-  let mode = req.query["hub.mode"];
-  let token = req.query["hub.verify_token"];
-  let challenge = req.query["hub.challenge"];
-
-  if (mode && token) {
-    if (mode === "subscribe" && token === VERIFY_TOKEN) {
-      console.log("WEBHOOK_VERIFIED");
-      res.json({ "hub.challenge": challenge });
-    } else {
-      res.sendStatus(403);
-    }
-  }
-});
-
-async function calculateIntersectingWaterways(
-  polylineString: string
-): Promise<(Feature | FeatureCollection)[] | undefined> {
-  try {
-    const routeGeoJSON: LineString = polyline.toGeoJSON(polylineString);
-    const routeBoundingBox: BBox = bbox(routeGeoJSON);
-    const waterwaysQuery = fetchWaterwaysQuery(routeBoundingBox);
-    const osmData = await fetchOverpassData(waterwaysQuery);
-    if (!osmData) {
-      console.error(
-        `No osm features returned for Overpass query: ${waterwaysQuery}`
-      );
-      return;
-    }
-    const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
-    const combined = combineSameNameFeatures(waterwaysGeoJSON);
-    const intersectingWaterways = filterIntersectingWaterways(
-      combined,
-      routeGeoJSON
-    );
-    console.log(intersectingWaterways);
-    return intersectingWaterways;
-  } catch (error) {
-    console.error("Error processing GeoJSON:", error);
-    return;
-  }
-}
-
-// Create a query for the Overpass API to fetch waterways within a bounding box, if the bounding box is too big only fetch relations
-function fetchWaterwaysQuery(bbox: BBox): string {
-  let waterwaysQuery = `(rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});)->._;out geom;`;
-  if (area(bboxPolygon(bbox)) > bboxSizeLimit_m2) {
-    console.log(
-      "The Bbox is too big. To reduce the computation on the client size the fetch only bigger waterways (OSM relations) and ignore smaller streams (OSM ways) from the OSM overpass api."
-    );
-    console.log(`${area(bboxPolygon(bbox))} m**2 > ${bboxSizeLimit_m2}`);
-    waterwaysQuery = `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
-  }
-  return waterwaysQuery;
-}
-
-// Fetch data from the Overpass API
-async function fetchOverpassData(waterwaysQuery: string): Promise<string> {
-  const response = await fetch("https://www.overpass-api.de/api/interpreter?", {
-    method: "POST",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: waterwaysQuery,
-  });
-  if (response.ok) {
-    const text = await response.text();
-    return text;
-  } else {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-}
-
-// Parse OSM XML data to GeoJSON
-function parseOSMToGeoJSON(
-  osmData: string
-): FeatureCollection<Geometry, GeoJsonProperties> {
-  const dom = new DOMParser().parseFromString(osmData, "text/xml");
-  return osmtogeojson(dom);
-}
-
-// Filter waterways that intersect with the route
-function filterIntersectingWaterways(
-  waterwaysGeoJSON: FeatureCollection,
-  routeGeoJSON: LineString
-): Feature[] {
-  return waterwaysGeoJSON.features.filter((feature) =>
-    booleanIntersects(feature, routeGeoJSON)
-  );
-}
-
-function combineSameNameFeatures(
-  osmData: FeatureCollection<Geometry, GeoJsonProperties>
-): FeatureCollection<Geometry, GeoJsonProperties> {
-  const groupedFeatures: object = groupBy(
-    osmData.features,
-    (feature: Feature) => feature.properties && feature.properties.name
-  );
-  const combinedFeatures: Feature[] = Object.values(groupedFeatures).map(
-    (group) => {
-      if (group.length > 1) {
-        return combine(featureCollection(group));
-      }
-      return group[0];
-    }
-  );
-
-  return featureCollection(combinedFeatures);
-}
-
-// combine all FeatureCollection features (which come from turf.combine )in a feature collection into a single feature
-function flattenFeatureCollectionFeatures(
-  featureCollection: FeatureCollection
-): FeatureCollection {
-  const features = featureCollection.features;
-  // const combinedFeatures = features.map((feature) => {
-  //   if (feature.type === 'FeatureCollection') {
-  //     return (feature.features);
-  //   }
-  //   return feature;
-  // });
-  // return combinedFeatures;
-  return featureCollection;
-}
 
 function createWaterwaysMessage(
   features: (Feature | FeatureCollection)[]
@@ -285,3 +149,18 @@ function createWaterwaysMessage(
     " | "
   )} 🌐 https://kreuzungen.world 🗺️`;
 }
+
+// // combine all FeatureCollection features (which come from turf.combine )in a feature collection into a single feature
+// function flattenFeatureCollectionFeatures(
+//   featureCollection: FeatureCollection
+// ): FeatureCollection {
+//   const features = featureCollection.features;
+//   // const combinedFeatures = features.map((feature) => {
+//   //   if (feature.type === 'FeatureCollection') {
+//   //     return (feature.features);
+//   //   }
+//   //   return feature;
+//   // });
+//   // return combinedFeatures;
+//   return featureCollection;
+// }
