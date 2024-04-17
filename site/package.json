@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "@types/mapbox__polyline": "^1.0.5",
     "@types/webpack-dev-server": "^4.7.2",
     "html-webpack-plugin": "^5.6.0",
     "ts-loader": "^9.5.1",
@@ -13,6 +14,7 @@
   },
   "dependencies": {
     "@mapbox/polyline": "^1.2.1",
+    "@mapbox/togeojson": "^0.16.2",
     "@turf/turf": "^7.0.0-alpha.114",
     "maplibre-gl": "^4.1.2",
     "osmtogeojson": "^3.0.0-beta.5",

@@ -1,18 +1,19 @@
-import maplibregl from "maplibre-gl";
+import maplibregl, { Feature } from "maplibre-gl";
 import osmtogeojson from "osmtogeojson";
 import polyline from "@mapbox/polyline";
 import * as turf from "@turf/turf";
-import toGeoJSON from "togeojson";
+import toGeoJSON from "@mapbox/togeojson";
+import { GeoJsonProperties, Geometry } from "geojson";
 
 // Define global variables
-let isRouteDisplayed = null;
+let isRouteDisplayed: boolean | null = null;
 let displayedRouteGeoJSON = null;
-let isActivitiesDisplayed = null;
-let isIntersectingWaterwaysDisplayed = null;
+let isActivitiesDisplayed: boolean | null = null;
+let isIntersectingWaterwaysDisplayed: boolean | null = null;
 let isMapCenteredToRoute = false;
 let isShareExpanded = false;
-let hoveredFeatureId = null;
-let isBigBbox = null;
+let hoveredFeatureId: string | number | null | undefined = null;
+let isBigBbox: boolean | null = null;
 let shareableTitle = "Kreuzungen 🗺️";
 let shareableDescription = "Reveal the waterways that shape your adventures!";
 let shareableUrl = "https://kreuzungen.world";
@@ -42,7 +43,7 @@ class CustomAttributionControl extends maplibregl.AttributionControl {
     }
   };
 
-  onAdd(map) {
+  onAdd(map: maplibregl.Map) {
     const container = super.onAdd(map);
     container.classList.add("maplibregl-compact");
     this._map.on("mousedown", this._updateCompactMinimize);
@@ -295,7 +296,9 @@ class ShareControl {
 
   minimizeShareControl() {
     const urlButton = document.getElementById("urlButton");
-    urlButton.style.display = "none";
+    if (urlButton) {
+      urlButton.style.display = "none";
+    }
     const emailButton = document.getElementById("emailButton");
     emailButton.style.display = "none";
     const whatsappButton = document.getElementById("whatsappButton");
@@ -395,7 +398,8 @@ function processFileUpload(e) {
   const selectedFile = e.target.files[0];
   if (!selectedFile) return;
 
-  const fileReader = new FileReader();
+  const fileReader: any = new FileReader();
+  // TODO: correct type annotation.
   fileReader.readAsText(selectedFile);
   fileReader.onload = async function (e) {
     const fileContents = e.target.result;
@@ -465,7 +469,7 @@ function createMap() {
   return map;
 }
 
-async function parseGPXToGeoJSON(contents) {
+async function parseGPXToGeoJSON(contents: string) {
   const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
   return toGeoJSON.gpx(gpxDom);
 }
@@ -818,7 +822,7 @@ function displaySpinner(id) {
   showInfo();
 }
 
-function setMapCenter(pos) {
+function setMapCenter(pos: GeolocationPosition) {
   if (!isMapCenteredToRoute)
     mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
 }

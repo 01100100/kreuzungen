@@ -77,9 +77,9 @@ The site is served using github pages. There is a github action in place to serv
 
 The site gets deployed to [https://kreuzungen.world](https://kreuzungen.world).
 
-### Backend - fly.io
+### Auth Backend - fly.io
 
-The backend is hosted on fly.io. There is a github action in place to deploy the backend for the `main` branch
+The python auth backend is hosted on fly.io. There is a github action in place to deploy the backend for the `main` branch
 
 Note: variables stored in the `.env` file must be set as fly secrets.
 
@@ -91,6 +91,10 @@ fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
 fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
 fly secrets set REDIS_URL=$REDIS_URL
 ```
+
+## Strava Webhook Service
+
+
 
 ## Shout outs
 
