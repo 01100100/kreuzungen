@@ -38,7 +38,7 @@ export async function calculateIntersectingWaterwaysGeojson(
     const combined = combineSameNameFeatures(waterwaysGeoJSON) as FeatureCollection<LineString | MultiLineString>;
     console.log("combined", combined);
     console.log("routeGeoJSON", routeGeoJSON);
-    const intersectingWaterways = findIntersectingFeatures(
+    const intersectingWaterways = findIntersectingFeatures2(
       combined,
       routeGeoJSON
     );
@@ -87,6 +87,22 @@ export function findIntersectingFeatures(
   for (const feature of fc.features) {
     const x = lineIntersect(feature, routeLineString, { ignoreSelfIntersections: true });
     if (x.features.length > 0) {
+      intersectingFeatures.push(feature);
+    }
+  }
+  return featureCollection(intersectingFeatures);
+}
+
+
+export function findIntersectingFeatures2(
+  fc: FeatureCollection<LineString | MultiLineString>,
+  routeLineString: Feature<LineString>
+): FeatureCollection {
+  // TODO: implement this to return on the first Intersection instead of calculating all of the intersections.  https://github.com/rowanwins/sweepline-intersections
+
+  const intersectingFeatures = [];
+  for (const feature of fc.features) {
+    if (booleanIntersects(feature, routeLineString)) {
       intersectingFeatures.push(feature);
     }
   }

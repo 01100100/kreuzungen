@@ -30,8 +30,6 @@ export let shareableDescription =
   "Reveal the waterways that shape your adventures!";
 export let shareableUrl = "https://kreuzungen.world";
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
-
-const bboxSizeLimit_m2 = 500000000;
 export const mapInstance = createMap();
 
 setUp();
@@ -67,7 +65,6 @@ function processFileUpload(e) {
   if (!selectedFile) return;
 
   const fileReader: any = new FileReader();
-  // TODO: correct type annotation.
   fileReader.readAsText(selectedFile);
   fileReader.onload = async function (e) {
     const fileContents = e.target.result;
@@ -92,11 +89,9 @@ export async function processGeojson(
     console.error("No intersecting waterways found");
     return;
   }
-
-  console.log("Intersecting waterways found");
-
-  // displayWaterwayNames(intersectingWaterways);
   displayIntersectingWaterways(intersectingWaterways);
+  addMapInteractions()
+  displayWaterwayNames(intersectingWaterways);
 }
 
 function createMap() {
@@ -222,7 +217,9 @@ function displayIntersectingWaterways(
       ],
     },
   });
+}
 
+function addMapInteractions() {
   // TODO: improve the ui by reducing the sensitivity.
   // https://github.com/acalcutt/maplibre-gl-inspect/blob/main/lib/MaplibreInspect.js#L159C1-L176C6
   mapInstance.on("click", "intersectingWaterways", (e) => {
@@ -273,45 +270,54 @@ function createPopUp(
     features?: maplibregl.MapGeoJSONFeature[];
   } & Object
 ) {
+
   const riverName = x.features[0].properties.name;
-  const destination = x.features[0].properties.destination || "";
-  const wikipedia = x.features[0].properties.wikipedia || "";
-  const wikidata = x.features[0].properties.wikidata || "";
-  const type = x.features[0].properties.type || "";
-
-  let osmUrlsContent = "";
-
-  // if MultiLineString/combined way then output a url for all way parts
-  if (x.features[0].properties.collectedProperties) {
+  let destination = null
+  let wikipedia = null
+  let wikidata = null
+  let type = null
+  let urls = []
+  if (x.features[0].geometry.type === "MultiLineString") {
     const collectedProps = JSON.parse(
       x.features[0].properties.collectedProperties
     );
-    const urls = collectedProps.map((property) => {
-      const id = property.id; // Assuming the 'id' field exists within the 'property' object
-      return `<a href="https://www.openstreetmap.org/${id}" target="_blank">https://www.openstreetmap.org/${id}</a>`;
-    });
+    for (let i = 0; i < collectedProps.length; i++) {
+      if (collectedProps[i].destination) {
+        destination = collectedProps[i].destination
+      }
+      if (collectedProps[i].wikipedia) {
+        wikipedia = collectedProps[i].wikipedia
+      }
+      if (collectedProps[i].wikidata) {
+        wikidata = collectedProps[i].wikidata
+      }
+      if (collectedProps[i].type) {
+        type = collectedProps[i].type
+      }
 
-    osmUrlsContent = `
+      if (collectedProps[i].id) {
+        urls.push(collectedProps[i].id)
+      }
+    }
+  } else {
+    destination = x.features[0].properties.destination
+    wikipedia = x.features[0].properties.wikipedia
+    wikidata = x.features[0].properties.wikidata
+    type = x.features[0].properties.type
+    urls = [x.features[0].properties.id]
+  }
+
+  let osmUrlsContent = "";
+
+  osmUrlsContent = `
     <br>
     <details class="osm-details">
       <summary>OSM data</summary>
       <ul>
-        ${urls.map((url) => `<li>${url}</li>`).join("")}
+        ${urls.map((url) => `<li><a href="https://www.openstreetmap.org/${url}" target="_blank">https://www.openstreetmap.org/${url}</a></li>`).join("")}
       </ul>
     </details>
   `;
-  } else {
-    const osm_url = `https://www.openstreetmap.org/${x.features[0].id}`;
-    osmUrlsContent = `
-    <br>
-    <details>
-      <summary>OSM data source's</summary>
-      <ul>
-        ${riverName}<br><a href="${osm_url}" target="_blank">${osm_url}</a>
-      </ul>
-    </details>
-  `;
-  }
 
   let popupContent = `Name: ${riverName}`;
 
@@ -336,16 +342,18 @@ function createPopUp(
   popupContent += osmUrlsContent;
 
   const coordinates = x.lngLat;
-
   new maplibregl.Popup({ closeButton: true, closeOnClick: true })
     .setLngLat(coordinates)
     .setHTML(popupContent)
     .addTo(mapInstance);
 }
 
-function displayWaterwayNames(intersectingWaterways) {
+function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
   // Display all the river names in the info-container
-  const riverNames = intersectingWaterways
+  // extract the name and geometry from the intersectingWaterways
+
+
+  const riverNames = intersectingWaterways.features
     .map((feature) => ({
       name: feature.properties.name,
       id: feature.id,
@@ -370,7 +378,7 @@ function displayWaterwayNames(intersectingWaterways) {
     riverElement.addEventListener("mouseenter", () => {
       // Set line-opacity to 1 when hovered.
       mapInstance.setFeatureState(
-        { source: "intersectingWaterways", id: item.id },
+        { source: "intersectingWaterways", id: item.name },
         { selected: true }
       );
     });
@@ -378,7 +386,7 @@ function displayWaterwayNames(intersectingWaterways) {
     // Event listener when mouse leaves the element
     riverElement.addEventListener("mouseleave", () => {
       mapInstance.setFeatureState(
-        { source: "intersectingWaterways", id: item.id },
+        { source: "intersectingWaterways", id: item.name },
         { selected: false }
       );
     });
