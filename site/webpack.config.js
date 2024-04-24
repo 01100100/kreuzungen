@@ -13,17 +13,21 @@ module.exports = {
   optimization: {
     runtimeChunk: 'single',
   },
-  entry: { main: './src/main.ts', strava_api: './src/strava_api.js' },
+  entry: { main: './src/main.ts' },
   module: {
     rules: [
       {
         test: /\.ts?$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /\.test\.ts$/],
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
+        test: /\.(png|jpe?g|gif|svg)$/i,
         type: 'asset/resource'
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
       },
     ],
   },
