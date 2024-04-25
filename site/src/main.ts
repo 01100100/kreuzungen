@@ -81,14 +81,14 @@ export async function processGeojson(
   fitMapToBoundingBox(turf.bbox(routeGeoJSON));
 
   displaySpinner("info");
-  let intersectingWaterways = await calculateIntersectingWaterwaysGeojson(
-    routeGeoJSON
-  );
-  if (intersectingWaterways) {
-    displayIntersectingWaterways(intersectingWaterways);
-    addMapInteractions()
-    displayWaterwayNames(intersectingWaterways);
-  }
+  calculateIntersectingWaterwaysGeojson(routeGeoJSON)
+    .then(intersectingWaterways => {
+      if (intersectingWaterways) {
+        displayIntersectingWaterways(intersectingWaterways);
+        addMapInteractions()
+        displayWaterwayNames(intersectingWaterways);
+      }
+    });
 }
 
 function createMap() {
@@ -101,7 +101,7 @@ function createMap() {
   const map = new ExtendedMap({
     container: "map",
     style:
-      "https://api.maptiler.com/maps/topo-v2/style.json?key=ykqGqGPMAYuYgedgpBOY",
+      "https://maps.geoapify.com/v1/styles/maptiler-3d/style.json?apiKey=f67d96d433304d3ba3d27ea452c82b43",
     center: [0, 51.4769], // Greenwich meridian
     zoom: 10,
     maxZoom: 18,
