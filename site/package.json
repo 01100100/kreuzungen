@@ -3,23 +3,30 @@
     "@babel/preset-env": "^7.24.4",
     "@babel/preset-typescript": "^7.24.1",
     "@types/jest": "^29.5.12",
+    "@types/lodash": "^4.17.0",
     "@types/mapbox__polyline": "^1.0.5",
     "@types/webpack-dev-server": "^4.7.2",
     "css-loader": "^7.1.1",
     "html-webpack-plugin": "^5.6.0",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jsdom": "^24.0.0",
     "style-loader": "^4.0.0",
     "ts-jest": "^29.1.2",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.4"
+    "webpack-dev-server": "^5.0.4",
+    "webpack-node-externals": "^3.0.0"
   },
   "scripts": {
     "test": "jest --verbose",
     "build": "webpack",
-    "serve": "webpack serve --open"
+    "serve": "webpack serve --open",
+    "compile": "npx tsc",
+    "start": "node app.js"
   },
   "dependencies": {
     "@mapbox/polyline": "^1.2.1",
@@ -28,7 +35,6 @@
     "@turf/boolean-intersects": "^7.0.0-alpha.115",
     "@turf/turf": "^7.0.0-alpha.114",
     "cross-fetch": "^4.0.0",
-    "jsdom": "^24.0.0",
     "maplibre-gl": "^4.1.2",
     "osmtogeojson": "^3.0.0-beta.5",
     "redis": "^4.6.13",

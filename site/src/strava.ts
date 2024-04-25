@@ -1,10 +1,10 @@
 import fetch from "cross-fetch";
 import { feature } from "@turf/helpers";
-import { processGeojson } from "./main";
 import { createClient } from "redis";
-type RedisClientType = ReturnType<typeof createClient>;
 import polyline from "@mapbox/polyline";
+import { Feature, LineString, GeoJsonProperties } from "geojson";
 
+type RedisClientType = ReturnType<typeof createClient>;
 // Get a Strava refresh token for a user stored in redis
 export async function getStravaRefreshToken(
   user_id: number,
@@ -56,6 +56,7 @@ export async function getStravaAccessTokenRedis(
 export async function getStravaAccessToken(
   refreshToken: string
 ): Promise<string> {
+  console.log("Getting Strava access token");
   try {
     const response = await fetch("https://kreuzungen.fly.dev/reoauth", {
       method: "POST",
@@ -135,7 +136,7 @@ export async function getStravaActivity(
 // Get data for last 200 Strava activities with coordinates
 export async function getStravaActivities(
   owner_access_token: string
-): Promise<any> {
+): Promise<any[]> {
   try {
     const response = await fetch(
       `https://www.strava.com/api/v3/activities?per_page=200`,
@@ -208,37 +209,6 @@ export async function updateStravaActivityDescription(
 }
 
 ////////////////////////////////// the functions /////////////////////////////////////////////////////////////
-function displayActivities(activities: any[]) {
-  const activitiesPerPage = 5;
-  const startIndex = 0;
-  const currentPageActivities = activities.slice(
-    startIndex,
-    startIndex + activitiesPerPage
-  );
-  const activitiesList = document.getElementById("activitiesList");
-  activitiesList.style.width = "250px";
-  activitiesList.innerHTML = "";
-
-  currentPageActivities.forEach(function (activity) {
-    const activityElement = createActivityElement(activity);
-    activityElement.addEventListener("click", function () {
-      loadActivityOnMap(activity);
-    });
-    activitiesList.appendChild(activityElement);
-  });
-
-  activitiesList.style.cursor = "pointer";
-
-  if (activities.length > startIndex + activitiesPerPage) {
-    const nextLink = document.createElement("a");
-    nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
-    nextLink.style.float = "right";
-    nextLink.addEventListener("click", function () {
-      displayActivities(activities.slice(startIndex + activitiesPerPage));
-    });
-    activitiesList.appendChild(nextLink);
-  }
-}
 
 function createActivityElement(activity) {
   const activityElement = document.createElement("div");
@@ -275,7 +245,7 @@ function createActivityElement(activity) {
   return activityElement;
 }
 
-function loadActivityOnMap(activity) {
+function loadActivityOnMap(activity, callback: (a: Feature<LineString, GeoJsonProperties>) => void) {
   const activitiesContainer = document.getElementById("activities");
   if (activitiesContainer) {
     activitiesContainer.style.display = "none";
@@ -285,24 +255,5 @@ function loadActivityOnMap(activity) {
     name: activity.name,
     url: `https://www.strava.com/activities/${activity.id}`,
   };
-  processGeojson(geojson);
-}
-
-export async function loadStravaActivities(owner_access_token: string) {
-  // show loading spinner
-  const infoElement = document.getElementById("activitiesList");
-
-  const spinnerContainer = document.getElementById("spinner");
-  if (!spinnerContainer) {
-    const spinnerElement = document.createElement("div");
-    spinnerElement.id = "spinner";
-    spinnerElement.style.textAlign = "center";
-    spinnerElement.innerHTML =
-      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
-    infoElement.appendChild(spinnerElement);
-  }
-
-  // get activities
-  let activities = await getStravaActivities(owner_access_token);
-  displayActivities(activities);
+  callback(geojson);
 }

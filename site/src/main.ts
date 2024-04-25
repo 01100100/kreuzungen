@@ -1,11 +1,11 @@
-import maplibregl from "maplibre-gl";
+import maplibregl, { GeolocateControl } from "maplibre-gl";
 import polyline from "@mapbox/polyline";
 import * as turf from "@turf/turf";
-import toGeoJSON from "@mapbox/togeojson";
 import {
   FeatureCollection,
   Feature,
-  LineString
+  LineString,
+  GeoJsonProperties
 } from "geojson";
 import "maplibre-gl/dist/maplibre-gl.css";
 import {
@@ -16,14 +16,11 @@ import {
   showInfo,
   displaySpinner,
 } from "./ui";
-import { calculateIntersectingWaterwaysGeojson } from "./geo";
+import { calculateIntersectingWaterwaysGeojson, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 
 // Define global variables
-let isRouteDisplayed: boolean | null = null;
-let displayedRouteGeoJSON = null;
-let isIntersectingWaterwaysDisplayed: boolean | null = null;
-let isMapCenteredToRoute = false;
+export let isMapCenteredToRoute = false;
 let hoveredFeatureId: string | number | null | undefined = null;
 export let shareableTitle = "Kreuzungen 🗺️";
 export let shareableDescription =
@@ -32,66 +29,66 @@ export let shareableUrl = "https://kreuzungen.world";
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
 export const mapInstance = createMap();
 
+// Parse url params and check storage for strava login state
 setUp();
-const fileInput = document.getElementById("fileInput");
-fileInput.addEventListener("change", processFileUpload, false);
-document.querySelector("input").addEventListener("cancel", (evt) => {
-  showInfo();
-});
 
-function clearRoute() {
-  // Clear existing info and reset map state
-  if (isRouteDisplayed) {
-    mapInstance.removeLayerAndSource("route");
-    isRouteDisplayed = null;
-    displayedRouteGeoJSON = null;
-    shareableUrl = null;
-    shareableUrlEncoded = null;
-  }
-  const intersectingWaterwaysLayer = mapInstance.getLayer(
-    "intersectingWaterways"
-  );
-  if (intersectingWaterwaysLayer) {
-    mapInstance.removeLayerAndSource("intersectingWaterways");
-    isIntersectingWaterwaysDisplayed = null;
-  }
-  const infoElement = document.getElementById("info");
-  infoElement.innerHTML = "";
-  infoElement.style.display = "none";
+// Get the current location and set the map center
+navigator.geolocation.getCurrentPosition(setMapCenter);
+
+// Add file upload event listener for .gpx files
+const fileInput = document.getElementById("fileInput");
+if (fileInput) {
+  fileInput.addEventListener("change", processFileUpload, false);
+}
+const inputElement = document.querySelector("input");
+if (inputElement) {
+  inputElement.addEventListener("cancel", (evt) => {
+    showInfo();
+  });
 }
 
-function processFileUpload(e) {
-  const selectedFile = e.target.files[0];
-  if (!selectedFile) return;
+// Set the map center to the user's current location
+function setMapCenter(pos: GeolocationPosition) {
+  if (!isMapCenteredToRoute) {
+    console.log("Setting map center to geo location of user")
+    mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
+  }
+}
 
-  const fileReader: any = new FileReader();
+// Read and parse and process a uploaded .gpx file
+function processFileUpload(e: Event) {
+  const target = e.target as HTMLInputElement;
+  const selectedFile = target.files?.[0];
+  if (!selectedFile) return;
+  const fileReader = new FileReader();
   fileReader.readAsText(selectedFile);
   fileReader.onload = async function (e) {
-    const fileContents = e.target.result;
-    const routeGeoJSON = await parseGPXToGeoJSON(fileContents);
-    processGeojson(routeGeoJSON.features[0]);
+    const fileContents = e.target?.result?.toString();
+    if (fileContents) {
+      const routeGeoJSON = await parseGPXToGeoJSON(fileContents);
+      processGeojson(routeGeoJSON.features[0]);
+    }
   };
 }
 
+// Process a GeoJSON object, calculate intersecting waterways and display them on the map with interactions
 export async function processGeojson(
   routeGeoJSON: Feature<LineString>
 ) {
   clearRoute();
   addRoute(routeGeoJSON);
+  displayRouteMetadata(routeGeoJSON);
   fitMapToBoundingBox(turf.bbox(routeGeoJSON));
 
   displaySpinner("info");
   let intersectingWaterways = await calculateIntersectingWaterwaysGeojson(
     routeGeoJSON
   );
-
-  if (!intersectingWaterways) {
-    console.error("No intersecting waterways found");
-    return;
+  if (intersectingWaterways) {
+    displayIntersectingWaterways(intersectingWaterways);
+    addMapInteractions()
+    displayWaterwayNames(intersectingWaterways);
   }
-  displayIntersectingWaterways(intersectingWaterways);
-  addMapInteractions()
-  displayWaterwayNames(intersectingWaterways);
 }
 
 function createMap() {
@@ -109,6 +106,7 @@ function createMap() {
     zoom: 10,
     maxZoom: 18,
     minZoom: 5,
+    maxPitch: 85,
     attributionControl: false,
   });
   const attributionControl = new CustomAttributionControl({
@@ -126,12 +124,29 @@ function createMap() {
   return map;
 }
 
-async function parseGPXToGeoJSON(contents: string) {
-  const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
-  return toGeoJSON.gpx(gpxDom);
+
+function clearRoute() {
+  // Clear existing info and reset map state
+  shareableUrl = "";
+  shareableUrlEncoded = "";
+  // close any open popups
+  const popups = document.querySelectorAll(".mapboxgl-popup");
+  popups.forEach((popup) => popup.remove());
+  // Remove existing layers and sources
+  if (mapInstance.getLayer("route")) {
+    mapInstance.removeLayerAndSource("route");
+  }
+  if (mapInstance.getLayer("intersectingWaterways")) {
+    mapInstance.removeLayerAndSource("intersectingWaterways");
+  }
+  const infoElement = document.getElementById("info");
+  if (infoElement) {
+    infoElement.innerHTML = "";
+    infoElement.style.display = "none";
+  }
 }
 
-async function addRoute(routeGeoJSON) {
+async function addRoute(routeGeoJSON: Feature<LineString>) {
   mapInstance.addSource("route", { type: "geojson", data: routeGeoJSON });
   mapInstance.addLayer({
     id: "route",
@@ -140,24 +155,23 @@ async function addRoute(routeGeoJSON) {
     layout: { "line-join": "round", "line-cap": "round" },
     paint: { "line-color": "#fc03ca", "line-width": 7 },
   });
-  isRouteDisplayed = true;
-  displayedRouteGeoJSON = routeGeoJSON;
   shareableUrl = `https://kreuzungen.world/index.html?route=${encodeURIComponent(
-    polyline.fromGeoJSON(displayedRouteGeoJSON)
+    polyline.fromGeoJSON(routeGeoJSON)
   )}`;
   shareableUrlEncoded = encodeURIComponent(shareableUrl);
   shareableDescription = `Check out the waterways that I crossed on my latest adventures!`;
+  // TODO: add more info.. date, length km and altitude gained.
+}
+
+function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonProperties>) {
 
   const sourceElement = document.getElementById("source");
 
   // minimize the attribution on a compact screen
   const attributionControl = mapInstance
     ._controls[0] as CustomAttributionControl;
-  attributionControl._updateCompactMinimize();
-  sourceElement.style.display = "block";
-  sourceElement.innerHTML = `<i class="fa-solid fa-route"></i> ${routeGeoJSON.properties.name}`;
 
-  if (routeGeoJSON.properties.url) {
+  if (routeGeoJSON.properties && routeGeoJSON.properties.url) {
     const urlElement = document.createElement("a");
     urlElement.href = routeGeoJSON.properties.url;
     urlElement.innerHTML = 'View on Strava <i class="fa-brands fa-strava"></i>';
@@ -173,14 +187,16 @@ async function addRoute(routeGeoJSON) {
 
     // Append the link element to the link container
     linkContainer.appendChild(urlElement);
-
+    if (sourceElement) {
+      sourceElement.style.display = "block";
+      sourceElement.innerHTML = `<i class="fa-solid fa-route"></i> ${routeGeoJSON.properties?.name}`;
+    }
     sourceElement.appendChild(linkContainer);
   }
-
-  // TODO: add more info.. date, length km and altitude gained.
 }
 
-function fitMapToBoundingBox(bbox) {
+function fitMapToBoundingBox(bbox: any) {
+  console.log("Fitting map to bounding box");
   mapInstance.fitBounds(bbox, { padding: 50, animate: true });
   isMapCenteredToRoute = true;
 }
@@ -278,33 +294,47 @@ function createPopUp(
   let type = null
   let urls = []
   if (x.features[0].geometry.type === "MultiLineString") {
-    const collectedProps = JSON.parse(
-      x.features[0].properties.collectedProperties
-    );
-    for (let i = 0; i < collectedProps.length; i++) {
-      if (collectedProps[i].destination) {
-        destination = collectedProps[i].destination
-      }
-      if (collectedProps[i].wikipedia) {
-        wikipedia = collectedProps[i].wikipedia
-      }
-      if (collectedProps[i].wikidata) {
-        wikidata = collectedProps[i].wikidata
-      }
-      if (collectedProps[i].type) {
-        type = collectedProps[i].type
-      }
+    // cheque if it has the collected property field. If it does, then use it, otherwise use the features property.
+    if (!x.features[0].properties.collectedProperties) {
+      console.error("No collectedProperties field found")
+      destination = x.features[0].properties.destination
+      wikipedia = x.features[0].properties.wikipedia
+      wikidata = x.features[0].properties.wikidata
+      type = x.features[0].properties.type
+      urls = [x.features[0].properties.id]
+    }
+    else {
+      const collectedProps = JSON.parse(
+        x.features[0].properties.collectedProperties
+      );
+      for (let i = 0; i < collectedProps.length; i++) {
+        if (collectedProps[i].destination) {
+          destination = collectedProps[i].destination
+        }
+        if (collectedProps[i].wikipedia) {
+          wikipedia = collectedProps[i].wikipedia
+        }
+        if (collectedProps[i].wikidata) {
+          wikidata = collectedProps[i].wikidata
+        }
+        if (collectedProps[i].type) {
+          type = collectedProps[i].type
+        }
 
-      if (collectedProps[i].id) {
-        urls.push(collectedProps[i].id)
+        if (collectedProps[i].id) {
+          urls.push(collectedProps[i].id)
+        }
       }
     }
-  } else {
+  } else if (x.features[0].geometry.type === "LineString") {
     destination = x.features[0].properties.destination
     wikipedia = x.features[0].properties.wikipedia
     wikidata = x.features[0].properties.wikidata
     type = x.features[0].properties.type
     urls = [x.features[0].properties.id]
+  } else {
+    console.log(x)
+    console.error("Unknown geometry type")
   }
 
   let osmUrlsContent = "";
@@ -313,9 +343,7 @@ function createPopUp(
     <br>
     <details class="osm-details">
       <summary>OSM data</summary>
-      <ul>
-        ${urls.map((url) => `<li><a href="https://www.openstreetmap.org/${url}" target="_blank">https://www.openstreetmap.org/${url}</a></li>`).join("")}
-      </ul>
+        ${urls.map((url) => `<a href="https://www.openstreetmap.org/${url}" target="_blank">https://www.openstreetmap.org/${url}</a><br>`).join("")}
     </details>
   `;
 
@@ -407,9 +435,3 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
   infoElement.style.display = "flex";
 }
 
-function setMapCenter(pos: GeolocationPosition) {
-  if (!isMapCenteredToRoute)
-    mapInstance.setCenter([pos.coords.longitude, pos.coords.latitude]);
-}
-
-navigator.geolocation.getCurrentPosition(setMapCenter);

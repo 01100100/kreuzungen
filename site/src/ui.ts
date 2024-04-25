@@ -5,7 +5,11 @@ import {
   shareableDescription,
   shareableTitle,
   shareableUrlEncoded,
+  processGeojson,
 } from "./main";
+import { feature } from "@turf/helpers";
+import { getStravaActivities } from "./strava";
+import polyline from "@mapbox/polyline";
 
 export class CustomAttributionControl extends maplibregl.AttributionControl {
   _toggleAttribution = () => {
@@ -85,7 +89,7 @@ export class StravaControl {
   _map: any;
   _container: HTMLDivElement;
   _isActivitiesDisplayed: boolean;
-  constructor() {}
+  constructor() { }
   onAdd(map) {
     this._map = map;
     this._isActivitiesDisplayed = false;
@@ -190,8 +194,8 @@ export class ShareControl {
       window.open(
         `
             mailto:?subject=${encodeURIComponent(
-              shareableTitle
-            )}%20${encodeURIComponent(
+          shareableTitle
+        )}%20${encodeURIComponent(
           shareableDescription
         )}&body=I%20used%20the%20website%20kreuzungen.world%20to%20explore%20the%20waterways%20that%20shaped%20my%20recent%20adventure!!%0A%0AClick%20on%20the%20url%20below%20to%20access%20the%20route%20on%20a%20map%20and%20see%20for%20yourself.%20%0A%0A${shareableUrl}`,
         "_blank"
@@ -372,4 +376,106 @@ export function displaySpinner(id) {
     element.appendChild(spinnerElement);
   }
   showInfo();
+}
+
+
+export async function loadStravaActivities(owner_access_token: string) {
+  // show loading spinner
+  const infoElement = document.getElementById("activitiesList");
+
+  const spinnerContainer = document.getElementById("spinner");
+  if (!spinnerContainer) {
+    const spinnerElement = document.createElement("div");
+    spinnerElement.id = "spinner";
+    spinnerElement.style.textAlign = "center";
+    spinnerElement.innerHTML =
+      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
+    infoElement.appendChild(spinnerElement);
+  }
+
+  // get activities
+  let activities = await getStravaActivities(owner_access_token);
+  displayActivities(activities);
+}
+
+function displayActivities(activities: any[]) {
+  const activitiesPerPage = 5;
+  const startIndex = 0;
+  const currentPageActivities = activities.slice(
+    startIndex,
+    startIndex + activitiesPerPage
+  );
+  const activitiesList = document.getElementById("activitiesList");
+  activitiesList.style.width = "250px";
+  activitiesList.innerHTML = "";
+
+  currentPageActivities.forEach(function (activity) {
+    const activityElement = createActivityElement(activity);
+    activityElement.addEventListener("click", function () {
+      console.log("Activity clicked", activity);
+      loadActivityOnMap(activity)
+    });
+    activitiesList.appendChild(activityElement);
+  });
+
+  activitiesList.style.cursor = "pointer";
+
+  if (activities.length > startIndex + activitiesPerPage) {
+    const nextLink = document.createElement("a");
+    nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
+    nextLink.style.float = "right";
+    nextLink.addEventListener("click", function () {
+      displayActivities(activities.slice(startIndex + activitiesPerPage));
+    });
+    activitiesList.appendChild(nextLink);
+  }
+}
+
+
+function createActivityElement(activity) {
+  const activityElement = document.createElement("div");
+  activityElement.className =
+    "text-white bg-gradient-to-r from-pink-500 to-orange-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 px-1 py-1";
+  activityElement.style.display = "flex";
+  activityElement.style.flexDirection = "column";
+  activityElement.style.marginBottom = "3px";
+  activityElement.style.borderRadius = "3px";
+  const nameElement = document.createElement("div");
+  nameElement.innerHTML = activity.name;
+  nameElement.style.fontWeight = "bold";
+  nameElement.style.whiteSpace = "nowrap";
+  nameElement.style.overflow = "hidden";
+  nameElement.style.textOverflow = "ellipsis";
+  nameElement.style.maxWidth = "100%";
+  activityElement.appendChild(nameElement);
+
+  const detailsElement = document.createElement("div");
+  detailsElement.style.display = "flex";
+  detailsElement.style.justifyContent = "space-between";
+  activityElement.appendChild(detailsElement);
+
+  const distanceElement = document.createElement("div");
+  distanceElement.innerHTML = (activity.distance / 1000).toFixed(2) + " km";
+  detailsElement.appendChild(distanceElement);
+
+  const dateElement = document.createElement("div");
+  const date = new Date(activity.start_date);
+  const formattedDate = date.toISOString().split("T")[0];
+  dateElement.innerHTML = formattedDate;
+  detailsElement.appendChild(dateElement);
+
+  return activityElement;
+}
+
+function loadActivityOnMap(activity) {
+  const activitiesContainer = document.getElementById("activities");
+  if (activitiesContainer) {
+    activitiesContainer.style.display = "none";
+  }
+  const geojson = feature(polyline.toGeoJSON(activity.map.summary_polyline));
+  geojson.properties = {
+    name: activity.name,
+    url: `https://www.strava.com/activities/${activity.id}`,
+  };
+  processGeojson(geojson);
 }

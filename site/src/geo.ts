@@ -1,12 +1,9 @@
-import polyline from "@mapbox/polyline";
 import {
   bbox,
   combine,
   featureCollection,
-  feature,
-  lineString,
-  lineIntersect,
 } from "@turf/turf";
+import { feature } from "@turf/helpers";
 import { booleanIntersects } from "./durf"
 import osmtogeojson from "osmtogeojson";
 import { groupBy } from "lodash";
@@ -19,7 +16,16 @@ import {
   BBox,
   MultiLineString
 } from "geojson";
+import polyline from "@mapbox/polyline";
+import toGeoJSON from "@mapbox/togeojson";
 import { fetchOverpassData, makeWaterwaysQuery } from "./overpass";
+
+
+export async function calculateIntersectingWaterwaysPolyline(polylineString: string): Promise<FeatureCollection | undefined> {
+  const geojson = feature(polyline.toGeoJSON(polylineString));
+  return calculateIntersectingWaterwaysGeojson(geojson);
+}
+
 
 export async function calculateIntersectingWaterwaysGeojson(
   routeGeoJSON: Feature<LineString>
@@ -36,9 +42,7 @@ export async function calculateIntersectingWaterwaysGeojson(
     }
     const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
     const combined = combineSameNameFeatures(waterwaysGeoJSON) as FeatureCollection<LineString | MultiLineString>;
-    console.log("combined", combined);
-    console.log("routeGeoJSON", routeGeoJSON);
-    const intersectingWaterways = findIntersectingFeatures2(
+    const intersectingWaterways = intersectingFeatures(
       combined,
       routeGeoJSON
     );
@@ -57,49 +61,18 @@ export function parseOSMToGeoJSON(
   return osmtogeojson(dom);
 }
 
-// import { booleanDisjoint } from "@turf/boolean-disjoint";
-// import { flattenEach } from "@turf/meta";
-
-// function booleanIntersects(feature1, feature2) {
-//   let bool = false;
-
-//   flattenEach(feature1, (flatten1) => {
-//     flattenEach(feature2, (flatten2) => {
-
-//       if (bool === true) {
-//         return true;
-//       }
-//       console.log(feature1.properties.name, flatten1.geometry, feature2.properties.name, flatten2.geometry, !booleanDisjoint(flatten1.geometry, flatten2.geometry));
-
-//       bool = !booleanDisjoint(flatten1.geometry, flatten2.geometry);
-//     });
-//   });
-//   return bool;
-// }
-
-export function findIntersectingFeatures(
-  fc: FeatureCollection<LineString | MultiLineString>,
-  routeLineString: Feature<LineString>
-): FeatureCollection {
-  // TODO: implement this to return on the first Intersection instead of calculating all of the intersections.  https://github.com/rowanwins/sweepline-intersections
-
-  const intersectingFeatures = [];
-  for (const feature of fc.features) {
-    const x = lineIntersect(feature, routeLineString, { ignoreSelfIntersections: true });
-    if (x.features.length > 0) {
-      intersectingFeatures.push(feature);
-    }
-  }
-  return featureCollection(intersectingFeatures);
+export async function parseGPXToGeoJSON(contents: string) {
+  const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
+  return toGeoJSON.gpx(gpxDom);
 }
-
-
-export function findIntersectingFeatures2(
+// Find intersecting features between a route and a FeatureCollection of LineStrings or MultiLineStrings
+export function intersectingFeatures(
   fc: FeatureCollection<LineString | MultiLineString>,
   routeLineString: Feature<LineString>
 ): FeatureCollection {
   // TODO: implement this to return on the first Intersection instead of calculating all of the intersections.  https://github.com/rowanwins/sweepline-intersections
-
+  console.log("fc", fc);
+  console.log("routeLineString", routeLineString);
   const intersectingFeatures = [];
   for (const feature of fc.features) {
     if (booleanIntersects(feature, routeLineString)) {
@@ -109,40 +82,27 @@ export function findIntersectingFeatures2(
   return featureCollection(intersectingFeatures);
 }
 
-// function booleanDisjoint(
-//   feature1: Feature<any> | Geometry,
-//   feature2: Feature<any> | Geometry
-// ): boolean {
-//   let bool = true;
-//   flattenEach(feature1, (flatten1) => {
-//     flattenEach(feature2, (flatten2) => {
-//       if (bool === false) {
-//         return false;
-//       }
-//       bool = disjoint(flatten1.geometry, flatten2.geometry);
-//     });
-//   });
-//   return bool;
-// }
 
-
+// Combine features with the same name into single features
 function combineSameNameFeatures(
   osmData: FeatureCollection<Geometry, GeoJsonProperties>
 ): FeatureCollection<Geometry, GeoJsonProperties> {
-  const groupedFeatures: object = groupBy(
-    osmData.features,
+  const namedFeatures = osmData.features.filter(
     (feature: Feature) => feature.properties && feature.properties.name
   );
-  // remove features without a name
-  delete groupedFeatures["undefined"];
+
+  const groupedFeatures: object = groupBy(
+    namedFeatures,
+    (feature: Feature) => feature.properties && feature.properties.name
+  );
+  console.log("groupedFeatures", groupedFeatures)
 
   const combinedFeatures: Feature[] = Object.values(groupedFeatures).map(
     (group) => {
       if (group.length > 1) {
-        // todo: check if any of the combined features have more than one feature
         const combined = combine(featureCollection(group));
-        const combinedFeature: Feature<Geometry, GeoJsonProperties> =
-          combined.features[0];
+
+        const combinedFeature = combined.features[0] as any;
         if (combined.features.length > 1) {
           console.error(
             "combined.features.length > 1",
@@ -150,7 +110,8 @@ function combineSameNameFeatures(
             combined
           );
         }
-        // add a name property to the combined feature
+
+        // add a name property to the combinedfeature.properties and set to group[0].properties.name for later use as a identifier
         combinedFeature.properties.name = group[0].properties.name;
         return combinedFeature;
       }
@@ -158,4 +119,20 @@ function combineSameNameFeatures(
     }
   );
   return featureCollection(combinedFeatures);
+}
+
+
+export function createWaterwaysMessage(
+  featureCollection: FeatureCollection
+): string {
+  let names: string[] = [];
+  // For each feature in the feature collection, take the properties dot name value and add it to the names array. 
+  featureCollection.features.forEach((feature) => {
+    let name: string;
+    name = feature.properties.name;
+    names.push(name);
+  });
+  return `Crossed ${names.length} waterways 🏞️ ${names.join(
+    " | "
+  )} 🌐 https://kreuzungen.world 🗺️`;
 }
