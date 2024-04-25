@@ -2,7 +2,7 @@ import { BBox } from "geojson";
 import { area, bboxPolygon } from "@turf/turf";
 
 // Define Constants
-const bboxSizeLimit_m2 = 500000000; // maximum size limit for a bounding box in square meters
+const bboxSizeLimit_m2 = 10000000000; // maximum size limit for a bounding box in square meters
 
 // Create a query for the Overpass API to fetch waterways within a bounding box, if the bounding box is too big only fetch relations
 export function makeWaterwaysQuery(bbox: BBox): string {

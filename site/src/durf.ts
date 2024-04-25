@@ -142,7 +142,7 @@ function isLineInPoly(polygon: Polygon, lineString: LineString) {
             return true;
         }
     }
-    const doLinesIntersect = lineIntersect(lineString, polygonToLine(polygon));
+    const doLinesIntersect = lineIntersect(lineString, polygonToLine(polygon), { ignoreSelfIntersections: true });
     if (doLinesIntersect.features.length > 0) {
         return true;
     }
