@@ -74,10 +74,7 @@ export async function setUp() {
 
     if (hasRequiredScopes) {
       const code = urlParams.get("code");
-      await getAndStoreStravaAccessToken(code);
-      const accessToken = JSON.parse(
-        localStorage.getItem("strava_data")
-      ).access_token;
+      const accessToken = await getAndStoreStravaAccessToken(code);
       loadStravaActivities(accessToken);
     } else {
       alert(
