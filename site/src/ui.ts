@@ -409,7 +409,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   activitiesList.innerHTML = "";
 
   currentPageActivities.forEach(function (activity) {
-    const activityElement = createActivityElement(actchivity);
+    const activityElement = createActivityElement(activity);
     activityElement.addEventListener("click", function () {
       console.log("Activity clicked", activity);
       loadActivityOnMap(activity)
