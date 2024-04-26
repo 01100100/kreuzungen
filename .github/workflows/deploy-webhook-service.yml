@@ -2,12 +2,9 @@ name: Build and Deploy Webhook service to Fly.io
 
 on:
   push:
-    branches:
-      - main
     paths:
-      - "site/Dockerfile"
-      - "site/fly.toml"
-      - "site/src/**"
+      - "site/"
+
 
       jobs:
         build-and-deploy:
