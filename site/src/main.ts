@@ -1,6 +1,8 @@
-import maplibregl, { GeolocateControl } from "maplibre-gl";
+import {
+  Map, FullscreenControl, MapMouseEvent, MapGeoJSONFeature, Popup
+} from "maplibre-gl";
 import polyline from "@mapbox/polyline";
-import * as turf from "@turf/turf";
+import { bbox } from "@turf/turf";
 import {
   FeatureCollection,
   Feature,
@@ -78,7 +80,7 @@ export async function processGeojson(
   clearRoute();
   addRoute(routeGeoJSON);
   displayRouteMetadata(routeGeoJSON);
-  fitMapToBoundingBox(turf.bbox(routeGeoJSON));
+  fitMapToBoundingBox(bbox(routeGeoJSON));
 
   displaySpinner("info");
   calculateIntersectingWaterwaysGeojson(routeGeoJSON)
@@ -92,7 +94,7 @@ export async function processGeojson(
 }
 
 function createMap() {
-  class ExtendedMap extends maplibregl.Map {
+  class ExtendedMap extends Map {
     removeLayerAndSource(name: string) {
       this.removeLayer(name);
       this.removeSource(name);
@@ -114,7 +116,7 @@ function createMap() {
   });
 
   map.addControl(attributionControl);
-  map.addControl(new maplibregl.FullscreenControl());
+  map.addControl(new FullscreenControl());
   const uploadControl = new UploadControl("fileInput", processFileUpload);
   map.addControl(uploadControl, "top-right");
   const stravaControl = new StravaControl();
@@ -282,8 +284,8 @@ function addMapInteractions() {
 }
 
 function createPopUp(
-  x: maplibregl.MapMouseEvent & {
-    features?: maplibregl.MapGeoJSONFeature[];
+  x: MapMouseEvent & {
+    features?: MapGeoJSONFeature[];
   } & Object
 ) {
 
@@ -369,7 +371,7 @@ function createPopUp(
   popupContent += osmUrlsContent;
 
   const coordinates = x.lngLat;
-  new maplibregl.Popup({ closeButton: true, closeOnClick: true })
+  new Popup({ closeButton: true, closeOnClick: true })
     .setLngLat(coordinates)
     .setHTML(popupContent)
     .addTo(mapInstance);
@@ -420,7 +422,7 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
     // Event listener for click event to fit the map to the bounding box
     riverElement.addEventListener("click", () => {
       // Use turf to calculate the bounding box of the feature's geometry
-      const routeBoundingBox = turf.bbox(item.geometry);
+      const routeBoundingBox = bbox(item.geometry);
       fitMapToBoundingBox(routeBoundingBox);
     });
 
