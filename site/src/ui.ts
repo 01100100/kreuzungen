@@ -409,7 +409,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   activitiesList.innerHTML = "";
 
   currentPageActivities.forEach(function (activity) {
-    const activityElement = createActivityElement(activity);
+    const activityElement = createActivityElement(actchivity);
     activityElement.addEventListener("click", function () {
       console.log("Activity clicked", activity);
       loadActivityOnMap(activity)
@@ -488,9 +488,7 @@ function createActivityElement(activity) {
 
 function loadActivityOnMap(activity) {
   const activitiesContainer = document.getElementById("activities");
-  if (activitiesContainer) {
-    activitiesContainer.style.display = "none";
-  }
+  hideActivitiesContainer();
   const geojson = feature(polyline.toGeoJSON(activity.map.summary_polyline));
   geojson.properties = {
     name: activity.name,
