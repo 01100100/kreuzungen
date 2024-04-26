@@ -1,6 +1,5 @@
+/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-    moduleNameMapper: {
-        "\\.(css|sass)$": "identity-obj-proxy",
-    },
-    testEnvironment: 'jest-environment-jsdom',
+  preset: 'ts-jest',
+  testEnvironment: 'node',
 };
