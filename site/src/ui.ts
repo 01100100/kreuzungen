@@ -398,9 +398,8 @@ export async function loadStravaActivities(owner_access_token: string) {
   displayActivities(activities);
 }
 
-function displayActivities(activities: any[]) {
+function displayActivities(activities: any[], startIndex: number = 0) {
   const activitiesPerPage = 5;
-  const startIndex = 0;
   const currentPageActivities = activities.slice(
     startIndex,
     startIndex + activitiesPerPage
@@ -420,15 +419,35 @@ function displayActivities(activities: any[]) {
 
   activitiesList.style.cursor = "pointer";
 
+  const activitiesControl = document.getElementById("activitiesControl")
+  activitiesControl.innerHTML = ""
+
+
   if (activities.length > startIndex + activitiesPerPage) {
     const nextLink = document.createElement("a");
     nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
     nextLink.style.float = "right";
+    nextLink.style.cursor = "pointer";
     nextLink.addEventListener("click", function () {
-      displayActivities(activities.slice(startIndex + activitiesPerPage));
+      displayActivities(activities, startIndex + activitiesPerPage);
     });
-    activitiesList.appendChild(nextLink);
+    activitiesControl.appendChild(nextLink);
   }
+
+  if (startIndex >= activitiesPerPage) {
+    const prevLink = document.createElement("a");
+    prevLink.innerHTML = '<i class="fa-solid fa-circle-left"></i>';
+    prevLink.style.float = "right";
+    prevLink.style.cursor = "pointer";
+    prevLink.style.paddingRight = "5px"
+    prevLink.addEventListener("click", function () {
+      displayActivities(activities, startIndex - activitiesPerPage);
+    });
+    activitiesControl.appendChild(prevLink);
+  }
+
+
+
 }
 
 
