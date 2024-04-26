@@ -72,13 +72,9 @@ export async function setUp() {
       approvedScopes.includes(scope)
     );
 
-    // TODO: Check if the user has not approved the "write" scope, then give a popup talking with info on automated Strava updates. 
-
-
-
     if (hasRequiredScopes) {
       const code = urlParams.get("code");
-      getAndStoreStravaAccessToken(code);
+      await getAndStoreStravaAccessToken(code);
       const accessToken = JSON.parse(
         localStorage.getItem("strava_data")
       ).access_token;
