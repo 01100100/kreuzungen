@@ -2,6 +2,8 @@ name: Deploy Auth service to Fly.io
 
 on:
   push:
+    branches:
+      - "*"
     paths:
       - "auth/""
 

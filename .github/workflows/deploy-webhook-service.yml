@@ -2,6 +2,8 @@ name: Build and Deploy Webhook service to Fly.io
 
 on:
   push:
+    branches:
+      - "*"
     paths:
       - "site/"
 
