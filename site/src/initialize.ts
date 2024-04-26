@@ -79,6 +79,10 @@ export async function setUp() {
     if (hasRequiredScopes) {
       const code = urlParams.get("code");
       getAndStoreStravaAccessToken(code);
+      const accessToken = JSON.parse(
+        localStorage.getItem("strava_data")
+      ).access_token;
+      loadStravaActivities(accessToken);
     } else {
       alert(
         "For this app to work with strava, you need to authorize it to view activity data. Please authenticate again and authorize the app."

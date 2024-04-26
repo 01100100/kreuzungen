@@ -381,7 +381,7 @@ export function displaySpinner(id) {
 
 export async function loadStravaActivities(owner_access_token: string) {
   // show loading spinner
-  const infoElement = document.getElementById("activitiesList");
+  const activitiesList = document.getElementById("activitiesList");
 
   const spinnerContainer = document.getElementById("spinner");
   if (!spinnerContainer) {
@@ -390,7 +390,7 @@ export async function loadStravaActivities(owner_access_token: string) {
     spinnerElement.style.textAlign = "center";
     spinnerElement.innerHTML =
       '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
-    infoElement.appendChild(spinnerElement);
+    activitiesList.appendChild(spinnerElement);
   }
 
   // get activities
