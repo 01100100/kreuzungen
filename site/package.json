@@ -26,19 +26,24 @@
     "build": "webpack",
     "serve": "webpack serve --open",
     "compile": "npx tsc",
-    "start": "node app.js"
+    "start": "node dist/app.js"
   },
   "dependencies": {
     "@mapbox/polyline": "^1.2.1",
     "@mapbox/togeojson": "^0.16.2",
-    "@turf/boolean-disjoint": "^7.0.0-alpha.115",
     "@turf/boolean-intersects": "^7.0.0-alpha.115",
     "@turf/turf": "^7.0.0-alpha.114",
+    "@xmldom/xmldom": "^0.8.10",
+    "buffer": "^6.0.3",
     "cross-fetch": "^4.0.0",
+    "fast-xml-parser": "^4.3.6",
     "maplibre-gl": "^4.1.2",
     "osmtogeojson": "^3.0.0-beta.5",
     "redis": "^4.6.13",
+    "stream-browserify": "^3.0.0",
     "togeojson": "^0.16.0",
+    "xml-js": "^1.6.11",
+    "xmldom": "^0.6.0",
     "xmldom-ts": "^0.3.1"
   }
 }

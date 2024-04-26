@@ -12,15 +12,23 @@ You can read more in the [blog post](https://0110100.github.io/kreuzungen).
 
 The algorithm calculates intersecting waterways by first pulling all the waterways near a route from OpenStreetMaps and then checks if the route intersects with any of them. If the waterways are not showing up on kreuzungen.world, it might be because the waterways are not present in OpenStreetMaps.
 
-## What is OSM?
+## What is OpenStreetMaps?
 
-OpenStreetMap (OSM) is a collaborative project that creates a free editable map of the world. The data is collected by volunteers and is made available under the Open Database License.
+OpenStreetMap (OSM) is a collaborative project creating a map of the world. The data is collected by every type of people and organizations, and it's free for anyone to fix, update, download and use.
 
-To add 
+The numerous waterways and rich basemaps used in Kreuzungen.world, and countless other projects on the web, are possible thanks to this great project.
+
+## How can I add a waterway to Kreuzungen.world?
+
+By adding it the waterway to OSM. You can add and edit OpenStreetMaps by following the instructions on the [OpenStreetMaps website](https://www.openstreetmap.org/).
+
+Once the waterway is added to OpenStreetMaps, it should be on Kreuzungen.world straight away.
 
 ## Why do you display waterways which are not crossed on the route?
 
 This might happen because kreuzungen joins together waterways geometries with the same name for the best processing of OSM data. In the case that there are two disjoint rivers sharing a unique name and one intersects the route, both parts will be displayed on the map.
+
+Common names like "dorfbach", "village creek" or "bach" are often used for small waterways and can be found in many places.
 
 ## How to automatically update Strava activity descriptions with waterways crossed?
 

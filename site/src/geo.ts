@@ -53,26 +53,22 @@ export async function calculateIntersectingWaterwaysGeojson(
   }
 }
 
-// Parse OSM XML data to GeoJSON
 export function parseOSMToGeoJSON(
   osmData: string
 ): FeatureCollection<Geometry, GeoJsonProperties> {
-  const dom = new DOMParser().parseFromString(osmData, "text/xml");
-  return osmtogeojson(dom);
+  return osmtogeojson(osmData);
 }
 
-export async function parseGPXToGeoJSON(contents: string) {
-  const gpxDom = new DOMParser().parseFromString(contents, "text/xml");
-  return toGeoJSON.gpx(gpxDom);
+export async function parseGPXToGeoJSON(GPXContents: string) {
+  const doc = new DOMParser().parseFromString(GPXContents, "text/xml");
+  return toGeoJSON.gpx(doc);
 }
+
 // Find intersecting features between a route and a FeatureCollection of LineStrings or MultiLineStrings
 export function intersectingFeatures(
   fc: FeatureCollection<LineString | MultiLineString>,
   routeLineString: Feature<LineString>
 ): FeatureCollection {
-  // TODO: implement this to return on the first Intersection instead of calculating all of the intersections.  https://github.com/rowanwins/sweepline-intersections
-  console.log("fc", fc);
-  console.log("routeLineString", routeLineString);
   const intersectingFeatures = [];
   for (const feature of fc.features) {
     if (booleanIntersects(feature, routeLineString)) {
@@ -95,7 +91,6 @@ function combineSameNameFeatures(
     namedFeatures,
     (feature: Feature) => feature.properties && feature.properties.name
   );
-  console.log("groupedFeatures", groupedFeatures)
 
   const combinedFeatures: Feature[] = Object.values(groupedFeatures).map(
     (group) => {

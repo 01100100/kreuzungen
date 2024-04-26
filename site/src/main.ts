@@ -333,7 +333,6 @@ function createPopUp(
     type = x.features[0].properties.type
     urls = [x.features[0].properties.id]
   } else {
-    console.log(x)
     console.error("Unknown geometry type")
   }
 

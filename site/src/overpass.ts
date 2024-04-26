@@ -6,13 +6,14 @@ const bboxSizeLimit_m2 = 10000000000; // maximum size limit for a bounding box i
 
 // Create a query for the Overpass API to fetch waterways within a bounding box, if the bounding box is too big only fetch relations
 export function makeWaterwaysQuery(bbox: BBox): string {
-  let waterwaysQuery = `(rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});)->._;out geom;`;
+  let waterwaysQuery = `[out:json];(rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});)->._;out geom;`;
   if (area(bboxPolygon(bbox)) > bboxSizeLimit_m2) {
+    // TODO: take user input whether to fetch smaller waterways
     console.log(
       "The Bbox is too big. To reduce the computation on the client size the fetch only bigger waterways (OSM relations) and ignore smaller streams (OSM ways) from the OSM overpass api."
     );
     console.log(`${area(bboxPolygon(bbox))} m**2 > ${bboxSizeLimit_m2}`);
-    waterwaysQuery = `rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
+    waterwaysQuery = `[out:json];rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
   }
   return waterwaysQuery;
 }
@@ -30,7 +31,7 @@ export async function fetchOverpassData(
     body: waterwaysQuery,
   });
   if (response.ok) {
-    const text = await response.text();
+    const text = await response.json();
     return text;
   } else {
     throw new Error(`HTTP error! status: ${response.status}`);
