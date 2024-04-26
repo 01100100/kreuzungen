@@ -6,6 +6,7 @@ import {
 } from "./strava";
 import { loadStravaActivities } from "./ui";
 import { feature } from "@turf/turf";
+import { getSavedRoute } from "./stash";
 
 export async function setUp() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -23,6 +24,15 @@ export async function setUp() {
       mapInstance.once("style.load", () => {
         processGeojson(geojson);
       });
+    }
+  }
+
+  // check if the url contains a saved id and load it from the backend
+  if (urlParams.has("saved")) {
+    const savedId = urlParams.get("saved");
+    if (savedId) {
+      const savedGeojson = await getSavedRoute(savedId)
+      processGeojson(savedGeojson);
     }
   }
 
@@ -44,10 +54,6 @@ export async function setUp() {
     const token = JSON.parse(localStorage.getItem("strava_data")).access_token;
     // load the activities
     const activities = await loadStravaActivities(token);
-
-    // add callbacks to process the geojson
-
-
     loadStravaActivities(token);
   } else if (token_exists && new Date().getTime() / 1000 >= expires_at) {
     // Access token is saved in local storage but expired

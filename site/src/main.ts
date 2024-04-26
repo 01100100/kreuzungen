@@ -28,6 +28,7 @@ export let shareableTitle = "Kreuzungen 🗺️";
 export let shareableDescription =
   "Reveal the waterways that shape your adventures!";
 export let shareableUrl = "https://kreuzungen.world";
+export let currentRoute: Feature<LineString>;
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
 export const mapInstance = createMap();
 
@@ -157,6 +158,7 @@ async function addRoute(routeGeoJSON: Feature<LineString>) {
     layout: { "line-join": "round", "line-cap": "round" },
     paint: { "line-color": "#fc03ca", "line-width": 7 },
   });
+  currentRoute = routeGeoJSON
   shareableUrl = `https://kreuzungen.world/index.html?route=${encodeURIComponent(
     polyline.fromGeoJSON(routeGeoJSON)
   )}`;

@@ -6,8 +6,6 @@ This website uses OpenStreetMap data. The algorithm calculates intersecting wate
 
 Routes can be uploaded from a GPX file or by connecting a Strava account.
 
-You can read more in the [blog post](https://0110100.github.io/kreuzungen).
-
 ## Why is a waterway not showing up?
 
 The algorithm calculates intersecting waterways by first pulling all the waterways near a route from OpenStreetMaps and then checks if the route intersects with any of them. If the waterways are not showing up on kreuzungen.world, it might be because the waterways are not present in OpenStreetMaps.
@@ -34,7 +32,7 @@ Common names like "dorfbach", "village creek" or "bach" are often used for small
 
 You can enable Kreuzungen.world to automatically update your Strava activity descriptions. Just select the "Upload your activities from Kreuzungen to Strava" checkbox when authorizing with Strava.
 
-TODO: Add message 
+To reauthorize go to [https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write](https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write) and ensure all checkboxes are selected before pressing "Authorize".
 
 ## How to disable automatic updates of Strava activity descriptions with waterways crossed?
 

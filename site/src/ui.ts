@@ -6,10 +6,12 @@ import {
   shareableTitle,
   shareableUrlEncoded,
   processGeojson,
+  currentRoute
 } from "./main";
 import { feature } from "@turf/helpers";
 import { getStravaActivities } from "./strava";
 import polyline from "@mapbox/polyline";
+import { saveRoute } from "./stash";
 
 export class CustomAttributionControl extends maplibregl.AttributionControl {
   _toggleAttribution = () => {
@@ -157,9 +159,11 @@ export class ShareControl {
     urlButton.style.display = "none";
     urlButton.title = "Copy url to clipboard";
     urlButton.style.borderRadius = "4px";
-    urlButton.onclick = () => {
+    urlButton.onclick = async () => {
+      const routeId = await saveRoute(currentRoute)
+      const shareURL = `https://kreuzungen.world/index.html?saved=${routeId}`
       navigator.clipboard
-        .writeText(shareableUrl)
+        .writeText(shareURL)
         .then(() => {
           console.log("URL copied to clipboard: " + shareableUrl);
           const mapContainer = document.getElementById("map");
@@ -385,16 +389,20 @@ export async function loadStravaActivities(owner_access_token: string) {
 
   const spinnerContainer = document.getElementById("spinner");
   if (!spinnerContainer) {
-    const spinnerElement = document.createElement("div");
-    spinnerElement.id = "spinner";
-    spinnerElement.style.textAlign = "center";
-    spinnerElement.innerHTML =
+    const spinnerContainer = document.createElement("div");
+    spinnerContainer.id = "spinner";
+    spinnerContainer.style.textAlign = "center";
+    spinnerContainer.innerHTML =
       '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
-    activitiesList.appendChild(spinnerElement);
+    activitiesList.appendChild(spinnerContainer);
   }
 
   // get activities
   let activities = await getStravaActivities(owner_access_token);
+  const spinner = document.getElementById("spinner");
+  if (spinner) {
+    spinner.innerHTML = "";
+  }
   displayActivities(activities);
 }
 
@@ -404,6 +412,18 @@ function displayActivities(activities: any[], startIndex: number = 0) {
     startIndex,
     startIndex + activitiesPerPage
   );
+
+  const activitiesControl = document.getElementById("activitiesControl")
+  activitiesControl.innerHTML = ""
+
+
+  // clear the spinner
+  const spinnerContainer = document.getElementById("spinner");
+  if (spinnerContainer) {
+    spinnerContainer.innerHTML = "";
+  }
+
+
   const activitiesList = document.getElementById("activitiesList");
   activitiesList.style.width = "250px";
   activitiesList.innerHTML = "";
@@ -411,16 +431,14 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   currentPageActivities.forEach(function (activity) {
     const activityElement = createActivityElement(activity);
     activityElement.addEventListener("click", function () {
-      console.log("Activity clicked", activity);
+      console.log("Activity clicked");
+      // StravaControl._isActivitiesDisplayed = false
       loadActivityOnMap(activity)
     });
     activitiesList.appendChild(activityElement);
   });
 
   activitiesList.style.cursor = "pointer";
-
-  const activitiesControl = document.getElementById("activitiesControl")
-  activitiesControl.innerHTML = ""
 
 
   if (activities.length > startIndex + activitiesPerPage) {
