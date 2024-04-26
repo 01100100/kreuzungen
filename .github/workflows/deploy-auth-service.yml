@@ -1,11 +1,11 @@
 name: Deploy Auth service to Fly.io
-
 on:
+  # Runs on pushes for all branches
   push:
     branches:
       - "*"
-    paths:
-      - "auth/""
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   deploy:

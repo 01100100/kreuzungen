@@ -1,11 +1,12 @@
 name: Build and Deploy Webhook service to Fly.io
 
 on:
+  # Runs on pushes for all branches
   push:
     branches:
       - "*"
-    paths:
-      - "site/"
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
