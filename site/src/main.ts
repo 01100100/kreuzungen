@@ -21,9 +21,11 @@ import {
 import { calculateIntersectingWaterwaysGeojson, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 
+
 // Define global variables
 export let isMapCenteredToRoute = false;
 let hoveredFeatureId: string | number | null | undefined = null;
+let selectedFeatureId: string | number | null | undefined = null;
 export let shareableTitle = "Kreuzungen 🗺️";
 export let shareableDescription =
   "Reveal the waterways that shape your adventures!";
@@ -237,13 +239,46 @@ function displayIntersectingWaterways(
   });
 }
 
+function nearbyFeature(e: MapMouseEvent, layer: string): any {
+  // return the single closest feature to the mouse pointer, if there is none then return null
+  const pixelDistance = 15;
+  let nearbyFeatures = mapInstance.queryRenderedFeatures([
+    [e.point.x - pixelDistance / 2, e.point.y - pixelDistance / 2],
+    [e.point.x + pixelDistance / 2, e.point.y + pixelDistance / 2]
+  ], { layers: [layer] });
+  return { ...e, features: nearbyFeatures };
+}
+
+
 function addMapInteractions() {
   // TODO: improve the ui by reducing the sensitivity.
   // https://github.com/acalcutt/maplibre-gl-inspect/blob/main/lib/MaplibreInspect.js#L159C1-L176C6
-  mapInstance.on("click", "intersectingWaterways", (e) => {
-    createPopUp(e);
+
+  // Update selected property on click event and create a popup
+  mapInstance.on("click", (e) => {
+    // remove and features that are selected
+    if (selectedFeatureId) {
+      mapInstance.setFeatureState(
+        { source: "intersectingWaterways", id: selectedFeatureId },
+        { selected: false }
+      );
+      selectedFeatureId = null;
+    }
+
+    // Create a popup for the near feature, reduce the sensitivity of selecting the feature exactly.
+    const nearFeatures = nearbyFeature(e, "intersectingWaterways");
+    if (nearFeatures.features.length > 0) {
+      createPopUp(nearFeatures);
+      mapInstance.setFeatureState(
+        { source: "intersectingWaterways", id: nearFeatures.features[0].id },
+        { selected: true }
+      );
+      selectedFeatureId = nearFeatures.features[0].id;
+    }
+
   });
 
+  // Update selected property on mouseenter event
   mapInstance.on("mouseenter", "intersectingWaterways", (e) => {
     mapInstance.getCanvas().style.cursor = "pointer";
     hoveredFeatureId = e.features[0].id;
@@ -253,9 +288,12 @@ function addMapInteractions() {
     );
   });
 
-  // Hide popup on mouseleave event
+  // Update selected property on mouseleave event
   mapInstance.on("mouseleave", "intersectingWaterways", () => {
     mapInstance.getCanvas().style.cursor = "";
+    if (selectedFeatureId) {
+      return;
+    }
     if (hoveredFeatureId) {
       mapInstance.setFeatureState(
         { source: "intersectingWaterways", id: hoveredFeatureId },
