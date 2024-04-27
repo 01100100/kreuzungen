@@ -2,7 +2,7 @@ import {
   Map, FullscreenControl, MapMouseEvent, MapGeoJSONFeature, Popup
 } from "maplibre-gl";
 import polyline from "@mapbox/polyline";
-import { bbox } from "@turf/turf";
+import { bbox, feature, nearestPointOnLine, point } from "@turf/turf";
 import {
   FeatureCollection,
   Feature,
@@ -402,17 +402,17 @@ function createPopUp(
     popupContent += `<br>Wikidata: <a href="${wikidataUrl}" target="_blank">${wikidata}</a>`;
   }
 
-  if (type) {
-    popupContent += `<br>Type: ${type}`;
+  const p = point([x.lngLat.lng, x.lngLat.lat]);
+  if (x.features && x.features.length > 0) {
+    const snappedCoordinates = nearestPointOnLine((x.features[0].geometry as LineString), p);
+    const [lng, lat] = snappedCoordinates.geometry.coordinates;
+    new Popup({ closeButton: true, closeOnClick: true })
+      .setLngLat([lng, lat])
+      .setHTML(popupContent)
+      .addTo(mapInstance);
+  } else {
+    console.error("No features found");
   }
-
-  popupContent += osmUrlsContent;
-
-  const coordinates = x.lngLat;
-  new Popup({ closeButton: true, closeOnClick: true })
-    .setLngLat(coordinates)
-    .setHTML(popupContent)
-    .addTo(mapInstance);
 }
 
 function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
