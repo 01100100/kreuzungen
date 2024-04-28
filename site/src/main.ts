@@ -291,7 +291,7 @@ function addMapInteractions() {
   // Update selected property on mouseleave event
   mapInstance.on("mouseleave", "intersectingWaterways", () => {
     mapInstance.getCanvas().style.cursor = "";
-    if (selectedFeatureId) {
+    if (selectedFeatureId === hoveredFeatureId) {
       return;
     }
     if (hoveredFeatureId) {
@@ -452,6 +452,9 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
 
     // Event listener when mouse leaves the element
     riverElement.addEventListener("mouseleave", () => {
+      if (item.name === selectedFeatureId) {
+        return;
+      }
       mapInstance.setFeatureState(
         { source: "intersectingWaterways", id: item.name },
         { selected: false }
@@ -459,9 +462,24 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
     });
     // Event listener for click event to fit the map to the bounding box
     riverElement.addEventListener("click", () => {
+      // unset the selected feature state
+      if (selectedFeatureId) {
+        mapInstance.setFeatureState(
+          { source: "intersectingWaterways", id: selectedFeatureId },
+          { selected: false }
+        );
+        selectedFeatureId = null;
+      }
       // Use turf to calculate the bounding box of the feature's geometry
       const routeBoundingBox = bbox(item.geometry);
       fitMapToBoundingBox(routeBoundingBox);
+      // set the selected feature id to and set the feature state to selected
+      selectedFeatureId = item.name;
+      mapInstance.setFeatureState(
+        { source: "intersectingWaterways", id: item.name },
+        { selected: true }
+      );
+
     });
 
     // Append the waterway name element to the river names container
