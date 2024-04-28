@@ -372,30 +372,19 @@ export function displaySpinner(id) {
     spinnerElement.id = "spinner";
     spinnerElement.style.textAlign = "center";
     spinnerElement.innerHTML =
-      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw fa-2xl"></i>';
+      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
     element.appendChild(spinnerElement);
   }
   showInfo();
 }
 
-
 export async function loadStravaActivities(owner_access_token: string) {
-  // show loading spinner
-  const activitiesList = document.getElementById("activitiesList");
-
-  const spinnerContainer = document.getElementById("spinner");
-  if (!spinnerContainer) {
-    const spinnerElement = document.createElement("div");
-    spinnerElement.id = "spinner";
-    spinnerElement.style.textAlign = "center";
-    spinnerElement.innerHTML =
-      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
-    activitiesList.appendChild(spinnerElement);
-  }
-
-  // get activities
-  let activities = await getStravaActivities(owner_access_token);
-  displayActivities(activities);
+  displaySpinner("activitiesList");
+  getStravaActivities(owner_access_token).then((activities) => {
+    if (activities) {
+      displayActivities(activities);
+    }
+  });
 }
 
 function displayActivities(activities: any[], startIndex: number = 0) {
