@@ -4,7 +4,7 @@ on:
   # Runs on pushes for all branches
   push:
     branches:
-      - "*"
+      - "main"
       # Only runs for changes in the /site directory
     paths:
       - "site/**"
