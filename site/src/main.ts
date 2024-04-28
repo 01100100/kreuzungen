@@ -326,7 +326,6 @@ function createPopUp(
     features?: MapGeoJSONFeature[];
   } & Object
 ) {
-
   const riverName = x.features[0].properties.name;
   let destination = null
   let wikipedia = null
@@ -381,7 +380,7 @@ function createPopUp(
   osmUrlsContent = `
     <br>
     <details class="osm-details">
-      <summary>OSM data</summary>
+      <summary>OSM data source</summary>
         ${urls.map((url) => `<a href="https://www.openstreetmap.org/${url}" target="_blank">https://www.openstreetmap.org/${url}</a><br>`).join("")}
     </details>
   `;
@@ -401,6 +400,12 @@ function createPopUp(
     const wikidataUrl = `https://www.wikidata.org/wiki/${wikidata}`;
     popupContent += `<br>Wikidata: <a href="${wikidataUrl}" target="_blank">${wikidata}</a>`;
   }
+
+  if (type) {
+    popupContent += `<br>Type: ${type}`;
+  }
+
+  popupContent += osmUrlsContent;
 
   const p = point([x.lngLat.lng, x.lngLat.lat]);
   if (x.features && x.features.length > 0) {
