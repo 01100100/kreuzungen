@@ -6,7 +6,9 @@ import {
   shareableTitle,
   shareableUrlEncoded,
   processGeojson,
+  currentRoute
 } from "./main";
+import { saveRoute } from "./stash";
 import { feature } from "@turf/helpers";
 import { getStravaActivities } from "./strava";
 import polyline from "@mapbox/polyline";
@@ -189,69 +191,71 @@ export class ShareControl {
     urlIcon.className = "fa-solid fa-link";
     urlButton.appendChild(urlIcon);
 
-    const emailButton = this.createShareButton("email", "fa-solid fa-envelope");
-    emailButton.addEventListener("click", () => {
-      window.open(
-        `
-            mailto:?subject=${encodeURIComponent(
-          shareableTitle
-        )}%20${encodeURIComponent(
-          shareableDescription
-        )}&body=I%20used%20the%20website%20kreuzungen.world%20to%20explore%20the%20waterways%20that%20shaped%20my%20recent%20adventure!!%0A%0AClick%20on%20the%20url%20below%20to%20access%20the%20route%20on%20a%20map%20and%20see%20for%20yourself.%20%0A%0A${shareableUrl}`,
-        "_blank"
-      );
-    });
-    const whatsappButton = this.createShareButton(
-      "whatsapp",
-      "fa-brands fa-whatsapp"
-    );
-    whatsappButton.addEventListener("click", () => {
-      // https://faq.whatsapp.com/5913398998672934
-      let whatsappMessage = `${shareableDescription}.. ${shareableUrl}`;
-      let whatsappShareLink = `https://wa.me/?text=${encodeURIComponent(
-        whatsappMessage
-      )}`;
-      window.open(whatsappShareLink, "_blank");
-    });
-    const facebookButton = this.createShareButton(
-      "facebook",
-      "fa-brands fa-facebook"
-    );
-    facebookButton.addEventListener("click", () => {
-      window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${shareableUrlEncoded}`,
-        "_blank"
-      );
-    });
-    const twitterButton = this.createShareButton(
-      "twitter",
-      "fa-brands fa-twitter"
-    );
-    // https://developer.twitter.com/en/docs/twitter-for-websites/tweet-button/guides/web-intent
-    twitterButton.addEventListener("click", () => {
-      window.open(
-        `https://twitter.com/intent/tweet?url=${shareableUrlEncoded}&text=${encodeURIComponent(
-          shareableDescription
-        )}`,
-        "_blank"
-      );
+    const saveButton = this.createShareButton("save", "fa-solid fa-floppy-disk");
+    saveButton.addEventListener("click", async () => {
+
+      // TODO: Add a model to the screen, which displays disclaimer and a submit button, we will. store your route for you, and it will be accessible to anyone with the following URL. 
+
+      // The URL will be copied to your clipboard, and you can share it with anyone you want.
+      if (!currentRoute) {
+        console.error("No route to save")
+        const mapContainer = document.getElementById("map");
+        const messageContainer = document.createElement("div");
+        messageContainer.className = "url-copied-message";
+        const icon = document.createElement("i");
+        icon.className = "fa-solid fa-link";
+        const text = document.createTextNode(`Load a route first to save it.`);
+        messageContainer.appendChild(icon);
+        messageContainer.appendChild(text);
+        mapContainer.appendChild(messageContainer);
+        return
+      }
+      const savedRoute = await saveRoute(currentRoute)
+      const savedURL = savedRoute.url
+      navigator.clipboard
+        .writeText(savedURL)
+        .then(() => {
+          console.log("Route save and URL copied to clipboard: " + savedURL);
+          const mapContainer = document.getElementById("map");
+          const messageContainer = document.createElement("div");
+          messageContainer.className = "url-copied-message";
+          const icon = document.createElement("i");
+          icon.className = "fa-solid fa-link";
+          const text = document.createTextNode(`Route save and URL copied to clipboard: ${savedURL}`);
+          messageContainer.appendChild(icon);
+          messageContainer.appendChild(text);
+          mapContainer.appendChild(messageContainer);
+
+          // Fade out the message by setting opacity to 0
+          setTimeout(() => {
+            messageContainer.style.opacity = "0";
+            setTimeout(() => {
+              mapContainer.removeChild(messageContainer);
+            }, 500); // Fade out for 500 milliseconds
+          }, 500); // Displayed solid for 500 milliseconds
+        })
+        .catch((err) => {
+          console.error("Unable to copy URL to clipboard", err);
+        });
+
+
     });
     this._container.appendChild(urlButton);
-    this._container.appendChild(emailButton);
-    this._container.appendChild(whatsappButton);
-    this._container.appendChild(facebookButton);
-    this._container.appendChild(twitterButton);
+    this._container.appendChild(saveButton);
 
     const shareButton = document.createElement("button");
     shareButton.type = "button";
     shareButton.title = "Share";
     shareButton.style.borderRadius = "4px";
-    shareButton.onclick = () => {
+    shareButton.onclick = async () => {
       if (navigator.share) {
+        // TODO: ask user for permission to save and share via url
+        const savedRoute = await saveRoute(currentRoute)
+        const savedURL = savedRoute.url
         navigator
           .share({
             title: shareableTitle,
-            url: shareableUrl,
+            url: savedURL,
             text: shareableDescription,
           })
           .then(() => {
@@ -294,28 +298,16 @@ export class ShareControl {
     if (urlButton) {
       urlButton.style.display = "none";
     }
-    const emailButton = document.getElementById("emailButton");
-    emailButton.style.display = "none";
-    const whatsappButton = document.getElementById("whatsappButton");
-    whatsappButton.style.display = "none";
-    const twitterButton = document.getElementById("twitterButton");
-    twitterButton.style.display = "none";
-    const facebookButton = document.getElementById("facebookButton");
-    facebookButton.style.display = "none";
+    const saveButton = document.getElementById("saveButton");
+    saveButton.style.display = "none";
     this._isShareExpanded = false;
   }
 
   expandShareControl() {
     const urlButton = document.getElementById("urlButton");
     urlButton.style.display = "block";
-    const emailButton = document.getElementById("emailButton");
-    emailButton.style.display = "block";
-    const whatsappButton = document.getElementById("whatsappButton");
-    whatsappButton.style.display = "block";
-    const twitterButton = document.getElementById("twitterButton");
-    twitterButton.style.display = "block";
-    const facebookButton = document.getElementById("facebookButton");
-    facebookButton.style.display = "block";
+    const saveButton = document.getElementById("saveButton");
+    saveButton.style.display = "block";
     this._isShareExpanded = true;
   }
 
@@ -400,7 +392,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   currentPageActivities.forEach(function (activity) {
     const activityElement = createActivityElement(activity);
     activityElement.addEventListener("click", function () {
-      console.log("Activity clicked", activity);
+      console.log("Activity clicked: ", activity.name);
       loadActivityOnMap(activity)
     });
     activitiesList.appendChild(activityElement);

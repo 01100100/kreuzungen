@@ -31,6 +31,7 @@ export let shareableDescription =
   "Reveal the waterways that shape your adventures!";
 export let shareableUrl = "https://kreuzungen.world";
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
+export let currentRoute: Feature<LineString>;
 export const mapInstance = createMap();
 
 // Parse url params and check storage for strava login state
@@ -159,6 +160,7 @@ async function addRoute(routeGeoJSON: Feature<LineString>) {
     layout: { "line-join": "round", "line-cap": "round" },
     paint: { "line-color": "#fc03ca", "line-width": 7 },
   });
+  currentRoute = routeGeoJSON
   shareableUrl = `https://kreuzungen.world/index.html?route=${encodeURIComponent(
     polyline.fromGeoJSON(routeGeoJSON)
   )}`;
@@ -209,7 +211,6 @@ function fitMapToBoundingBox(bbox: any) {
 function displayIntersectingWaterways(
   intersectingWaterways: FeatureCollection
 ) {
-  console.log(intersectingWaterways);
   mapInstance.addSource("intersectingWaterways", {
     type: "geojson",
     data: intersectingWaterways,

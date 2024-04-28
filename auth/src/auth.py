@@ -1,4 +1,5 @@
 import requests
+from unique_names_generator import get_random_name
 from flask import Flask, request
 from waitress import serve
 import redis
@@ -17,7 +18,7 @@ app = Flask(__name__)
 @app.after_request
 def after_request(response):
     response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "POST")
+    response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     if request.headers.get("Origin") == CONFIG.FRONTEND_HOST_URL:
         response.headers.add("Access-Control-Allow-Origin", CONFIG.FRONTEND_HOST_URL)
     else:
@@ -94,6 +95,30 @@ def get_access_token():
         )
 
     return response.json()
+
+
+@app.route("/save_geojson_feature", methods=["POST"])
+def save_geojson_feature():
+    # set the id to a random combination of 10 ascii_letters
+    random_id = get_random_name(separator="_", style="lowercase")
+    while redis_client.get(random_id):
+        random_id = get_random_name(separator="_", style="lowercase")
+
+    # save the feature to redis
+    redis_client.set(random_id, request.data)
+    return {
+        "id": random_id,
+        "url": f"{CONFIG.FRONTEND_HOST_URL}/index.html?saved={random_id}",
+    }
+
+
+@app.route("/get_geojson_feature", methods=["GET"])
+def get_geojson_feature():
+    feature_id = request.args.get("id")
+    feature = redis_client.get(feature_id)
+    if not feature:
+        return {"error": "Feature not found"}, 404
+    return feature
 
 
 if __name__ == "__main__":

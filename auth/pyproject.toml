@@ -12,6 +12,7 @@ requests = "^2.31.0"
 structlog = "^24.1.0"
 waitress = "^2.1.2"
 redis = "^5.0.3"
+unique-names-generator = "^1.0.2"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.2.0"

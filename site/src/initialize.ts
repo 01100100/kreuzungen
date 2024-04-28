@@ -6,6 +6,7 @@ import {
 } from "./strava";
 import { loadStravaActivities } from "./ui";
 import { feature } from "@turf/turf";
+import { getSavedRoute } from "./stash";
 
 export async function setUp() {
   const urlParams = new URLSearchParams(window.location.search);
@@ -23,6 +24,16 @@ export async function setUp() {
       mapInstance.once("style.load", () => {
         processGeojson(geojson);
       });
+    }
+  }
+
+  // check if the url contains a saved id and load it from the backend
+  if (urlParams.has("saved")) {
+    const savedId = urlParams.get("saved");
+    if (savedId) {
+      console.log("loading saved route with id: ", savedId);
+      const savedGeojson = await getSavedRoute(savedId)
+      processGeojson(savedGeojson);
     }
   }
 
