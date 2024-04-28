@@ -372,7 +372,7 @@ export function displaySpinner(id) {
     spinnerElement.id = "spinner";
     spinnerElement.style.textAlign = "center";
     spinnerElement.innerHTML =
-      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
+      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw fa-2xl"></i>';
     element.appendChild(spinnerElement);
   }
   showInfo();
@@ -421,11 +421,12 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 
   const activitiesControl = document.getElementById("activitiesControl")
   activitiesControl.innerHTML = ""
+  activitiesControl.style.paddingTop = "8px"
 
 
   if (activities.length > startIndex + activitiesPerPage) {
     const nextLink = document.createElement("a");
-    nextLink.innerHTML = '<i class="fa-solid fa-circle-right"></i>';
+    nextLink.innerHTML = '<i class="fa-solid fa-circle-right fa-2xl"></i>';
     nextLink.style.float = "right";
     nextLink.style.cursor = "pointer";
     nextLink.addEventListener("click", function () {
@@ -436,7 +437,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 
   if (startIndex >= activitiesPerPage) {
     const prevLink = document.createElement("a");
-    prevLink.innerHTML = '<i class="fa-solid fa-circle-left"></i>';
+    prevLink.innerHTML = '<i class="fa-solid fa-circle-left fa-2xl"></i>';
     prevLink.style.float = "right";
     prevLink.style.cursor = "pointer";
     prevLink.style.paddingRight = "5px"
