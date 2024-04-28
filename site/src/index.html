@@ -29,7 +29,6 @@
 
   <!-- External stylesheets and scripts -->
   <script src="https://kit.fontawesome.com/85c45c397d.js" crossorigin="anonymous"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
 
   <!-- Inline styling -->
   <style>
@@ -114,6 +113,28 @@
       max-width: 100%;
     }
 
+    .activity-item {
+      margin-bottom: 3px;
+      border-radius: 3px;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+      --tw-gradient-to: #FF8A4C var(--tw-gradient-to-position);
+      --tw-gradient-from: #E74694 var(--tw-gradient-from-position);
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+      background-image: linear-gradient(to right, var(--tw-gradient-stops));
+      --tw-gradient-from-position: ;
+      --tw-gradient-from-position: ;
+      --tw-gradient-via-position: ;
+      --tw-gradient-to-position: ;
+    }
+
+    .activity-item:hover {
+      background-image: linear-gradient(to left, var(--tw-gradient-stops));
+    }
+
+
     .help-message {
       max-height: 100%;
       overflow-y: auto;
@@ -192,9 +213,8 @@
 
       </div>
       <div id="activitiesControl"></div>
-      <div id="stravaPowered" style="text-align: center;">
-        <img src="<%= require('./img/api_logo_pwrdBy_strava_horiz_white.svg') %>" width="100" alt="Powered by Strava"
-          style="text-align: center;">
+      <div id="stravaPowered">
+        <img src="<%= require('./img/api_logo_pwrdBy_strava_horiz_white.svg') %>" width="100" alt="Powered by Strava">
       </div>
 
     </div>

@@ -455,7 +455,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 function createActivityElement(activity) {
   const activityElement = document.createElement("div");
   activityElement.className =
-    "text-white bg-gradient-to-r from-pink-500 to-orange-400 hover:bg-gradient-to-l focus:ring-4 focus:outline-none focus:ring-purple-200 dark:focus:ring-purple-800 px-1 py-1";
+    "activity-item";
   activityElement.style.display = "flex";
   activityElement.style.flexDirection = "column";
   activityElement.style.marginBottom = "3px";
