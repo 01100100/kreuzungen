@@ -112,6 +112,7 @@ export class StravaControl {
         this._isActivitiesDisplayed = false;
       } else {
         hideInfo();
+        hideFAQContainer();
         showActivitiesContainer();
         this._isActivitiesDisplayed = true;
       }
@@ -142,6 +143,61 @@ export class StravaControl {
     throw new Error("Method not implemented.");
   }
 }
+
+export class FAQControl {
+  _map: any;
+  _container: HTMLDivElement;
+  _isFAQDisplayed: boolean;
+  constructor() { }
+  onAdd(map) {
+    this._map = map;
+    this._isFAQDisplayed = false;
+    this._container = document.createElement("div");
+    this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.title = "FAQ's";
+    button.style.borderRadius = "4px";
+    button.onclick = () => {
+      // toggle the FAQ-container
+      if (this._isFAQDisplayed) {
+        showInfo();
+        showSourceInfo()
+        hideFAQContainer();
+        this._isFAQDisplayed = false;
+      } else {
+        hideInfo();
+        hideSourceInfo()
+        hideActivitiesContainer();
+        showFAQContainer();
+        this._isFAQDisplayed = true;
+      }
+    };
+
+    const icon = document.createElement("i");
+    icon.className = "fa-solid fa-question";
+    button.appendChild(icon);
+
+    this._container.appendChild(button);
+
+    // Event to hide FAQ-container when map is interacted with
+    this._map.on("mousedown", () => {
+      hideFAQContainer();
+      this._isFAQDisplayed = false;
+      showInfo();
+      showSourceInfo()
+    });
+
+    return this._container;
+  }
+
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map = undefined;
+  }
+}
+
 export class ShareControl {
   _map: any;
   _container: HTMLDivElement;
@@ -350,8 +406,20 @@ export function hideActivitiesContainer() {
   }
 }
 
+export function hideFAQContainer() {
+  const faqContainer = document.getElementById("faq");
+  if (faqContainer) {
+    faqContainer.style.display = "none";
+  }
+}
+
 export function showActivitiesContainer() {
   const activitiesContainer = document.getElementById("activities");
+  activitiesContainer.style.display = "block";
+}
+
+export function showFAQContainer() {
+  const activitiesContainer = document.getElementById("faq");
   activitiesContainer.style.display = "block";
 }
 

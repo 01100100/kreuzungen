@@ -15,6 +15,7 @@ import {
   ShareControl,
   UploadControl,
   StravaControl,
+  FAQControl,
   showInfo,
   displaySpinner,
 } from "./ui";
@@ -126,6 +127,8 @@ function createMap() {
   map.addControl(stravaControl, "top-right");
   const shareControl = new ShareControl();
   map.addControl(shareControl, "bottom-right");
+  const faqControl = new FAQControl();
+  map.addControl(faqControl, "bottom-right");
   return map;
 }
 

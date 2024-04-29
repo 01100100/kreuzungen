@@ -1,8 +1,6 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { type } = require('os');
 const path = require('path');
 
-const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
@@ -28,6 +26,21 @@ module.exports = {
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
+        exclude: /input\.css$/,
+      },
+      {
+        test: /\.md$/,
+        use: [
+          {
+            loader: 'html-loader',
+            options: {
+              esModule: false,
+            },
+          },
+          {
+            loader: 'markdown-loader',
+          },
+        ],
       },
     ],
   },
@@ -38,6 +51,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
+      inject: true,
     }),
   ],
   output: {

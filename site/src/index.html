@@ -69,6 +69,24 @@
       padding: 5px 5px;
     }
 
+    .faq-container {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      max-height: calc(100% - 30px);
+      max-width: calc(100% - 69px);
+      width: 400px;
+      overflow-y: scroll;
+      z-index: 1;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: #fff;
+      font-size: 11px;
+      line-height: 18px;
+      margin: 0;
+      border-radius: 3px;
+      padding: 5px 5px;
+    }
+
     .source-container {
       position: absolute;
       bottom: 10px;
@@ -180,6 +198,9 @@
   <!-- File input and map container -->
   <input type="file" id="fileInput" style="display: none;" />
   <div id="map">
+    <div id="faq" class="faq-container" style="display: none;">
+      <%= require('./faq.md') %>
+    </div>
     <div id="info" class="info-container">
       <div class="help-message">
         <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
