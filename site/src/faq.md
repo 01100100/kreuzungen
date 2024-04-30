@@ -56,7 +56,7 @@ OpenStreetMap (OSM) is a collaborative initiative to create a free and editable 
 
 ## How can I add a waterway? 🙋
 
-By adding the waterway to OpenStreetMap (OSM). Follow the instructions on the [OpenStreetMap website](https://www.openstreetmap.org/) to add or edit maps.
+Follow the instructions on the [OpenStreetMap website](https://www.openstreetmap.org/) to add or edit a waterway.
 
 Once the waterway is included in OpenStreetMap, it will become accessible to all OSM users and should appear on Kreuzungen.world immediately.
 
