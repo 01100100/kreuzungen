@@ -190,17 +190,13 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
   if (routeGeoJSON.properties && routeGeoJSON.properties.url) {
     const urlElement = document.createElement("a");
     urlElement.href = routeGeoJSON.properties.url;
-    urlElement.innerHTML = 'View on Strava <i class="fa-brands fa-strava"></i>';
+    urlElement.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> View on Strava <i class="fa-brands fa-strava"></i>';
     urlElement.style.fontWeight = "bold";
     urlElement.style.color = "#fff";
 
     // Create a new div element to contain the icon and link
     const linkContainer = document.createElement("div");
     linkContainer.id = "sourceLinkContainer"
-
-    // Add the icon to the link container
-    linkContainer.innerHTML =
-      '<i class="fa-solid fa-arrow-up-right-from-square"></i> ';
 
     // Append the link element to the link container
     linkContainer.appendChild(urlElement);
@@ -231,13 +227,12 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
   }
 
   const updateElement = document.createElement("a")
-  updateElement.innerHTML = 'Update description on Strava <i class="fa-brands fa-strava"></i>';
+  updateElement.innerHTML = '<br><i class="fa-solid fa-cloud-arrow-up"></i> Update description on Strava <i class="fa-brands fa-strava"></i>';
   updateElement.style.fontWeight = "bold";
   updateElement.style.color = "#fff";
   updateElement.style.textDecoration = "underline"; // Add underline to make it look like a link
   updateElement.style.cursor = "pointer"; // Change cursor to pointer on hover
   const linkContainer = document.getElementById("sourceLinkContainer")
-  linkContainer.innerHTML += '<br><i class="fa-solid fa-cloud-arrow-up"></i> ';
   linkContainer.appendChild(updateElement);
 
   // add click action to update element
@@ -256,6 +251,8 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
     logUpdateRoute(activity_id);
     // feedback to user that the activity has been updated
     flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
+    // remove the update button
+    updateElement.remove();
   })
 }
 
