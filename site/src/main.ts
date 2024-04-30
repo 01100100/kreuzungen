@@ -18,9 +18,11 @@ import {
   FAQControl,
   showInfo,
   displaySpinner,
+  flashMessage,
 } from "./ui";
-import { calculateIntersectingWaterwaysGeojson, parseGPXToGeoJSON } from "./geo";
+import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
+import { updateStravaActivityDescription } from "./strava";
 
 
 // Define global variables
@@ -79,13 +81,14 @@ function processFileUpload(e: Event) {
 
 // Process a GeoJSON object, calculate intersecting waterways and display them on the map with interactions
 export async function processGeojson(
-  routeGeoJSON: Feature<LineString>
+  routeGeoJSON: Feature<LineString>,
+  fromStrava: boolean = false,
+  stravaID?: number
 ) {
   clearRoute();
   addRoute(routeGeoJSON);
   displayRouteMetadata(routeGeoJSON);
   fitMapToBoundingBox(bbox(routeGeoJSON));
-
   displaySpinner("info");
   calculateIntersectingWaterwaysGeojson(routeGeoJSON)
     .then(intersectingWaterways => {
@@ -93,6 +96,9 @@ export async function processGeojson(
         displayIntersectingWaterways(intersectingWaterways);
         addMapInteractions()
         displayWaterwayNames(intersectingWaterways);
+        if (fromStrava && stravaID) {
+          displayManualUpdateButton(intersectingWaterways, stravaID)
+        }
       }
     });
 }
@@ -189,6 +195,7 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
 
     // Create a new div element to contain the icon and link
     const linkContainer = document.createElement("div");
+    linkContainer.id = "sourceLinkContainer"
 
     // Add the icon to the link container
     linkContainer.innerHTML =
@@ -201,6 +208,42 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
       sourceElement.innerHTML = `<i class="fa-solid fa-route"></i> ${routeGeoJSON.properties?.name}`;
     }
     sourceElement.appendChild(linkContainer);
+  }
+}
+
+function displayManualUpdateButton(intersectingWaterways: FeatureCollection, activity_id: number) {
+
+  const owner_access_token = JSON.parse(localStorage.getItem("strava_data")).access_token;
+  let route_from_strava = true
+  let has_update_permission = true
+  // TODO: detect this
+  if (route_from_strava && has_update_permission) {
+    const updateElement = document.createElement("a")
+    updateElement.innerHTML = 'Update description on Strava <i class="fa-brands fa-strava"></i>';
+    updateElement.style.fontWeight = "bold";
+    updateElement.style.color = "#fff";
+    updateElement.style.textDecoration = "underline"; // Add underline to make it look like a link
+    updateElement.style.cursor = "pointer"; // Change cursor to pointer on hover
+    const linkContainer = document.getElementById("sourceLinkContainer")
+    linkContainer.innerHTML += '<br><i class="fa-solid fa-cloud-arrow-up"></i> ';
+    linkContainer.appendChild(updateElement);
+
+    // add click action to update element
+    updateElement.addEventListener("click", async () => {
+      if (intersectingWaterways.features.length === 0) {
+        console.log("No intersecting waterways found");
+        return;
+      }
+      const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
+      // update the activity description with the waterways message if there are waterways
+      await updateStravaActivityDescription(
+        activity_id,
+        owner_access_token,
+        waterwaysMessage
+      );
+      // feedback to user that the activity has been updated
+      flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
+    })
   }
 }
 

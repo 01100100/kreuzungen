@@ -36,6 +36,10 @@ Just select the "Upload your activities from Kreuzungen to Strava" checkbox when
 
 **[ENABLE STRAVA UPDATES](https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write)**
 
+## How to manually update a Strava activity 🪄
+
+If you authorized Kreuzungen as explained above, then load a route with the strava control with crossed waterways and click the displayed with a option `Update description on Strava`.
+
 ## How to disable automatic updates? ⛔
 
 Revoke access to the Kreuzungen.world app in your [Strava settings](https://www.strava.com/settings/apps).

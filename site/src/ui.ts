@@ -220,23 +220,7 @@ export class ShareControl {
         .writeText(shareableUrl)
         .then(() => {
           console.log("URL copied to clipboard: " + shareableUrl);
-          const mapContainer = document.getElementById("map");
-          const messageContainer = document.createElement("div");
-          messageContainer.className = "url-copied-message";
-          const icon = document.createElement("i");
-          icon.className = "fa-solid fa-link";
-          const text = document.createTextNode("URL copied to clipboard.");
-          messageContainer.appendChild(icon);
-          messageContainer.appendChild(text);
-          mapContainer.appendChild(messageContainer);
-
-          // Fade out the message by setting opacity to 0
-          setTimeout(() => {
-            messageContainer.style.opacity = "0";
-            setTimeout(() => {
-              mapContainer.removeChild(messageContainer);
-            }, 500); // Fade out for 500 milliseconds
-          }, 500); // Displayed solid for 500 milliseconds
+          flashMessage(`URL copied to clipboard: ${shareableUrl}`)
         })
         .catch((err) => {
           console.error("Unable to copy URL to clipboard", err);
@@ -537,12 +521,31 @@ function createActivityElement(activity) {
 }
 
 function loadActivityOnMap(activity) {
-  const activitiesContainer = document.getElementById("activities");
   hideActivitiesContainer();
   const geojson = feature(polyline.toGeoJSON(activity.map.summary_polyline));
   geojson.properties = {
     name: activity.name,
     url: `https://www.strava.com/activities/${activity.id}`,
   };
-  processGeojson(geojson);
+  processGeojson(geojson, true, activity.id);
+}
+
+export function flashMessage(message: string) {
+  const mapContainer = document.getElementById("map");
+  const messageContainer = document.createElement("div");
+  messageContainer.className = "url-copied-message";
+  const icon = document.createElement("i");
+  icon.className = "fa-solid fa-link";
+  const text = document.createTextNode(message);
+  messageContainer.appendChild(icon);
+  messageContainer.appendChild(text);
+  mapContainer.appendChild(messageContainer);
+
+  // Fade out the message by setting opacity to 0
+  setTimeout(() => {
+    messageContainer.style.opacity = "0";
+    setTimeout(() => {
+      mapContainer.removeChild(messageContainer);
+    }, 500); // Fade out for 500 milliseconds
+  }, 1000); // Displayed solid for 500 milliseconds
 }

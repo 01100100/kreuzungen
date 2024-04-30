@@ -50,6 +50,7 @@ export async function setUp() {
   }
   // Handle different scenarios based on token existence and expiration
   if (token_exists && new Date().getTime() / 1000 < expires_at) {
+
     console.log("token exists and hasn't expired");
     // Access token is saved in local storage and hasn't expired yet
     const token = JSON.parse(localStorage.getItem("strava_data")).access_token;
