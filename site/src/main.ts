@@ -23,6 +23,7 @@ import {
 import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 import { updateStravaActivityDescription } from "./strava";
+import { logUpdateRoute } from "./stash";
 
 
 // Define global variables
@@ -213,38 +214,50 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
 
 function displayManualUpdateButton(intersectingWaterways: FeatureCollection, activity_id: number) {
 
-  const owner_access_token = JSON.parse(localStorage.getItem("strava_data")).access_token;
-  let route_from_strava = true
-  let has_update_permission = true
-  // TODO: detect this
-  if (route_from_strava && has_update_permission) {
-    const updateElement = document.createElement("a")
-    updateElement.innerHTML = 'Update description on Strava <i class="fa-brands fa-strava"></i>';
-    updateElement.style.fontWeight = "bold";
-    updateElement.style.color = "#fff";
-    updateElement.style.textDecoration = "underline"; // Add underline to make it look like a link
-    updateElement.style.cursor = "pointer"; // Change cursor to pointer on hover
-    const linkContainer = document.getElementById("sourceLinkContainer")
-    linkContainer.innerHTML += '<br><i class="fa-solid fa-cloud-arrow-up"></i> ';
-    linkContainer.appendChild(updateElement);
 
-    // add click action to update element
-    updateElement.addEventListener("click", async () => {
-      if (intersectingWaterways.features.length === 0) {
-        console.log("No intersecting waterways found");
-        return;
-      }
-      const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
-      // update the activity description with the waterways message if there are waterways
-      await updateStravaActivityDescription(
-        activity_id,
-        owner_access_token,
-        waterwaysMessage
-      );
-      // feedback to user that the activity has been updated
-      flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
-    })
+  // if no features then flash a message and return
+  if (intersectingWaterways.features.length === 0) {
+    console.log("No intersecting waterways found");
+    flashMessage("No intersecting waterways found. Pick another activity.")
+    return;
   }
+  // get the owner access token from local storage
+  const owner_access_token = JSON.parse(localStorage.getItem("strava_data")).access_token;
+  // handel the case where it is not set
+  if (!owner_access_token) {
+    console.error("No owner access token found");
+    flashMessage("Something went wrong. No local token found. Try authorizing again.")
+    return;
+  }
+
+  const updateElement = document.createElement("a")
+  updateElement.innerHTML = 'Update description on Strava <i class="fa-brands fa-strava"></i>';
+  updateElement.style.fontWeight = "bold";
+  updateElement.style.color = "#fff";
+  updateElement.style.textDecoration = "underline"; // Add underline to make it look like a link
+  updateElement.style.cursor = "pointer"; // Change cursor to pointer on hover
+  const linkContainer = document.getElementById("sourceLinkContainer")
+  linkContainer.innerHTML += '<br><i class="fa-solid fa-cloud-arrow-up"></i> ';
+  linkContainer.appendChild(updateElement);
+
+  // add click action to update element
+  updateElement.addEventListener("click", async () => {
+    if (intersectingWaterways.features.length === 0) {
+      console.log("No intersecting waterways found");
+      return;
+    }
+    const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
+    // update the activity description with the waterways message if there are waterways
+    await updateStravaActivityDescription(
+      activity_id,
+      owner_access_token,
+      waterwaysMessage
+    );
+    // send log to kreuzungen.fly.dev/update_activity
+    logUpdateRoute(activity_id);
+    // feedback to user that the activity has been updated
+    flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
+  })
 }
 
 function fitMapToBoundingBox(bbox: any) {

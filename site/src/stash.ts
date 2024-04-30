@@ -50,3 +50,29 @@ export async function saveRoute(route: Feature<LineString>): Promise<any> {
         throw new Error("Failed to save route");
     }
 }
+
+// Delete a route
+// TODO: 
+
+// log a route_id to back end
+export async function logUpdateRoute(routeId: number): Promise<any> {
+    try {
+        const response = await fetch("https://shredhook.fly.dev/log_update_route", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ routeId }),
+        });
+        if (!response.ok) {
+            throw new Error(
+                `Failed to log update route. Status: ${response.status}`
+            );
+        }
+        return await response.json();
+    }
+    catch (error) {
+        console.error("Error logging route:", error);
+        throw new Error("Failed to log route");
+    }
+}

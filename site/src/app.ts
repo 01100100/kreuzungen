@@ -111,3 +111,13 @@ app.post("/webhook", async (req, res) => {
   }
   res.status(200).send("EVENT_RECEIVED");
 });
+
+app.post("/log_update_route", async (req, res) => {
+  const routeId = req.body.routeId;
+  if (!routeId) {
+    res.status(400).send("No routeId provided");
+    return;
+  }
+  console.log(`Activity ${routeId} updated by remote client`);
+  res.status(200).send({ message: "Route update successful" });
+});

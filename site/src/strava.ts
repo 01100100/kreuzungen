@@ -1,8 +1,5 @@
 import fetch from "cross-fetch";
-import { feature } from "@turf/helpers";
 import { createClient } from "redis";
-import polyline from "@mapbox/polyline";
-import { Feature, LineString, GeoJsonProperties } from "geojson";
 
 type RedisClientType = ReturnType<typeof createClient>;
 // Get a Strava refresh token for a user stored in redis
