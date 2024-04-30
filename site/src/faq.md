@@ -79,7 +79,7 @@ There are two exceptions:
 - Saved routes
 - Automatic Strava updates
 
-When you save a route, the data is stored on the server and can be accessed by anyone with the link. If you don't want this, share the data directly to your friend in a secure way and tell them to use Kreuzungen.world to upload the file and visualize it without saving it.
+When you save a route, the data is stored on the server and can be accessed by anyone with the link. If you don't want this and your on a desktop device, you can use the TODO:fa-link control that pops up when you press the share control. This will copy a *very long* link to your clipboard that has the gps data encoded in it. It is not shared with kreuzungen servers and can be shared with your friends exclusively in a secure way.
 
 When you enable automatic updates, Kreuzungen.world stores your Strava access tokens, needed to request and update your Strava activities. This can be revoked at any through your [Strava settings](https://www.strava.com/settings/apps).
 
