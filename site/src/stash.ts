@@ -51,9 +51,9 @@ export async function saveRoute(route: Feature<LineString>): Promise<any> {
 }
 
 // ping a route id to the serve to log it
-export async function logUpdateRoute(routeId: number): Promise<any> {
+export async function logUpdateRoute(activityId: number): Promise<any> {
     try {
-        const response = await fetch(`https://kreuzungen.fly.dev/activity?routeId=${routeId}`, {
+        const response = await fetch(`https://kreuzungen.fly.dev/activity?activityId=${activityId}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
