@@ -253,7 +253,6 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
       owner_access_token,
       waterwaysMessage
     );
-    // send log to kreuzungen.fly.dev/update_activity
     logUpdateRoute(activity_id);
     // feedback to user that the activity has been updated
     flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)

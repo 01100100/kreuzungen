@@ -7,7 +7,6 @@ export async function getSavedRoute(
     if (!routeId) {
         throw new Error("Route ID is not set");
     }
-    // rest of the code...
     try {
         console.log("fetching saved route with id: ", routeId);
         const response = await fetch(`https://kreuzungen.fly.dev/get_geojson_feature?id=${routeId}`, {
@@ -51,28 +50,23 @@ export async function saveRoute(route: Feature<LineString>): Promise<any> {
     }
 }
 
-// Delete a route
-// TODO: 
-
-// log a route_id to back end
+// ping a route id to the serve to log it
 export async function logUpdateRoute(routeId: number): Promise<any> {
     try {
-        const response = await fetch("https://shredhook.fly.dev/log_update_route", {
-            method: "POST",
+        const response = await fetch(`https://kreuzungen.fly.dev/activity?routeId=${routeId}`, {
+            method: "GET",
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ routeId }),
         });
         if (!response.ok) {
             throw new Error(
-                `Failed to log update route. Status: ${response.status}`
+                `Failed to log update. Status: ${response.status}`
             );
         }
         return await response.json();
-    }
-    catch (error) {
-        console.error("Error logging route:", error);
-        throw new Error("Failed to log route");
+    } catch (error) {
+        console.error("Error logging update:", error);
+        throw new Error("Failed to log update");
     }
 }
