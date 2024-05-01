@@ -4,7 +4,7 @@ import {
   getAndStoreStravaAccessToken,
   getStravaAccessToken,
 } from "./strava";
-import { loadStravaActivities } from "./ui";
+import { flashMessage, loadStravaActivities } from "./ui";
 import { feature } from "@turf/turf";
 import { getSavedRoute } from "./stash";
 
@@ -80,17 +80,24 @@ export async function setUp() {
     // Authorization code retrieved
     const approvedScopes = urlParams.get("scope");
     const requiredScopes = ["activity", "activity:read_all"];
-    const hasRequiredScopes = requiredScopes.some((scope) =>
+    const hasRequiredScopes = approvedScopes !== null && requiredScopes.some((scope) =>
       approvedScopes.includes(scope)
     );
 
     if (hasRequiredScopes) {
+      // Check if the activity:write scope is set and if not flash a message on the screen
+      const hasWriteScope = approvedScopes.includes("activity:write");
+      if (!hasWriteScope) {
+        flashMessage(
+          'You have not granted "Write" permissions to Kreuzungen.<br><p>You can enable Kreuzungen to Automagically update the description of newly created activities. It will create a message like this:</p><hr><p>Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube River | Ganges | River Thames 🌐 <a href="https://kreuzungen.world">https://kreuzungen.world</a> 🗺️</p><hr>'
+        );
+      }
       const code = urlParams.get("code");
       const accessToken = await getAndStoreStravaAccessToken(code);
       loadStravaActivities(accessToken);
     } else {
-      alert(
-        "For this app to work with strava, you need to authorize it to view activity data. Please authenticate again and authorize the app."
+      flashMessage(
+        'To Sync with strava, you need to authorize Kreuzungen it to read your activity data. Please authenticate again and check the box for "View data about your activities".'
       );
       document.getElementById("stravaConnect").style.display = "flex";
       document.getElementById("stravaPowered").style.display = "none";

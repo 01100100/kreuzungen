@@ -2,14 +2,14 @@ import {
   Map, FullscreenControl, MapMouseEvent, MapGeoJSONFeature, Popup
 } from "maplibre-gl";
 import polyline from "@mapbox/polyline";
-import { bbox, feature, nearestPointOnLine, point } from "@turf/turf";
+import { area, bbox, bboxPolygon, feature, nearestPointOnLine, point } from "@turf/turf";
 import {
   FeatureCollection,
   Feature,
   LineString,
-  GeoJsonProperties
+  GeoJsonProperties,
+  BBox
 } from "geojson";
-import "maplibre-gl/dist/maplibre-gl.css";
 import {
   CustomAttributionControl,
   ShareControl,
@@ -24,7 +24,8 @@ import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, parseGPX
 import { setUp } from "./initialize";
 import { updateStravaActivityDescription } from "./strava";
 import { logUpdateRoute } from "./stash";
-
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faArrowUpRightFromSquare, faRoute, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons'
 
 // Define global variables
 export let isMapCenteredToRoute = false;
@@ -37,6 +38,7 @@ export let shareableUrl = "https://kreuzungen.world";
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
 export let currentRoute: Feature<LineString>;
 export const mapInstance = createMap();
+library.add(faArrowUpRightFromSquare, faRoute, faCloudArrowUp)
 
 // Parse url params and check storage for strava login state
 setUp();
@@ -91,6 +93,12 @@ export async function processGeojson(
   displayRouteMetadata(routeGeoJSON);
   fitMapToBoundingBox(bbox(routeGeoJSON));
   displaySpinner("info");
+  // TODO: if its a big bbox for the geojson, flash a message to say so and it will take a while
+  const bboxArea = area(bboxPolygon(bbox(routeGeoJSON)));
+  // If the bounding box is large, flash a message to the user
+  if (bboxArea > 50000000000) {
+    flashMessage("The the route is a big one 🔥 This may take a while...");
+  }
   calculateIntersectingWaterwaysGeojson(routeGeoJSON)
     .then(intersectingWaterways => {
       if (intersectingWaterways) {
@@ -190,7 +198,7 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
   if (routeGeoJSON.properties && routeGeoJSON.properties.url) {
     const urlElement = document.createElement("a");
     urlElement.href = routeGeoJSON.properties.url;
-    urlElement.innerHTML = '<i class="fa-solid fa-arrow-up-right-from-square"></i> View on Strava <i class="fa-brands fa-strava"></i>';
+    urlElement.innerHTML = `<FontAwesomeIcon icon="arrow-up-right-from-square" /> View on Strava <FontAwesomeIcon icon={['fab', 'strava']} />`;
     urlElement.style.fontWeight = "bold";
     urlElement.style.color = "#fff";
 
@@ -202,7 +210,7 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
     linkContainer.appendChild(urlElement);
     if (sourceElement) {
       sourceElement.style.display = "block";
-      sourceElement.innerHTML = `<i class="fa-solid fa-route"></i> ${routeGeoJSON.properties?.name}`;
+      sourceElement.innerHTML = `<FontAwesomeIcon icon="route" /> ${routeGeoJSON.properties?.name}`;
     }
     sourceElement.appendChild(linkContainer);
   }
@@ -227,8 +235,7 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
   }
 
   const updateElement = document.createElement("a")
-  updateElement.innerHTML = '<br><i class="fa-solid fa-cloud-arrow-up"></i> Update description on Strava <i class="fa-brands fa-strava"></i>';
-  updateElement.style.fontWeight = "bold";
+  updateElement.innerHTML = `<br><FontAwesomeIcon icon="cloud-arrow-up" /> Update description on Strava <FontAwesomeIcon icon={['fab', 'strava']} />`; updateElement.style.fontWeight = "bold";
   updateElement.style.color = "#fff";
   updateElement.style.textDecoration = "underline"; // Add underline to make it look like a link
   updateElement.style.cursor = "pointer"; // Change cursor to pointer on hover

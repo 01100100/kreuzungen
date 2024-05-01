@@ -1,5 +1,6 @@
 import { BBox } from "geojson";
 import { area, bboxPolygon } from "@turf/turf";
+import { flashMessage } from "./ui"
 
 // Define Constants
 const bboxSizeLimit_m2 = 10000000000; // maximum size limit for a bounding box in square meters
@@ -12,6 +13,7 @@ export function makeWaterwaysQuery(bbox: BBox): string {
     console.log(
       "The Bbox is too big. To reduce the computation on the client size the fetch only bigger waterways (OSM relations) and ignore smaller streams (OSM ways) from the OSM overpass api."
     );
+
     console.log(`${area(bboxPolygon(bbox))} m**2 > ${bboxSizeLimit_m2}`);
     waterwaysQuery = `[out:json];rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
   }

@@ -28,6 +28,9 @@
     "start": "node dist/app.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.5.2",
+    "@fortawesome/free-brands-svg-icons": "^6.5.2",
+    "@fortawesome/free-solid-svg-icons": "^6.5.2",
     "@mapbox/polyline": "^1.2.1",
     "@mapbox/togeojson": "^0.16.2",
     "@turf/boolean-point-in-polygon": "^7.0.0-alpha.115",
@@ -37,9 +40,12 @@
     "@turf/polygon-to-line": "^7.0.0-alpha.115",
     "@turf/turf": "^7.0.0-alpha.114",
     "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
     "cross-fetch": "^4.0.0",
     "express": "^4.19.2",
     "flowbite": "^2.3.0",
+    "font-awesome": "^4.7.0",
+    "fontawesome-free": "^1.0.4",
     "geojson": "^0.5.0",
     "lodash": "^4.17.21",
     "maplibre-gl": "^4.1.2",

@@ -12,6 +12,11 @@ import { saveRoute } from "./stash";
 import { feature } from "@turf/helpers";
 import { getStravaActivities } from "./strava";
 import polyline from "@mapbox/polyline";
+import { library, icon } from "@fortawesome/fontawesome-svg-core";
+import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
+import { faStrava } from "@fortawesome/free-brands-svg-icons";
+// Add the icons to the library so you can use it in your page
+library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes);
 
 export class CustomAttributionControl extends maplibregl.AttributionControl {
   _toggleAttribution = () => {
@@ -72,9 +77,8 @@ export class UploadControl {
       this._fileInput.click();
     };
 
-    const icon = document.createElement("i");
-    icon.className = "fa fa-upload"; // Assuming you are using FontAwesome for icons
-    button.appendChild(icon);
+    const uploadIcon = icon({ prefix: 'fas', iconName: 'upload' });
+    button.appendChild(uploadIcon.node[0]);
 
     this._container.appendChild(button);
 
@@ -118,10 +122,8 @@ export class StravaControl {
       }
     };
 
-    const icon = document.createElement("i");
-    icon.className = "fa-brands fa-strava"; // Assuming you are using FontAwesome for icons
-    button.appendChild(icon);
-
+    const stravaIcon = icon({ prefix: 'fab', iconName: 'strava' });
+    button.appendChild(stravaIcon.node[0]);
     this._container.appendChild(button);
 
     // Event to hide activities-container when map is interacted with
@@ -175,9 +177,9 @@ export class FAQControl {
       }
     };
 
-    const icon = document.createElement("i");
-    icon.className = "fa-solid fa-question";
-    button.appendChild(icon);
+    const questionIcon = icon({ prefix: 'fas', iconName: 'question' });
+    button.appendChild(questionIcon.node[0]);
+    this._container.appendChild(button);
 
     this._container.appendChild(button);
 
@@ -209,13 +211,13 @@ export class ShareControl {
     this._container.style.margin = "0 10px";
     this._isShareExpanded = false;
 
-    const urlButton = document.createElement("button");
-    urlButton.id = "urlButton";
-    urlButton.type = "button";
-    urlButton.style.display = "none";
-    urlButton.title = "Copy url to clipboard";
-    urlButton.style.borderRadius = "4px";
-    urlButton.onclick = () => {
+    const linkButton = document.createElement("button");
+    linkButton.id = "linkButton";
+    linkButton.type = "button";
+    linkButton.style.display = "none";
+    linkButton.title = "Copy url to clipboard";
+    linkButton.style.borderRadius = "4px";
+    linkButton.onclick = () => {
       navigator.clipboard
         .writeText(shareableUrl)
         .then(() => {
@@ -227,11 +229,20 @@ export class ShareControl {
         });
     };
 
-    const urlIcon = document.createElement("i");
-    urlIcon.className = "fa-solid fa-link";
-    urlButton.appendChild(urlIcon);
 
-    const saveButton = this.createShareButton("save", "fa-solid fa-floppy-disk");
+    const linkIcon = icon({ prefix: 'fas', iconName: 'link' });
+    linkButton.appendChild(linkIcon.node[0]);
+
+    this._container.appendChild(linkButton);
+
+    const saveButton = document.createElement("button");
+    saveButton.id = "saveButton";
+    saveButton.type = "button";
+    saveButton.style.display = "none";
+    saveButton.title = "Save route";
+    saveButton.style.borderRadius = "4px";
+    const floppyDiskIcon = icon({ prefix: 'fas', iconName: 'floppy-disk' });
+    saveButton.appendChild(floppyDiskIcon.node[0]);
     saveButton.addEventListener("click", async () => {
 
       // TODO: Add a model to the screen, which displays disclaimer and a submit button, we will. store your route for you, and it will be accessible to anyone with the following URL. 
@@ -280,7 +291,7 @@ export class ShareControl {
 
 
     });
-    this._container.appendChild(urlButton);
+    this._container.appendChild(linkButton);
     this._container.appendChild(saveButton);
 
     const shareButton = document.createElement("button");
@@ -311,32 +322,18 @@ export class ShareControl {
       }
     };
 
-    const shareIcon = document.createElement("i");
-    shareIcon.className = "fa-solid fa-share-nodes"; // Assuming you are using FontAwesome for icons
-    shareButton.appendChild(shareIcon);
-
+    const shareIcon = icon({ prefix: 'fas', iconName: 'share-nodes' });
+    shareButton.appendChild(shareIcon.node[0]);
     this._container.appendChild(shareButton);
 
     return this._container;
   }
 
-  createShareButton(id, faIcon) {
-    const button = document.createElement("button");
-    button.id = `${id}Button`;
-    button.type = "button";
-    button.style.display = "none";
-    button.title = id;
-    button.style.borderRadius = "4px";
-    const icon = document.createElement("i");
-    icon.className = faIcon;
-    button.appendChild(icon);
-    return button;
-  }
 
   minimizeShareControl() {
-    const urlButton = document.getElementById("urlButton");
-    if (urlButton) {
-      urlButton.style.display = "none";
+    const linkButton = document.getElementById("linkButton");
+    if (linkButton) {
+      linkButton.style.display = "none";
     }
     const saveButton = document.getElementById("saveButton");
     saveButton.style.display = "none";
@@ -344,8 +341,8 @@ export class ShareControl {
   }
 
   expandShareControl() {
-    const urlButton = document.getElementById("urlButton");
-    urlButton.style.display = "block";
+    const linkButton = document.getElementById("linkButton");
+    linkButton.style.display = "block";
     const saveButton = document.getElementById("saveButton");
     saveButton.style.display = "block";
     this._isShareExpanded = true;
@@ -530,22 +527,20 @@ function loadActivityOnMap(activity) {
   processGeojson(geojson, true, activity.id);
 }
 
-export function flashMessage(message: string) {
+export function flashMessage(html: string) {
   const mapContainer = document.getElementById("map");
   const messageContainer = document.createElement("div");
-  messageContainer.className = "url-copied-message";
-  const icon = document.createElement("i");
-  icon.className = "fa-solid fa-link";
-  const text = document.createTextNode(message);
-  messageContainer.appendChild(icon);
-  messageContainer.appendChild(text);
+  messageContainer.className = "flash-message";
+  messageContainer.innerHTML = html;
   mapContainer.appendChild(messageContainer);
+
+  // TODO: be careful not to do multiple times and decrease opacity
 
   // Fade out the message by setting opacity to 0
   setTimeout(() => {
     messageContainer.style.opacity = "0";
     setTimeout(() => {
       mapContainer.removeChild(messageContainer);
-    }, 500); // Fade out for 500 milliseconds
-  }, 1000); // Displayed solid for 500 milliseconds
+    }, 2000); // Fade out for 500 milliseconds
+  }, 1500); // Displayed solid for 500 milliseconds
 }
