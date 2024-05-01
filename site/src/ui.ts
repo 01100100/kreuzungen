@@ -541,6 +541,6 @@ export function flashMessage(html: string) {
     messageContainer.style.opacity = "0";
     setTimeout(() => {
       mapContainer.removeChild(messageContainer);
-    }, 2000); // Fade out for 500 milliseconds
-  }, 1500); // Displayed solid for 500 milliseconds
+    }, 1500); // Fade out in milliseconds
+  }, 3500); // Displayed solid in milliseconds
 }

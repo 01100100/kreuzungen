@@ -36,7 +36,6 @@ export async function setUp() {
       processGeojson(savedGeojson);
     }
   }
-
   // check local storage for a possible access token
   let token_exists = false;
   let expires_at: any = 0;
@@ -89,7 +88,7 @@ export async function setUp() {
       const hasWriteScope = approvedScopes.includes("activity:write");
       if (!hasWriteScope) {
         flashMessage(
-          'You have not granted "Write" permissions to Kreuzungen.<br><p>You can enable Kreuzungen to Automagically update the description of newly created activities. It will create a message like this:</p><hr><p>Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube River | Ganges | River Thames 🌐 <a href="https://kreuzungen.world">https://kreuzungen.world</a> 🗺️</p><hr>'
+          'You have not granted Strava "Write" permissions to Kreuzungen.<br><p>Grant the permissions and enable Kreuzungen to Automagically update newly created Strava activities.</p><hr><p style="">Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube River | Ganges | River Thames 🌐 <a href="https://kreuzungen.world">https://kreuzungen.world</a> 🗺️</p>'
         );
       }
       const code = urlParams.get("code");
