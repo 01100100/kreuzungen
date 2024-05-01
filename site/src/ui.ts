@@ -223,6 +223,7 @@ export class ShareControl {
         .then(() => {
           console.log("URL copied to clipboard: " + shareableUrl);
           flashMessage(`URL copied to clipboard: ${shareableUrl}`)
+          window.umami.track('copy-polyline-encoded-url');
         })
         .catch((err) => {
           console.error("Unable to copy URL to clipboard", err);
@@ -524,6 +525,7 @@ function loadActivityOnMap(activity) {
     name: activity.name,
     url: `https://www.strava.com/activities/${activity.id}`,
   };
+  window.umami.track('processing-strava-activity', { user: activity.athlete.id, id: activity.id });
   processGeojson(geojson, true, activity.id);
 }
 

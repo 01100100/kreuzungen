@@ -23,9 +23,11 @@ import {
 import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 import { updateStravaActivityDescription } from "./strava";
-import { logUpdateRoute } from "./stash";
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faArrowUpRightFromSquare, faRoute, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons'
+declare global {
+  interface Window { umami: any; }
+}
 
 // Define global variables
 export let isMapCenteredToRoute = false;
@@ -77,6 +79,7 @@ function processFileUpload(e: Event) {
     const fileContents = e.target?.result?.toString();
     if (fileContents) {
       const routeGeoJSON = await parseGPXToGeoJSON(fileContents);
+      window.umami.track('processing-local-file');
       processGeojson(routeGeoJSON.features[0]);
     }
   };
@@ -250,16 +253,20 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
     }
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
     // update the activity description with the waterways message if there are waterways
-    await updateStravaActivityDescription(
+    const response = await updateStravaActivityDescription(
       activity_id,
       owner_access_token,
       waterwaysMessage
     );
-    logUpdateRoute(activity_id);
-    // feedback to user that the activity has been updated
-    flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
-    // remove the update button
-    updateElement.remove();
+    if (!response.ok) {
+      flashMessage("Failed to update the activity description. Something messed up. Try authorizing with Strava again.")
+    } else {
+      window.umami.track('manual-strava-activity-update', { id: activity_id });
+      // feedback to user that the activity has been updated
+      flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
+      // remove the update button
+      updateElement.remove();
+    }
   })
 }
 

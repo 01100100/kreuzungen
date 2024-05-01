@@ -93,18 +93,20 @@ app.post("/webhook", async (req, res) => {
         return;
       }
 
-      console.log("Intersecting waterways found");
+      console.log(`${intersectingWaterways.features.length} intersecting waterways found`);
 
       // create a message with the intersecting waterways
       const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
 
       // update the activity description with the waterways message if there are waterways
-      await updateStravaActivityDescription(
+      const success = await updateStravaActivityDescription(
         activity_id,
         owner_access_token,
         waterwaysMessage
       );
-      console.log(`Activity ${activity_id} updated`);
+      if (success) {
+        window.umami.track('webhook-strava-activity-update', { user: owner_id, id: activity_id });
+      }
     } catch (error) {
       console.error("Error updating activity description", error);
     }

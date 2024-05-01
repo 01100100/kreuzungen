@@ -163,12 +163,13 @@ export async function getStravaActivities(
   }
 }
 
-// Update the description of a Strava activity
+// Update the description of a Strava activity and return true if success
 export async function updateStravaActivityDescription(
   activity_id: number,
   owner_access_token: string,
   description: string
-) {
+): Promise<any> {
+  console.log(activity_id)
   try {
     const response = await fetch(
       `https://www.strava.com/api/v3/activities/${activity_id}`,
@@ -188,22 +189,21 @@ export async function updateStravaActivityDescription(
       try {
         const errorResponse = (await response.json()) as any;
         errorMessage = errorResponse.message;
+        return response
       } catch {
         errorMessage = "Unknown error occurred";
       }
       throw new Error(
-        `Failed to update Strava activity ${activity_id} description. Status: ${response.status}. Error: ${errorMessage}`
+        `Failed to update Strava activity https://www.strava.com/activities/${activity_id} description. Status: ${response.status}. Error: ${errorMessage}`
       );
     } else {
-      console.log(`Updated Strava activity ${activity_id} description`);
+      console.log(`Updated Strava activity https://www.strava.com/activities/${activity_id} description with message: ${description}`);
+      return response
     }
   } catch (error) {
     console.error(
       `Error updating Strava activity ${activity_id} description:`,
       error
-    );
-    throw new Error(
-      `Failed to update Strava activity ${activity_id} description`
     );
   }
 }

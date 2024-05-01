@@ -20,6 +20,7 @@ export async function getSavedRoute(
                 `Failed to get saved route. Status: ${response.status}`
             );
         }
+        window.umami.track('get-saved-route', { id: routeId });
         const data = (await response.json()) as Feature<LineString>;
         return data
     } catch (error) {
@@ -43,30 +44,11 @@ export async function saveRoute(route: Feature<LineString>): Promise<any> {
                 `Failed to save route. Status: ${response.status}`
             );
         }
-        return await response.json();
+        const json = await response.json();
+        window.umami.track('save-route', { id: json.id, url: json.url });
+        return json;
     } catch (error) {
         console.error("Error saving route:", error);
         throw new Error("Failed to save route");
-    }
-}
-
-// ping a route id to the serve to log it
-export async function logUpdateRoute(activityId: number): Promise<any> {
-    try {
-        const response = await fetch(`https://kreuzungen.fly.dev/activity?activityId=${activityId}`, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-            },
-        });
-        if (!response.ok) {
-            throw new Error(
-                `Failed to log update. Status: ${response.status}`
-            );
-        }
-        return await response.json();
-    } catch (error) {
-        console.error("Error logging update:", error);
-        throw new Error("Failed to log update");
     }
 }
