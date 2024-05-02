@@ -170,7 +170,6 @@ export async function updateStravaActivityDescription(
   owner_access_token: string,
   description: string
 ): Promise<boolean> {
-  console.log(activity_id)
   try {
     const response = await fetch(
       `https://www.strava.com/api/v3/activities/${activity_id}`,
@@ -185,14 +184,7 @@ export async function updateStravaActivityDescription(
         }),
       }
     );
-    // log the response fully
-    console.log(`response status: ${response.status}`);
-    console.log(`response ok: ${response.ok}`);
-    console.log(`response statusText: ${response.statusText}`);
-    console.log(`response type: ${response.type}`);
-    console.log(`response url: ${response.url}`);
     if (!response.ok) {
-      console.log(`response status: ${response.status}`);
       const errorMessage = await response.text();
       console.error(
         `Failed to update Strava activity https://www.strava.com/activities/${activity_id} description. Status: ${response.status}. Error: ${errorMessage}`

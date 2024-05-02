@@ -114,8 +114,8 @@ export async function processGeojson(
         displayIntersectingWaterways(intersectingWaterways);
         addMapInteractions()
         // order rivers by intersection index along route
-        const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
-        displayWaterwayNames(orderedIntersectingWaterways);
+        // const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
+        displayWaterwayNames(intersectingWaterways);
         if (fromStrava && stravaID) {
           displayManualUpdateButton(intersectingWaterways, stravaID)
         }
@@ -286,7 +286,8 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
       owner_access_token,
       waterwaysMessage
     );
-    if (success) {
+    // if success is false
+    if (!success) {
       flashMessage("Failed to update the activity description. Something messed up. Try authorizing with Strava again.")
     } else {
       window.umami.track('manual-strava-activity-update', { id: activity_id });
@@ -576,8 +577,7 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
       // Use turf to calculate the bounding box of the feature's geometry
       const routeBoundingBox = bbox(item.geometry);
       fitMapToBoundingBox(routeBoundingBox);
-      console.log(item)
-      mapInstance.flyTo({ center: item.intersection })
+      // mapInstance.flyTo({ center: item.intersection })
       // set the selected feature id to and set the feature state to selected
       selectedFeatureId = item.name;
       mapInstance.setFeatureState(
