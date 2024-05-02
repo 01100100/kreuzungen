@@ -13,10 +13,10 @@ import { feature } from "@turf/helpers";
 import { getStravaActivities } from "./strava";
 import polyline from "@mapbox/polyline";
 import { library, icon } from "@fortawesome/fontawesome-svg-core";
-import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
+import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faCircleRight, faCircleLeft } from "@fortawesome/free-solid-svg-icons";
 import { faStrava } from "@fortawesome/free-brands-svg-icons";
 // Add the icons to the library so you can use it in your page
-library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes);
+library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faRoute, faArrowUpRightFromSquare, faCloudArrowUp, faCircleRight, faCircleLeft);
 
 export class CustomAttributionControl extends maplibregl.AttributionControl {
   _toggleAttribution = () => {
@@ -156,6 +156,7 @@ export class FAQControl {
     this._isFAQDisplayed = false;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
+    this._container.style.margin = "0 10px";
 
     const button = document.createElement("button");
     button.type = "button";
@@ -179,8 +180,6 @@ export class FAQControl {
 
     const questionIcon = icon({ prefix: 'fas', iconName: 'question' });
     button.appendChild(questionIcon.node[0]);
-    this._container.appendChild(button);
-
     this._container.appendChild(button);
 
     // Event to hide FAQ-container when map is interacted with
@@ -208,7 +207,6 @@ export class ShareControl {
     this._map = map;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
-    this._container.style.margin = "0 10px";
     this._isShareExpanded = false;
 
     const linkButton = document.createElement("button");
@@ -222,7 +220,7 @@ export class ShareControl {
         .writeText(shareableUrl)
         .then(() => {
           console.log("URL copied to clipboard: " + shareableUrl);
-          flashMessage(`URL copied to clipboard: ${shareableUrl}`)
+          flashMessage(`URL copied to clipboard: <a href="${shareableUrl}" target="_blank">${shareableUrl}</a>`)
           window.umami.track('copy-polyline-encoded-url');
         })
         .catch((err) => {
@@ -251,15 +249,7 @@ export class ShareControl {
       // The URL will be copied to your clipboard, and you can share it with anyone you want.
       if (!currentRoute) {
         console.error("No route to save")
-        const mapContainer = document.getElementById("map");
-        const messageContainer = document.createElement("div");
-        messageContainer.className = "url-copied-message";
-        const icon = document.createElement("i");
-        icon.className = "fa-solid fa-link";
-        const text = document.createTextNode(`Load a route first to save it.`);
-        messageContainer.appendChild(icon);
-        messageContainer.appendChild(text);
-        mapContainer.appendChild(messageContainer);
+        flashMessage("Load a route first to save it.")
         return
       }
       const savedRoute = await saveRoute(currentRoute)
@@ -267,24 +257,8 @@ export class ShareControl {
       navigator.clipboard
         .writeText(savedURL)
         .then(() => {
-          console.log("Route save and URL copied to clipboard: " + savedURL);
-          const mapContainer = document.getElementById("map");
-          const messageContainer = document.createElement("div");
-          messageContainer.className = "url-copied-message";
-          const icon = document.createElement("i");
-          icon.className = "fa-solid fa-link";
-          const text = document.createTextNode(`Route save and URL copied to clipboard: ${savedURL}`);
-          messageContainer.appendChild(icon);
-          messageContainer.appendChild(text);
-          mapContainer.appendChild(messageContainer);
-
-          // Fade out the message by setting opacity to 0
-          setTimeout(() => {
-            messageContainer.style.opacity = "0";
-            setTimeout(() => {
-              mapContainer.removeChild(messageContainer);
-            }, 500); // Fade out for 500 milliseconds
-          }, 500); // Displayed solid for 500 milliseconds
+          console.log("Route saved and URL copied to clipboard: " + savedURL);
+          flashMessage(`Route saved and Url Copied to clipboard! 🪩 <a href="${savedURL}" target="_blank">${savedURL}</a>`)
         })
         .catch((err) => {
           console.error("Unable to copy URL to clipboard", err);
@@ -413,8 +387,11 @@ export function displaySpinner(id) {
     const spinnerElement = document.createElement("div");
     spinnerElement.id = "spinner";
     spinnerElement.style.textAlign = "center";
-    spinnerElement.innerHTML =
-      '<i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>';
+    spinnerElement.style.display = "flex";
+    spinnerElement.style.justifyContent = "center";
+    spinnerElement.style.alignItems = "center";
+    const spinnerIcon = icon({ prefix: 'fas', iconName: 'spinner' }, { classes: ['fa-spin', 'fa-3x'] });
+    spinnerElement.appendChild(spinnerIcon.node[0]);
     element.appendChild(spinnerElement);
   }
   showInfo();
@@ -452,12 +429,13 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 
   const activitiesControl = document.getElementById("activitiesControl")
   activitiesControl.innerHTML = ""
-  activitiesControl.style.paddingTop = "8px"
+  activitiesControl.style.paddingTop = "4px"
 
 
   if (activities.length > startIndex + activitiesPerPage) {
     const nextLink = document.createElement("a");
-    nextLink.innerHTML = '<i class="fa-solid fa-circle-right fa-2xl"></i>';
+    const spinnerIcon = icon({ prefix: 'fas', iconName: 'circle-right' }, { classes: ['fa-2xl'] });
+    nextLink.appendChild(spinnerIcon.node[0]);
     nextLink.style.float = "right";
     nextLink.style.cursor = "pointer";
     nextLink.addEventListener("click", function () {
@@ -468,7 +446,8 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 
   if (startIndex >= activitiesPerPage) {
     const prevLink = document.createElement("a");
-    prevLink.innerHTML = '<i class="fa-solid fa-circle-left fa-2xl"></i>';
+    const spinnerIcon = icon({ prefix: 'fas', iconName: 'circle-left' }, { classes: ['fa-2xl'] });
+    prevLink.appendChild(spinnerIcon.node[0]);
     prevLink.style.float = "right";
     prevLink.style.cursor = "pointer";
     prevLink.style.paddingRight = "5px"

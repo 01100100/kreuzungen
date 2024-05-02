@@ -39,6 +39,7 @@
     "@turf/meta": "^7.0.0-alpha.115",
     "@turf/polygon-to-line": "^7.0.0-alpha.115",
     "@turf/turf": "^7.0.0-alpha.114",
+    "@umami/node": "^0.2.0",
     "body-parser": "^1.20.2",
     "cross-fetch": "^4.0.0",
     "express": "^4.19.2",

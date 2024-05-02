@@ -20,11 +20,14 @@ import {
   displaySpinner,
   flashMessage,
 } from "./ui";
-import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, parseGPXToGeoJSON } from "./geo";
+import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 import { updateStravaActivityDescription } from "./strava";
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faArrowUpRightFromSquare, faRoute, faCloudArrowUp } from '@fortawesome/free-solid-svg-icons'
+import { library, dom, icon } from '@fortawesome/fontawesome-svg-core'
+import { faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
+import { faStrava } from "@fortawesome/free-brands-svg-icons";
+// Add the icons to the library so you can use it in your page
+
 declare global {
   interface Window { umami: any; }
 }
@@ -40,7 +43,10 @@ export let shareableUrl = "https://kreuzungen.world";
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
 export let currentRoute: Feature<LineString>;
 export const mapInstance = createMap();
-library.add(faArrowUpRightFromSquare, faRoute, faCloudArrowUp)
+library.add(faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes)
+// Replace any existing <i> tags with <svg> and set up a MutationObserver to
+// continue doing this as the DOM changes.
+dom.watch();
 
 // Parse url params and check storage for strava login state
 setUp();
@@ -107,7 +113,9 @@ export async function processGeojson(
       if (intersectingWaterways) {
         displayIntersectingWaterways(intersectingWaterways);
         addMapInteractions()
-        displayWaterwayNames(intersectingWaterways);
+        // order rivers by intersection index along route
+        const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
+        displayWaterwayNames(orderedIntersectingWaterways);
         if (fromStrava && stravaID) {
           displayManualUpdateButton(intersectingWaterways, stravaID)
         }
@@ -143,10 +151,10 @@ function createMap() {
   map.addControl(uploadControl, "top-right");
   const stravaControl = new StravaControl();
   map.addControl(stravaControl, "top-right");
-  const shareControl = new ShareControl();
-  map.addControl(shareControl, "bottom-right");
   const faqControl = new FAQControl();
   map.addControl(faqControl, "bottom-right");
+  const shareControl = new ShareControl();
+  map.addControl(shareControl, "bottom-right");
   return map;
 }
 
@@ -169,6 +177,11 @@ function clearRoute() {
   if (infoElement) {
     infoElement.innerHTML = "";
     infoElement.style.display = "none";
+  }
+  const sourceElement = document.getElementById("source");
+  if (sourceElement) {
+    sourceElement.innerHTML = "";
+    sourceElement.style.display = "none";
   }
 }
 
@@ -193,29 +206,40 @@ async function addRoute(routeGeoJSON: Feature<LineString>) {
 function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonProperties>) {
 
   const sourceElement = document.getElementById("source");
+  sourceElement.style.display = "block";
 
   // minimize the attribution on a compact screen
   const attributionControl = mapInstance
     ._controls[0] as CustomAttributionControl;
 
-  if (routeGeoJSON.properties && routeGeoJSON.properties.url) {
-    const urlElement = document.createElement("a");
-    urlElement.href = routeGeoJSON.properties.url;
-    urlElement.innerHTML = `<FontAwesomeIcon icon="arrow-up-right-from-square" /> View on Strava <FontAwesomeIcon icon={['fab', 'strava']} />`;
-    urlElement.style.fontWeight = "bold";
-    urlElement.style.color = "#fff";
-
+  if (routeGeoJSON.properties.name) {
     // Create a new div element to contain the icon and link
-    const linkContainer = document.createElement("div");
-    linkContainer.id = "sourceLinkContainer"
+    const routeContainer = document.createElement("div");
+    routeContainer.id = "sourceLinkContainer"
 
-    // Append the link element to the link container
-    linkContainer.appendChild(urlElement);
-    if (sourceElement) {
-      sourceElement.style.display = "block";
-      sourceElement.innerHTML = `<FontAwesomeIcon icon="route" /> ${routeGeoJSON.properties?.name}`;
-    }
-    sourceElement.appendChild(linkContainer);
+    const routeIcon = icon({ prefix: 'fas', iconName: 'route' });
+    routeContainer.appendChild(routeIcon.node[0]);
+    routeContainer.innerHTML += ` ${routeGeoJSON.properties?.name}`;
+    routeContainer.appendChild(document.createElement("br"));
+    sourceElement.appendChild(routeContainer);
+  }
+
+  if (routeGeoJSON.properties.url) {
+    const routeElement = document.createElement("div")
+    const routeLink = document.createElement("a")
+    const stravaIcon = icon({ prefix: 'fab', iconName: 'strava' });
+    routeElement.appendChild(stravaIcon.node[0]);
+    routeLink.innerHTML += `View on Strava`;
+    routeLink.href = routeGeoJSON.properties.url;
+    routeLink.target = "_blank";
+    routeLink.style.color = "#fff";
+    routeLink.style.textDecoration = "underline";
+    routeLink.style.cursor = "pointer";
+    routeElement.appendChild(routeLink)
+    const sourceElement = document.getElementById("source")
+    sourceElement.appendChild(routeElement);
+
+
   }
 }
 
@@ -237,13 +261,17 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
     return;
   }
 
-  const updateElement = document.createElement("a")
-  updateElement.innerHTML = `<br><FontAwesomeIcon icon="cloud-arrow-up" /> Update description on Strava <FontAwesomeIcon icon={['fab', 'strava']} />`; updateElement.style.fontWeight = "bold";
-  updateElement.style.color = "#fff";
-  updateElement.style.textDecoration = "underline"; // Add underline to make it look like a link
-  updateElement.style.cursor = "pointer"; // Change cursor to pointer on hover
-  const linkContainer = document.getElementById("sourceLinkContainer")
-  linkContainer.appendChild(updateElement);
+  const updateElement = document.createElement("div")
+  const cloudIcon = icon({ prefix: 'fas', iconName: 'cloud-arrow-up' });
+  const updateLink = document.createElement("a")
+  updateElement.appendChild(cloudIcon.node[0]);
+  updateLink.innerHTML += `Update description on Strava`;
+  updateLink.style.color = "#fff";
+  updateLink.style.textDecoration = "underline"; // Add underline to make it look like a link
+  updateLink.style.cursor = "pointer"; // Change cursor to pointer on hover
+  updateElement.appendChild(updateLink)
+  const sourceElement = document.getElementById("source")
+  sourceElement.appendChild(updateElement);
 
   // add click action to update element
   updateElement.addEventListener("click", async () => {
@@ -253,17 +281,17 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
     }
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
     // update the activity description with the waterways message if there are waterways
-    const response = await updateStravaActivityDescription(
+    const success = await updateStravaActivityDescription(
       activity_id,
       owner_access_token,
       waterwaysMessage
     );
-    if (!response.ok) {
+    if (success) {
       flashMessage("Failed to update the activity description. Something messed up. Try authorizing with Strava again.")
     } else {
       window.umami.track('manual-strava-activity-update', { id: activity_id });
       // feedback to user that the activity has been updated
-      flashMessage(`Updated https://www.strava.com/activities/${activity_id}`)
+      flashMessage(`Updated route! 🪩 <a href="https://www.strava.com/activities/${activity_id}" target="_blank">https://www.strava.com/activities/${activity_id}</a>`)
       // remove the update button
       updateElement.remove();
     }
@@ -491,15 +519,15 @@ function createPopUp(
 }
 
 function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
+  console.log(intersectingWaterways)
   // Display all the river names in the info-container
   // extract the name and geometry from the intersectingWaterways
-
 
   const riverNames = intersectingWaterways.features
     .map((feature) => ({
       name: feature.properties.name,
-      id: feature.id,
       geometry: feature.geometry,
+      intersection: feature.properties.intersection
     }))
     .filter((item) => item.name);
 
@@ -535,7 +563,7 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
         { selected: false }
       );
     });
-    // Event listener for click event to fit the map to the bounding box
+    // Event listener for click event to center the map on the intersection property value
     riverElement.addEventListener("click", () => {
       // unset the selected feature state
       if (selectedFeatureId) {
@@ -548,6 +576,8 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
       // Use turf to calculate the bounding box of the feature's geometry
       const routeBoundingBox = bbox(item.geometry);
       fitMapToBoundingBox(routeBoundingBox);
+      console.log(item)
+      mapInstance.flyTo({ center: item.intersection })
       // set the selected feature id to and set the feature state to selected
       selectedFeatureId = item.name;
       mapInstance.setFeatureState(

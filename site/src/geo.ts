@@ -1,9 +1,9 @@
 import {
   bbox,
   combine,
-  featureCollection,
+  featureCollection, length, lineIntersect, lineSlice
 } from "@turf/turf";
-import { feature } from "@turf/helpers";
+import { feature, point } from "@turf/helpers";
 import { booleanIntersects } from "./durf"
 import osmtogeojson from "osmtogeojson";
 import { groupBy } from "lodash";
@@ -14,7 +14,8 @@ import {
   Feature,
   LineString,
   BBox,
-  MultiLineString
+  MultiLineString,
+  Point
 } from "geojson";
 import polyline from "@mapbox/polyline";
 import toGeoJSON from "@mapbox/togeojson";
@@ -114,6 +115,40 @@ function combineSameNameFeatures(
     }
   );
   return featureCollection(combinedFeatures);
+}
+
+// For a fc which has only intersecting features, return the first point that each feature intersects and the distance along the LineString from the start, then return the intersecting waterways ordered by the ascending distance 
+export function orderAlongRoute(
+  fc: FeatureCollection<any>,
+  routeLineString: Feature<LineString>
+): FeatureCollection<LineString | MultiLineString> {
+  const enrichedFeatures = fc.features.map((feature) => {
+    const intersection = firstIntersection(feature, routeLineString);
+    const slice = lineSlice(routeLineString.geometry.coordinates[0], intersection, routeLineString);
+    const distance = length(slice);
+    return {
+      feature,
+      intersection,
+      distance
+    };
+  });
+
+  // return the orderedFeatureCollection as a FeatureCollection of LineStrings or MultiLineStrings with a property intersection which is the first intersection point, they should be ordered by the distance
+  const orderFeatures = enrichedFeatures.sort((a, b) => a.distance - b.distance)
+  // TODO: add the intersection to properties.intersection 
+
+  return featureCollection(orderFeatures.map((feature) => feature.feature))
+}
+
+function firstIntersection(
+  feature: Feature<LineString | MultiLineString>,
+  routeLineString: Feature<LineString>
+): Feature<Point> | null {
+  const intersections = lineIntersect(feature, routeLineString);
+  if (intersections.features.length > 0) {
+    return intersections.features[0];
+  }
+  return null;
 }
 
 

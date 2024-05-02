@@ -148,6 +148,7 @@ export async function getStravaActivities(
       throw new Error(
         `Failed to get Strava activities. Status: ${response.status}`
       );
+      // TODO: flash on screen and prompt to reauthenticate
     } else {
       const data = await response.json();
       // filter out the activities that do not have coordinates
@@ -168,7 +169,7 @@ export async function updateStravaActivityDescription(
   activity_id: number,
   owner_access_token: string,
   description: string
-): Promise<any> {
+): Promise<boolean> {
   console.log(activity_id)
   try {
     const response = await fetch(
@@ -184,21 +185,21 @@ export async function updateStravaActivityDescription(
         }),
       }
     );
+    // log the response fully
+    console.log(`response status: ${response.status}`);
+    console.log(`response ok: ${response.ok}`);
+    console.log(`response statusText: ${response.statusText}`);
+    console.log(`response type: ${response.type}`);
+    console.log(`response url: ${response.url}`);
     if (!response.ok) {
-      let errorMessage = "";
-      try {
-        const errorResponse = (await response.json()) as any;
-        errorMessage = errorResponse.message;
-        return response
-      } catch {
-        errorMessage = "Unknown error occurred";
-      }
-      throw new Error(
+      console.log(`response status: ${response.status}`);
+      const errorMessage = await response.text();
+      console.error(
         `Failed to update Strava activity https://www.strava.com/activities/${activity_id} description. Status: ${response.status}. Error: ${errorMessage}`
       );
+      return false
     } else {
-      console.log(`Updated Strava activity https://www.strava.com/activities/${activity_id} description with message: ${description}`);
-      return response
+      return true
     }
   } catch (error) {
     console.error(

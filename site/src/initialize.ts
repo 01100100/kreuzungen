@@ -48,35 +48,8 @@ export async function setUp() {
     expires_at = 0;
   }
   // Handle different scenarios based on token existence and expiration
-  if (token_exists && new Date().getTime() / 1000 < expires_at) {
-
-    console.log("token exists and hasn't expired");
-    // Access token is saved in local storage and hasn't expired yet
-    const token = JSON.parse(localStorage.getItem("strava_data")).access_token;
-    // load the activities
-    const activities = await loadStravaActivities(token);
-
-    // add callbacks to process the geojson
-
-
-    loadStravaActivities(token);
-  } else if (token_exists && new Date().getTime() / 1000 >= expires_at) {
-    // Access token is saved in local storage but expired
-    console.log("Token exists but has expired");
-    const refreshToken = JSON.parse(
-      localStorage.getItem("strava_data")
-    ).refresh_token;
-    let newAccessToken = await getStravaAccessToken(refreshToken);
-    loadStravaActivities(newAccessToken);
-  } else if (
-    !urlParams.has("exchange_token") ||
-    urlParams.get("error") === "access_denied"
-  ) {
-    // No token in local storage, no authorization code
-    document.getElementById("stravaConnect").style.display = "flex";
-    document.getElementById("stravaPowered").style.display = "none";
-  } else {
-    // Authorization code retrieved
+  if (urlParams.has("scope")) {
+    // User has been redirected from strava oauth
     const approvedScopes = urlParams.get("scope");
     const requiredScopes = ["activity", "activity:read_all"];
     const hasRequiredScopes = approvedScopes !== null && requiredScopes.some((scope) =>
@@ -101,5 +74,30 @@ export async function setUp() {
       document.getElementById("stravaConnect").style.display = "flex";
       document.getElementById("stravaPowered").style.display = "none";
     }
+  }
+  else if (token_exists && new Date().getTime() / 1000 < expires_at) {
+    console.log("token exists and hasn't expired");
+    // Access token is saved in local storage and hasn't expired yet
+    const token = JSON.parse(localStorage.getItem("strava_data")).access_token;
+    // load the activities
+    const activities = await loadStravaActivities(token);
+  } else if (token_exists && new Date().getTime() / 1000 >= expires_at) {
+    // Access token is saved in local storage but expired
+    console.log("Token exists but has expired");
+    const refreshToken = JSON.parse(
+      localStorage.getItem("strava_data")
+    ).refresh_token;
+    let newAccessToken = await getStravaAccessToken(refreshToken);
+    loadStravaActivities(newAccessToken);
+  } else if (
+    !urlParams.has("exchange_token") ||
+    urlParams.get("error") === "access_denied"
+  ) {
+    // No token in local storage, no authorization code
+    document.getElementById("stravaConnect").style.display = "flex";
+    document.getElementById("stravaPowered").style.display = "none";
+  } else {
+    console.log("Something went wrong, opps.")
+
   }
 }
