@@ -9,7 +9,7 @@ export async function getSavedRoute(
     }
     try {
         console.log("fetching saved route with id: ", routeId);
-        const response = await fetch(`https://kreuzungen.fly.dev/get_geojson_feature?id=${routeId}`, {
+        const response = await fetch(`https://storage.kreuzungen.world/get_geojson_feature?id=${routeId}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -32,7 +32,7 @@ export async function getSavedRoute(
 // Save a route
 export async function saveRoute(route: Feature<LineString>): Promise<any> {
     try {
-        const response = await fetch("https://kreuzungen.fly.dev/save_geojson_feature", {
+        const response = await fetch("https://storage.kreuzungen.world/save_geojson_feature", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

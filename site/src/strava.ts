@@ -30,7 +30,7 @@ export async function getStravaAccessTokenRedis(
 ): Promise<string> {
   try {
     const refreshToken = await getStravaRefreshToken(user_id, redisClient);
-    const response = await fetch("https://kreuzungen.fly.dev/reoauth", {
+    const response = await fetch("https://auth.kreuzungen.world/reoauth", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -55,7 +55,7 @@ export async function getStravaAccessToken(
 ): Promise<string> {
   console.log("Getting Strava access token");
   try {
-    const response = await fetch("https://kreuzungen.fly.dev/reoauth", {
+    const response = await fetch("https://auth.kreuzungen.world/reoauth", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -83,7 +83,7 @@ export async function getAndStoreStravaAccessToken(
   oauth_code: string
 ): Promise<string> {
   try {
-    const response = await fetch("https://kreuzungen.fly.dev/oauth", {
+    const response = await fetch("https://auth.kreuzungen.world/oauth", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
