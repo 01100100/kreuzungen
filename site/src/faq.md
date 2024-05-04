@@ -50,6 +50,8 @@ Kreuzungen.world will no longer be able to update your activity descriptions.
 
 This could be due to the absence of the waterway you crossed in OpenStreetMaps. Kreuzungen only shows waterways in the OSM database.
 
+Otherwise, you might have not fully crossed the waterway. Time to go back and finish the job!
+
 ## What is OpenStreetMaps? 🗺️
 
 OpenStreetMap (OSM) is a collaborative initiative to create a free and editable map of the world. It's a community-driven project where individuals and organizations contribute to the data collection. This data is freely available for anyone to modify, download, and use. Kreuzungen.world, along with many other web projects, utilizes OSM's extensive waterways data and rich basemaps.
