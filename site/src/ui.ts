@@ -4,7 +4,6 @@ import {
   shareableUrl,
   shareableDescription,
   shareableTitle,
-  shareableUrlEncoded,
   processGeojson,
   currentRoute
 } from "./main";
@@ -13,10 +12,10 @@ import { feature } from "@turf/helpers";
 import { getStravaActivities } from "./strava";
 import polyline from "@mapbox/polyline";
 import { library, icon } from "@fortawesome/fontawesome-svg-core";
-import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faCircleRight, faCircleLeft } from "@fortawesome/free-solid-svg-icons";
+import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faCircleRight, faCircleLeft, faFileImport, faFileArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { faStrava } from "@fortawesome/free-brands-svg-icons";
 // Add the icons to the library so you can use it in your page
-library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faRoute, faArrowUpRightFromSquare, faCloudArrowUp, faCircleRight, faCircleLeft);
+library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faRoute, faArrowUpRightFromSquare, faCloudArrowUp, faCircleRight, faCircleLeft, faFileImport, faFileArrowUp);
 
 export class CustomAttributionControl extends maplibregl.AttributionControl {
   _toggleAttribution = () => {
@@ -51,11 +50,11 @@ export class CustomAttributionControl extends maplibregl.AttributionControl {
 }
 
 export class UploadControl {
-  private _fileInput: HTMLElement;
+  private _fileInput: HTMLInputElement;
   private _map: any;
   private _container: HTMLDivElement;
   constructor(fileInputId, callback) {
-    this._fileInput = document.getElementById(fileInputId);
+    this._fileInput = document.getElementById(fileInputId) as HTMLInputElement;
     this._fileInput.addEventListener("change", callback, false);
   }
 
@@ -73,7 +72,6 @@ export class UploadControl {
     button.onclick = () => {
       hideActivitiesContainer();
       hideInfo();
-      // Triggering the hidden file input click event
       this._fileInput.click();
     };
 
@@ -82,8 +80,64 @@ export class UploadControl {
 
     this._container.appendChild(button);
 
+    // Add drag and drop upload functionality
+    const mapContainer = document.getElementById("map");
+    let dragCounter = 0; // Add a counter
+    mapContainer.addEventListener("dragenter", (event) => {
+      event.stopPropagation();
+      event.preventDefault();
+      dragCounter++;
+      if (dragCounter === 1) {
+        const previousDiv = document.querySelector("#file-upload-container");
+        if (previousDiv) {
+          previousDiv.parentNode.removeChild(previousDiv);
+        }
+        const fileUploadIcon = document.createElement("div");
+        fileUploadIcon.id = "file-upload-container";
+        const uploadIconElement = icon({ prefix: 'fas', iconName: 'file-arrow-up' }, { classes: ['fa-8x'] });
+        fileUploadIcon.appendChild(uploadIconElement.node[0]);
+        mapContainer.appendChild(fileUploadIcon);
+        mapContainer.style.opacity = "0.8"
+      }
+    }, false);
+
+    mapContainer.addEventListener("dragover", (event) => {
+      event.preventDefault();
+    }, false);
+
+    mapContainer.addEventListener("dragleave", (event) => {
+      event.preventDefault();
+      dragCounter--;
+      if (dragCounter === 0) {
+        mapContainer.style.opacity = "1"
+        const uploadIcon = document.querySelector("#file-upload-container");
+        if (uploadIcon) {
+          uploadIcon.parentNode.removeChild(uploadIcon);
+        }
+      }
+    }, false);
+
+    mapContainer.addEventListener("drop", (event) => {
+      event.preventDefault();
+      const uploadIcon = document.querySelector("#file-upload-container");
+      if (uploadIcon) {
+        uploadIcon.parentNode.removeChild(uploadIcon);
+      }
+      const files = event.dataTransfer.files;
+      if (files.length > 0) {
+        this._fileInput.files = files;
+        const changeEvent = new Event('change');
+        this._fileInput.dispatchEvent(changeEvent);
+      }
+      dragCounter = 0;
+      mapContainer.style.opacity = "1"
+    }, false);
+
+
     return this._container;
   }
+
+
 
   onRemove() {
     this._container.parentNode.removeChild(this._container);
@@ -157,13 +211,11 @@ export class FAQControl {
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
     this._container.style.margin = "0 10px";
-
     const button = document.createElement("button");
     button.type = "button";
     button.title = "FAQ's";
     button.style.borderRadius = "4px";
     button.onclick = () => {
-      // toggle the FAQ-container
       if (this._isFAQDisplayed) {
         showInfo();
         showSourceInfo()
@@ -177,19 +229,15 @@ export class FAQControl {
         this._isFAQDisplayed = true;
       }
     };
-
     const questionIcon = icon({ prefix: 'fas', iconName: 'question' });
     button.appendChild(questionIcon.node[0]);
     this._container.appendChild(button);
-
-    // Event to hide FAQ-container when map is interacted with
     this._map.on("mousedown", () => {
       hideFAQContainer();
       this._isFAQDisplayed = false;
       showInfo();
       showSourceInfo()
     });
-
     return this._container;
   }
 
@@ -381,7 +429,6 @@ export function showFAQContainer() {
 
 export function displaySpinner(id) {
   const element = document.getElementById(id);
-
   const spinnerContainer = document.getElementById("spinner");
   if (!spinnerContainer) {
     const spinnerElement = document.createElement("div");
@@ -399,6 +446,7 @@ export function displaySpinner(id) {
 
 export async function loadStravaActivities(owner_access_token: string) {
   displaySpinner("activitiesList");
+  // todo add error handling
   getStravaActivities(owner_access_token).then((activities) => {
     if (activities) {
       displayActivities(activities);
@@ -415,7 +463,6 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   const activitiesList = document.getElementById("activitiesList");
   activitiesList.style.width = "250px";
   activitiesList.innerHTML = "";
-
   currentPageActivities.forEach(function (activity) {
     const activityElement = createActivityElement(activity);
     activityElement.addEventListener("click", function () {
@@ -424,14 +471,11 @@ function displayActivities(activities: any[], startIndex: number = 0) {
     });
     activitiesList.appendChild(activityElement);
   });
-
   activitiesList.style.cursor = "pointer";
-
   const activitiesControl = document.getElementById("activitiesControl")
   activitiesControl.innerHTML = ""
   activitiesControl.style.paddingTop = "4px"
-
-
+  // add right arrow
   if (activities.length > startIndex + activitiesPerPage) {
     const nextLink = document.createElement("a");
     const spinnerIcon = icon({ prefix: 'fas', iconName: 'circle-right' }, { classes: ['fa-2xl'] });
@@ -444,6 +488,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
     activitiesControl.appendChild(nextLink);
   }
 
+  // add left arrow
   if (startIndex >= activitiesPerPage) {
     const prevLink = document.createElement("a");
     const spinnerIcon = icon({ prefix: 'fas', iconName: 'circle-left' }, { classes: ['fa-2xl'] });
@@ -456,9 +501,6 @@ function displayActivities(activities: any[], startIndex: number = 0) {
     });
     activitiesControl.appendChild(prevLink);
   }
-
-
-
 }
 
 
@@ -510,14 +552,14 @@ function loadActivityOnMap(activity) {
 
 export function flashMessage(html: string) {
   const mapContainer = document.getElementById("map");
+  const previousMessages = document.getElementsByClassName("flash-message");
+  for (let i = 0; i < previousMessages.length; i++) {
+    mapContainer.removeChild(previousMessages[i]);
+  }
   const messageContainer = document.createElement("div");
   messageContainer.className = "flash-message";
   messageContainer.innerHTML = html;
   mapContainer.appendChild(messageContainer);
-
-  // TODO: be careful not to do multiple times and decrease opacity
-
-  // Fade out the message by setting opacity to 0
   setTimeout(() => {
     messageContainer.style.opacity = "0";
     setTimeout(() => {

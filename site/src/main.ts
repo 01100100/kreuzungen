@@ -79,6 +79,10 @@ function processFileUpload(e: Event) {
   const target = e.target as HTMLInputElement;
   const selectedFile = target.files?.[0];
   if (!selectedFile) return;
+  if (!selectedFile.name.endsWith(".gpx")) {
+    flashMessage("Only .gpx files are supported");
+    return;
+  }
   const fileReader = new FileReader();
   fileReader.readAsText(selectedFile);
   fileReader.onload = async function (e) {

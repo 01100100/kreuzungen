@@ -29,10 +29,7 @@
   <!-- Analytics -->
   <!-- the following script is used for cookie-less, GDPR compliant analytics.
 you can disable it at any time, e.g. using the NoScript or PrivacyBadger browser extensions,
-and the website will still work 100% fine. Ss a privately maintained open-source project,
-gaining some insights in how (much) this service is used is really good to stay motivated.
-for more information on the analytics framework, which is completely open source, please
-check https://umami.is/docs/faq -->
+and the website will still work 100% fine. Check https://umami.is/docs/faq -->
   <script defer src="https://stats.kreuzungen.world/script.js"
     data-website-id="a8bb61a3-65fb-404b-9a30-1bed3812b291"></script>
   <!-- Inline styling -->
@@ -208,6 +205,22 @@ check https://umami.is/docs/faq -->
     .url-copied-message i {
       margin-right: 5px;
     }
+
+    #file-upload-container {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      background-color: rgba(0, 0, 0, 0.5);
+      color: white;
+      border-radius: 25%;
+      width: 110px;
+      height: 130px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   </style>
   <!-- External stylesheets and scripts -->
 
@@ -216,7 +229,7 @@ check https://umami.is/docs/faq -->
 
 <body>
   <!-- File input and map container -->
-  <input type="file" id="fileInput" style="display: none;" />
+  <input type="file" id="fileInput" style="display: none;" accept=".gpx" />
   <div id="map">
     <div id="faq" class="faq-container" style="display: none;">
       <%= require('./faq.md') %>
