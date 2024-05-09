@@ -19,7 +19,7 @@ import {
 } from "geojson";
 import polyline from "@mapbox/polyline";
 import toGeoJSON from "@mapbox/togeojson";
-import { fetchOverpassData, makeWaterwaysQuery } from "./overpass";
+import { fetchOverpassData, waterwaysInBboxQuery, waterwaysInAreaQuery, waterwaysRelationsInAreaQuery } from "./overpass";
 
 
 export async function calculateIntersectingWaterwaysPolyline(polylineString: string): Promise<FeatureCollection | undefined> {
@@ -33,7 +33,7 @@ export async function calculateIntersectingWaterwaysGeojson(
 ): Promise<FeatureCollection | undefined> {
   try {
     const routeBoundingBox: BBox = bbox(routeGeoJSON);
-    const waterwaysQuery = makeWaterwaysQuery(routeBoundingBox);
+    const waterwaysQuery = waterwaysInBboxQuery(routeBoundingBox);
     const osmData = await fetchOverpassData(waterwaysQuery);
     if (!osmData) {
       console.error(
@@ -52,6 +52,34 @@ export async function calculateIntersectingWaterwaysGeojson(
     console.error("Error processing GeoJSON:", error);
     return;
   }
+}
+
+export async function getWaterwaysForArea(areaName: string): Promise<FeatureCollection | undefined> {
+  const waterwaysQuery = waterwaysInAreaQuery(areaName);
+  const osmData = await fetchOverpassData(waterwaysQuery);
+  if (!osmData) {
+    console.error(
+      `No osm features returned for Overpass query: ${waterwaysQuery}`
+    );
+    return;
+  }
+  const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
+  const combined = combineSameNameFeatures(waterwaysGeoJSON) as FeatureCollection<LineString | MultiLineString>;
+  return combined;
+}
+
+export async function getMainWaterwaysForArea(areaName: string): Promise<FeatureCollection | undefined> {
+  const waterwaysQuery = waterwaysRelationsInAreaQuery(areaName);
+  const osmData = await fetchOverpassData(waterwaysQuery);
+  if (!osmData) {
+    console.error(
+      `No osm features returned for Overpass query: ${waterwaysQuery}`
+    );
+    return;
+  }
+  const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
+  const combined = combineSameNameFeatures(waterwaysGeoJSON) as FeatureCollection<LineString | MultiLineString>;
+  return combined;
 }
 
 export function parseOSMToGeoJSON(

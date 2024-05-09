@@ -6,7 +6,7 @@ import { flashMessage } from "./ui"
 const bboxSizeLimit_m2 = 10000000000; // maximum size limit for a bounding box in square meters
 
 // Create a query for the Overpass API to fetch waterways within a bounding box, if the bounding box is too big only fetch relations
-export function makeWaterwaysQuery(bbox: BBox): string {
+export function waterwaysInBboxQuery(bbox: BBox): string {
   let waterwaysQuery = `[out:json];(rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});way["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});)->._;out geom;`;
   if (area(bboxPolygon(bbox)) > bboxSizeLimit_m2) {
     // TODO: take user input whether to fetch smaller waterways
@@ -18,6 +18,31 @@ export function makeWaterwaysQuery(bbox: BBox): string {
     waterwaysQuery = `[out:json];rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
   }
   return waterwaysQuery;
+}
+
+export function waterwaysInAreaQuery(areaName: string): string {
+  return `
+  [out:json];
+  area
+    [name ="${areaName}"]->.a;
+  out body qt;
+  (
+    relation
+      (area.a)
+      ["waterway"];
+    way
+      (area.a)
+    ["waterway"];
+  );
+  out body qt;
+  >;
+  out geom;
+  `;
+}
+
+export function waterwaysRelationsInAreaQuery(areaName: string): string {
+  return `[out:json]; area[name = "${areaName}"]; rel(area)["waterway"]; out geom;
+  `;
 }
 
 // Fetch data from the Overpass API

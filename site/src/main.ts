@@ -20,7 +20,7 @@ import {
   displaySpinner,
   flashMessage,
 } from "./ui";
-import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
+import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, getMainWaterwaysForArea, getWaterwaysForArea, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 import { updateStravaActivityDescription } from "./strava";
 import { library, dom, icon } from '@fortawesome/fontawesome-svg-core'
@@ -54,7 +54,7 @@ setUp();
 // Get the current location and set the map center
 navigator.geolocation.getCurrentPosition(setMapCenter);
 
-// Add file upload event listener for .gpx files
+// Add file upload event listener for .gpx files and ensure the info box is 
 const fileInput = document.getElementById("fileInput");
 if (fileInput) {
   fileInput.addEventListener("change", processFileUpload, false);
@@ -118,14 +118,43 @@ export async function processGeojson(
         displayIntersectingWaterways(intersectingWaterways);
         addMapInteractions()
         // order rivers by intersection index along route
-        // const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
-        displayWaterwayNames(intersectingWaterways);
+        const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
+        displayWaterwayNames(orderedIntersectingWaterways);
         if (fromStrava && stravaID) {
-          displayManualUpdateButton(intersectingWaterways, stravaID)
+          displayManualUpdateButton(orderedIntersectingWaterways, stravaID)
         }
       }
     });
 }
+
+export async function loadWaterwaysForArea(areaName: string) {
+  clearRoute();
+  displaySpinner("info");
+  flashMessage("There is a lot of data to compute 🔥 This may take a while...")
+  getWaterwaysForArea(areaName).then(waterways => {
+    if (waterways) {
+      displayIntersectingWaterways(waterways);
+      addMapInteractions();
+      displayWaterwayNames(waterways);
+      fitMapToBoundingBox(bbox(waterways));
+    }
+  });
+}
+
+export async function loadMainWaterwaysForArea(areaName: string) {
+  clearRoute();
+  displaySpinner("info");
+  flashMessage("There is a lot of data to compute 🔥 This may take a while...")
+  getMainWaterwaysForArea(areaName).then(waterways => {
+    if (waterways) {
+      displayIntersectingWaterways(waterways);
+      addMapInteractions();
+      displayWaterwayNames(waterways);
+      fitMapToBoundingBox(bbox(waterways));
+    }
+  });
+}
+
 
 function createMap() {
   class ExtendedMap extends Map {

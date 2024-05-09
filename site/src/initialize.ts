@@ -1,5 +1,5 @@
 import polyline from "@mapbox/polyline";
-import { processGeojson, mapInstance } from "./main";
+import { processGeojson, mapInstance, loadWaterwaysForArea, loadMainWaterwaysForArea } from "./main";
 import {
   getAndStoreStravaAccessToken,
   getStravaAccessToken,
@@ -23,6 +23,32 @@ export async function setUp() {
     } else {
       mapInstance.once("style.load", () => {
         processGeojson(geojson);
+      });
+    }
+  }
+
+  // check if the url contains a area name and process it
+  if (urlParams.has("showAll")) {
+    const areaName = urlParams.get("showAll");
+    console.log("loading area with name: ", areaName);
+    if (mapInstance.isStyleLoaded()) {
+      loadWaterwaysForArea(areaName)
+    } else {
+      mapInstance.once("style.load", () => {
+        loadWaterwaysForArea(areaName);
+      });
+    }
+  }
+
+  // check if the url contains a area name and process it
+  if (urlParams.has("showMain")) {
+    const areaName = urlParams.get("showMain");
+    console.log("loading area with name: ", areaName);
+    if (mapInstance.isStyleLoaded()) {
+      loadMainWaterwaysForArea(areaName)
+    } else {
+      mapInstance.once("style.load", () => {
+        loadMainWaterwaysForArea(areaName);
       });
     }
   }
