@@ -20,28 +20,14 @@ export function waterwaysInBboxQuery(bbox: BBox): string {
   return waterwaysQuery;
 }
 
-export function waterwaysInAreaQuery(areaName: string): string {
-  return `
-  [out:json];
-  area
-    [name ="${areaName}"]->.a;
-  out body qt;
-  (
-    relation
-      (area.a)
-      ["waterway"];
-    way
-      (area.a)
-    ["waterway"];
-  );
-  out body qt;
-  >;
-  out geom;
-  `;
+export async function waterwaysInAreaQuery(areaName: string): Promise<string> {
+  const areaId = await getAreaId(areaName);
+  return `[out:json];(rel(area:${areaId + 3600000000})["waterway"];way(area:${areaId + 3600000000})["waterway"];)->._;out geom;`;
 }
 
-export function waterwaysRelationsInAreaQuery(areaName: string): string {
-  return `[out:json]; area[name = "${areaName}"]; rel(area)["waterway"]; out geom;
+export async function waterwaysRelationsInAreaQuery(areaName: string): Promise<string> {
+  const areaId = await getAreaId(areaName);
+  return `[out:json]; rel(area:${areaId + 3600000000})["waterway"]; out geom;
   `;
 }
 
@@ -60,6 +46,19 @@ export async function fetchOverpassData(
   if (response.ok) {
     const text = await response.json();
     return text;
+  } else {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+}
+
+// Fetch data from Nominatim API
+export async function getAreaId(areaName: string): Promise<number> {
+  const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${areaName}`);
+  if (response.ok) {
+    const data = await response.json();
+    if (data.length > 0) {
+      return data[0].osm_id;
+    }
   } else {
     throw new Error(`HTTP error! status: ${response.status}`);
   }

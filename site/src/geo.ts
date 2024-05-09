@@ -55,7 +55,7 @@ export async function calculateIntersectingWaterwaysGeojson(
 }
 
 export async function getWaterwaysForArea(areaName: string): Promise<FeatureCollection | undefined> {
-  const waterwaysQuery = waterwaysInAreaQuery(areaName);
+  const waterwaysQuery = await waterwaysInAreaQuery(areaName);
   const osmData = await fetchOverpassData(waterwaysQuery);
   if (!osmData) {
     console.error(
@@ -69,7 +69,7 @@ export async function getWaterwaysForArea(areaName: string): Promise<FeatureColl
 }
 
 export async function getMainWaterwaysForArea(areaName: string): Promise<FeatureCollection | undefined> {
-  const waterwaysQuery = waterwaysRelationsInAreaQuery(areaName);
+  const waterwaysQuery = await waterwaysRelationsInAreaQuery(areaName);
   const osmData = await fetchOverpassData(waterwaysQuery);
   if (!osmData) {
     console.error(
