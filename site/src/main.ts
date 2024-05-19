@@ -225,7 +225,7 @@ async function addRoute(routeGeoJSON: Feature<LineString>) {
     type: "line",
     source: "route",
     layout: { "line-join": "round", "line-cap": "round" },
-    paint: { "line-color": "#fc03ca", "line-width": 7 },
+    paint: { "line-color": "#fc03ca", "line-width": 7, "line-dasharray": [1, 2] },
   });
   currentRoute = routeGeoJSON
   shareableUrl = `https://kreuzungen.world/index.html?route=${encodeURIComponent(

@@ -1,6 +1,6 @@
 import requests
 from unique_names_generator import get_random_name
-from flask import Flask, request
+from flask import Flask, request, redirect
 from waitress import serve
 import redis
 
@@ -26,6 +26,14 @@ def after_request(response):
     return response
 
 
+@app.route("/")
+def oauth_redirect():
+    return redirect(
+        f"https://www.strava.com/oauth/authorize?client_id={CONFIG.STRAVA_CLIENT_ID}&response_type=code&redirect_uri={CONFIG.FRONTEND_HOST_URL}/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write",
+        code=302,
+    )
+
+
 @app.route("/oauth", methods=["POST"])
 def oauth_callback():
     code = request.form.get("code")
@@ -47,7 +55,6 @@ def oauth_callback():
     refresh_token = json_response.get("refresh_token")
     user_id = json_response.get("athlete").get("id")
     redis_client.set(user_id, refresh_token)
-
     return json_response
 
 
@@ -72,39 +79,11 @@ def refresh_token():
     return response.json()
 
 
-@app.route("/access_token", methods=["POST"])
-def get_access_token():
-    user_id = request.form.get("userId")
-    refresh_token = redis_client.get(user_id)
-
-    if not refresh_token:
-        return {"error": "User not found"}, 404
-
-    response = requests.post(
-        f"{CONFIG.STRAVA_API_URL}/oauth/token",
-        data={
-            "client_id": CONFIG.STRAVA_CLIENT_ID,
-            "client_secret": CONFIG.STRAVA_API_CLIENT_SECRET,
-            "refresh_token": refresh_token,
-            "grant_type": "refresh_token",
-        },
-    )
-    if response.status_code != 200:
-        raise Exception(
-            f"Error refreshing access token, status code {response.status_code}"
-        )
-
-    return response.json()
-
-
 @app.route("/save_geojson_feature", methods=["POST"])
 def save_geojson_feature():
-    # set the id to a random combination of 10 ascii_letters
     random_id = get_random_name(separator="_", style="lowercase")
     while redis_client.get(random_id):
         random_id = get_random_name(separator="_", style="lowercase")
-
-    # save the feature to redis
     redis_client.set(random_id, request.data)
     return {
         "id": random_id,

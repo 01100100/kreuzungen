@@ -1,28 +1,27 @@
 ## What is Kreuzungen.world?  🌍
 
-Kreuzungen.world is this webapp! You can upload a local GPX file or fetch an activity from Strava, and then visualize which waterways your route has crossed on your runs/rides/walks.
+Kreuzungen.world is this webapp! You can upload a local GPX file or fetch an activity from Strava, and it will visualize which waterways you crossed on your runs, rides, paragliding trip, or any other activity you can think of.
 
 Kreuzungen highlights the waterways you cross on your journey and displays information that you can use to enrich your knowledge of the geography that shapes your adventures.
 
 ## How does Kreuzungen work? 🛠️
 
-1. Analyze route data
-1. Fetch nearby waterways
-1. Calculate intersections
-1. Display results on interactive map
+1. Analyze route data.
+1. Fetch nearby waterways.
+1. Calculate intersections.
+1. Display results on interactive map.
 
-<!-- 
-You can read more about how and why Kreuzungen came to be in the [blog post](https://0110100.github.io/kreuzungen). -->
+<!-- You can read more about how and why Kreuzungen came to be in the [blog post](https://0110100.github.io/kreuzungen). -->
 
 ## How to share this magic? 🤙
 
-You can share your activity link on Kreuzungen.world with your friends using the share control.
+You can share your activities on Kreuzungen.world with your friends using the share button.
 
-This will save the route to Kreuzungen.world and  copy a URL to your clipboard for easy sharing with your favorite people.
+This saves your route to Kreuzungen.world and copies a URL to your clipboard to share with your favorite people.
 
 ## What are Strava automatic updates? 🪩
 
-You can enable Kreuzungen to Automagically update the description of newly created activities. It will create a message like this:
+You can enable Kreuzungen to Automagically update the description of newly created activities. The updated description will look something like this:
 
 ---
 
@@ -32,13 +31,13 @@ Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube Riv
 
 ## How to enable automatic updates? 🚀
 
-Just select the "Upload your activities from Kreuzungen to Strava" checkbox when [authorizing with Strava](https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write) and this feature will be enabled.
+Just select the "Upload your activities from Kreuzungen to Strava" checkbox when [authorizing with Strava](https://auth.kreuzungen.world/) and this feature will be enabled.
 
-**[ENABLE STRAVA UPDATES](https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write)**
+**[ENABLE STRAVA UPDATES](https://auth.kreuzungen.world/)**
 
 ## How to manually update a Strava activity 🪄
 
-If you authorized Kreuzungen as explained above, then load a route with the strava control with crossed waterways and click the displayed with a option `Update description on Strava`.
+Once authorized, load a route with the strava button and click the `Update description on Strava` link in the bottom left corner.
 
 ## How to disable automatic updates? ⛔
 
@@ -66,13 +65,11 @@ By doing this, you're not only enhancing your own experience but also making a v
 
 ## Why show uncrossed waterways? 🏞️
 
-This might happen because kreuzungen joins together waterways geometries with the same name. In the case that there are two disjoint rivers sharing a unique name and one intersects the route, both parts will be displayed on the map.
+This might happen because Kreuzungen.world joins together all waterway geometries with the same name. In the case that there are multiple disjoint waterways sharing a unique name and one intersects the route, all parts will be displayed on the map.
 
-Common names like "dorfbach", "village creek" or "bach" are often used for small waterways and can be found in many places.
+Common names like "village creek", "spring", "dorfbach" or "bach" are often used for small waterways and can be found in many places.
 
 ## What about my data? 🛡️
-
-I take your privacy seriously and do not store any data.
 
 All data is processed locally on your device (the one the are using right now) and nothing is sent to Kreuzungen servers.
 
@@ -81,7 +78,7 @@ There are two exceptions:
 - Saved routes
 - Automatic Strava updates
 
-**Saved Routes:** When you save a route, the data is stored on our server and can be accessed by anyone with the link. If you prefer to keep this information private and you're using a desktop device, you can use the URL-copy control that appears when you click the share control. This action copies a *lennnngthy* link to your clipboard, which contains the GPS data. This link is not shared with Kreuzungen's servers and can be securely shared with your friends. If they are using apps link whatsapp to open the link, they should unfold it first to get the full route.
+**Saved Routes:** When you save a route, the data is stored on our server and can be accessed by anyone with the link. If you prefer to keep this information private and you're using a desktop device, you can use the URL-copy button that appears when you click the share button. This action copies a *lennnngthy* link to your clipboard, which contains the GPS data. This link is not shared with Kreuzungen's servers and can be securely shared with your friends. If they are using whatsapp to open the link, they should unfold it first to get the full route.
 
 **Automatic Strava Updates:** If you enable automatic updates, Kreuzungen.world stores your Strava access tokens, which are necessary to request and update your Strava activities. You can revoke this access at any time through your [Strava settings](https://www.strava.com/settings/apps).
 

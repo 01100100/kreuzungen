@@ -257,10 +257,17 @@ and the website will still work 100% fine. Check https://umami.is/docs/faq -->
     </div>
     <div id="activities" class="activities-container">
 
-      <a id="stravaConnect" style="display: none;"
-        href="https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write">
-        <img src="<%= require('./img/btn_strava_connectwith_orange.svg') %>" alt="Connect with Strava">
-      </a>
+      <div id="stravaConnect">
+
+        <a
+          href="https://auth.kreuzungen.world/">
+          <img src="<%= require('./img/btn_strava_connectwith_orange.svg') %>" alt="Connect with Strava">
+        </a>
+        <br>
+        <input type="checkbox" id="appendWaterwaysCheckbox" checked>
+        <label for="appendWaterwaysCheckbox">Append waterways to the description of my activity on Strava</label>
+      </div>
+
 
 
       <div id="activitiesList">
@@ -272,11 +279,8 @@ and the website will still work 100% fine. Check https://umami.is/docs/faq -->
       </div>
 
     </div>
-    <div id="source" class="source-container">
-
-    </div>
+    <div id="source" class="source-container"></div>
   </div>
-  </script>
 
 </body>
 

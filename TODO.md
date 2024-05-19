@@ -1,0 +1,29 @@
+# TODO
+
+- [x] remove flow bite
+- [x] increase button size
+- [x] remove spinner
+- [x] make backend for saving routes
+- [x] make front end
+- [] set up linting
+- [x] set up branch deployments
+- [x] Limit CI to main branch
+- [x] Show warning on big routes
+- [x] Analytics
+  - [x] number users
+  - [x] number page views
+  - [x] number routes saved
+  - [] number of registered users with webhook
+  - [] number of saved routes
+  - [] umber of manual strava updates
+  - [] number of webhook strava updates
+  - [] number of rivers
+  - [] geojson of rivers
+- [] order river in info
+- [] optimize assets
+- [] self host maps
+- [] react
+- [] Add nice popups for controls.
+- [] add tour
+- [] increase font size
+- [] add demo data links

@@ -21,19 +21,19 @@ export function waterwaysInBboxQuery(bbox: BBox): string {
 }
 
 export async function waterwaysInAreaQuery(areaName: string): Promise<string> {
-  const areaId = await getAreaId(areaName);
+  const areaId = await getAreaIdPhoton(areaName);
   return `[out:json];(rel(area:${areaId + 3600000000})["waterway"];way(area:${areaId + 3600000000})["waterway"];)->._;out geom;`;
 }
 
 export async function waterwaysRelationsInAreaQuery(areaName: string): Promise<string> {
-  const areaId = await getAreaId(areaName);
+  const areaId = await getAreaIdPhoton(areaName);
   return `[out:json]; rel(area:${areaId + 3600000000})["waterway"]; out geom;
   `;
 }
 
 // Fetch data from the Overpass API
 export async function fetchOverpassData(
-  waterwaysQuery: string
+  overpassQuery: string
 ): Promise<string> {
   const response = await fetch("https://www.overpass-api.de/api/interpreter?", {
     method: "POST",
@@ -41,10 +41,13 @@ export async function fetchOverpassData(
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: waterwaysQuery,
+    body: overpassQuery,
   });
   if (response.ok) {
     const text = await response.json();
+    console.log(text);
+    // log the type of text
+    console.log(typeof text);
     return text;
   } else {
     throw new Error(`HTTP error! status: ${response.status}`);
@@ -52,7 +55,7 @@ export async function fetchOverpassData(
 }
 
 // Fetch data from Nominatim API
-export async function getAreaId(areaName: string): Promise<number> {
+export async function getAreaIdNominatim(areaName: string): Promise<number> {
   const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${areaName}`);
   if (response.ok) {
     const data = await response.json();
@@ -62,4 +65,36 @@ export async function getAreaId(areaName: string): Promise<number> {
   } else {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
+}
+
+export async function getAreaIdPhoton(areaName: string): Promise<number> {
+  // https://photon.komoot.io has a more liberal Terms of service then Nominatim 
+  const response = await fetch(`photon.komoot.io/api/?q=${areaName}&limit=1`);
+  if (response.ok) {
+    const data = await response.json();
+    if (data.features.length > 0) {
+      // data.features[0].properties.osm_type ('N', 'W', 'R') indicates the type of the OSM object (node, way, relation)
+      return data.features[0].properties.osm_id;
+    }
+  } else {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+}
+
+
+// [out:json];
+// (
+//   relation[admin_level="8"]({{bbox}});
+// );
+// out geom;
+
+
+export function citiesInBboxQuery(bbox: BBox): string {
+  return `[out:json];
+  (
+    relation[place="city"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});
+    relation[place="town"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});
+    relation[place="village"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});
+  );
+  out tags;`
 }
