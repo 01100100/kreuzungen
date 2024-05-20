@@ -38,26 +38,26 @@ Kreuzungen uses several external libraries and resources:
 If you want to add custom features, you can edit the following files:
 
 - `auth/`: Backend auth service to facilitate Strava Oauth flow.
-- `site/`: Frontend and Webhook service.
+- `app/`: Frontend and Webhook service.
 - `.github/`: CI
 - `.env`:  
 
 ### Frontend
 
-To locally serve the frontend, change into the `site/` directory install the requirements and run a development server
+To locally serve the frontend, change into the `app/` directory install the requirements and run a development server
 
 ```bash
-cd site/
+cd app/
 npm install
 npm run serve
 ```
 
 The site should now be served on [`http://localhost:8080/`](http://localhost:8080/)
 
-To bundle the frontend, change into the `site/` directory and run the build command
+To bundle the frontend, change into the `app/` directory and run the build command
 
 ```bash
-cd site
+cd app
 npm install
 npm run build
 ```
@@ -66,12 +66,12 @@ npm run build
 
 There is a webhook service that listens to events from Strava and updates activity descriptions automatically.
 
-This is defined in `site/src/ap.ts` and shares code with the frontend.
+This is defined in `app/src/ap.ts` and shares code with the frontend.
 
 To compile the typscript code into `.js` to be ran with node, you can run the command
 
 ```bash
-cd site
+cd app
 npm install
 npm run compile
 ```
@@ -91,7 +91,7 @@ python3 src/auth.py
 
 ### Frontend - Github pages
 
-The site is served using github pages. There is a github action in bundle the site together and serve all content in the `site/dist` subdir for the `main` branch.
+The site is served using github pages. There is a github action in bundle the site together and serve all content in the `app/dist` subdir for the `main` branch.
 
 The site gets deployed to [https://kreuzungen.world](https://kreuzungen.world).
 
