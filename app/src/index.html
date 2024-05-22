@@ -11,10 +11,10 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Kreuzungen 🗺️">
   <meta property="og:description" content="Reveal the waterways that shape your adventures!">
-  <meta property="og:image" content="<%= 'https://kreuzungen.world/' + require('./img/screenshot.png') %>" />
+  <meta property="og:image" content="<%= 'https://kreuzungen.world/' + require('./assets/screenshot.png') %>" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:image" content="<%= 'https://kreuzungen.world/' + require('./img/smallscreenshot.jpg') %>" />
+  <meta property="og:image" content="<%= 'https://kreuzungen.world/' + require('./assets/smallscreenshot.jpg') %>" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <!-- Twitter Meta Tags -->
@@ -23,15 +23,15 @@
   <meta property="twitter:url" content="https://kreuzungen.world">
   <meta name="twitter:title" content="Kreuzungen 🗺️">
   <meta name="twitter:description" content="Reveal the waterways that shape your adventures!">
-  <meta name="twitter:image" content="<%= 'https://kreuzungen.world/' + require('./img/screenshot.png') %>">
+  <meta name="twitter:image" content="<%= 'https://kreuzungen.world/' + require('./assets/screenshot.png') %>">
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
   <!-- Analytics -->
-  <!-- the following script is used for cookie-less, GDPR compliant analytics.
-you can disable it at any time, e.g. using the NoScript or PrivacyBadger browser extensions,
-and the website will still work 100% fine. Check https://umami.is/docs/faq -->
+  <!-- The following script is used for cookie-less, GDPR compliant analytics. You can disable it at any time, e.g. using the NoScript or PrivacyBadger browser extensions, and the website will still work 100% fine. Check https://umami.is/docs/faq -->
   <script async src="https://stats.kreuzungen.world/script.js"
     data-website-id="a8bb61a3-65fb-404b-9a30-1bed3812b291"></script>
+
   <!-- Inline styling -->
   <style>
     html {
@@ -52,6 +52,18 @@ and the website will still work 100% fine. Check https://umami.is/docs/faq -->
       flex-grow: 1;
       min-height: 100%;
       max-height: 100%
+    }
+
+    .maplibregl-ctrl-group button {
+      background-color: transparent;
+      border: 0;
+      box-sizing: border-box;
+      cursor: pointer;
+      display: block;
+      height: 39px !important;
+      outline: none;
+      padding: 0;
+      width: 39px !important;
     }
 
     .info-container {
@@ -254,14 +266,11 @@ and the website will still work 100% fine. Check https://umami.is/docs/faq -->
     </div>
     <div id="activities" class="activities-container">
 
-      <div id="stravaConnect">
+      <div id="stravaConnect" style="display: none;">
 
         <a href="https://auth.kreuzungen.world/">
-          <img src="<%= require('./img/btn_strava_connectwith_orange.svg') %>" alt="Connect with Strava">
+          <img src="<%= require('./assets/btn_strava_connectwith_orange.svg') %>" alt="Connect with Strava">
         </a>
-        <br>
-        <input type="checkbox" id="appendWaterwaysCheckbox" checked>
-        <label for="appendWaterwaysCheckbox">Append waterways to the description of my activity on Strava</label>
       </div>
 
 
@@ -271,7 +280,8 @@ and the website will still work 100% fine. Check https://umami.is/docs/faq -->
       </div>
       <div id="activitiesControl"></div>
       <div id="stravaPowered">
-        <img src="<%= require('./img/api_logo_pwrdBy_strava_horiz_white.svg') %>" width="100" alt="Powered by Strava">
+        <img src="<%= require('./assets/api_logo_pwrdBy_strava_horiz_white.svg') %>" width="100"
+          alt="Powered by Strava">
       </div>
 
     </div>
