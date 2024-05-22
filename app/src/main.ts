@@ -117,11 +117,11 @@ export async function processGeojson(
       if (intersectingWaterways) {
         displayIntersectingWaterways(intersectingWaterways);
         addMapInteractions()
-        // order rivers by intersection index along route
-        const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
-        displayWaterwayNames(orderedIntersectingWaterways);
+        // TODO: order rivers by intersection index along route
+        // const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
+        displayWaterwayNames(intersectingWaterways);
         if (fromStrava && stravaID) {
-          displayManualUpdateButton(orderedIntersectingWaterways, stravaID)
+          displayManualUpdateButton(intersectingWaterways, stravaID)
         }
       }
     });
@@ -225,7 +225,10 @@ async function addRoute(routeGeoJSON: Feature<LineString>) {
     type: "line",
     source: "route",
     layout: { "line-join": "round", "line-cap": "round" },
-    paint: { "line-color": "#fc03ca", "line-width": 7, "line-dasharray": [1, 2] },
+    paint: {
+      "line-color": "#fc03ca", "line-width": 4,
+      //  "line-dasharray": [1, 2] 
+    },
   });
   currentRoute = routeGeoJSON
   shareableUrl = `https://kreuzungen.world/index.html?route=${encodeURIComponent(
