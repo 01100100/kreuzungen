@@ -2,18 +2,18 @@
 
 **[https://kreuzungen.world](https://kreuzungen.world)**
 
-![Screenshot](https://kreuzungen.world/img/screenshot.png)
+![Screenshot](src/assets/screenshot.png)
 
 Kreuzungen is a web application that allows users to upload a local GPX file or fetch an activity from Strava and visualize which waterways their route has crossed. It provides an interactive map for users to explore their journey in detail, highlighting the rivers and streams they've encountered.
 
 ## Features
 
 - Upload `.gpx` files directly from your device.
-- Display routes on an interactive map.
-- Highlight all the waterways crossed during the tour.
+- Visualize routes on an interactive map.
+- Highlight all the waterways crossed during the journey.
 - Integration with Strava to fetch activities.
 - Information about each crossed waterway accessible through map interaction.
-- Share routes with a url containing the encoded data.
+- Share routes with a url containing the encoded data or save a route with a short friendly name.
 - Automatically updates Strava activities.
 
 ## Powered By Open Data
@@ -35,16 +35,17 @@ Kreuzungen uses several external libraries and resources:
 
 ### Project Structure
 
-If you want to add custom features, you can edit the following files:
+The project is structured as follows:
 
+- `app/`: Webapp and webhook service.
 - `auth/`: Backend auth service to facilitate Strava Oauth flow.
-- `app/`: Frontend and Webhook service.
-- `.github/`: CI
-- `.env`:  
+- `analytics/`: [Umami](https://umami.is/) deployment config.
+- `.github/`: CI config.
+- `.env`: variables to be set as secrets.
 
 ### Frontend
 
-To locally serve the frontend, change into the `app/` directory install the requirements and run a development server
+To serve the webapp frontend locally, navigate to the `app/` directory, install the requirements, and run a development server:
 
 ```bash
 cd app/
@@ -64,11 +65,11 @@ npm run build
 
 ### Webhook Service
 
-There is a webhook service that listens to events from Strava and updates activity descriptions automatically.
+The webhook service listens to events from Strava and updates activity descriptions automatically.
 
-This is defined in `app/src/ap.ts` and shares code with the frontend.
+This is defined in `app/src/app.ts` and shares code with the frontend.
 
-To compile the typscript code into `.js` to be ran with node, you can run the command
+To compile the TypeScript code into .js to be run with Node, you can run the command:
 
 ```bash
 cd app
@@ -78,7 +79,7 @@ npm run compile
 
 ### Backend - auth server
 
-To locally serve the auth Backend, ensure the python env is setup and run `src/auth.py`:
+To locally serve the auth Backend, ensure the python environment is setup and run `src/auth.py`:
 
 ```bash
 # Ensure you set the correct values in the .env file and `poetry install` has been done.
@@ -91,19 +92,20 @@ python3 src/auth.py
 
 ### Frontend - Github pages
 
-The site is served using github pages. There is a github action in bundle the site together and serve all content in the `app/dist` subdir for the `main` branch.
+The site is hosted using github pages. A Github action bundles the site together and deploys all content in the `app/dist` subdir for the `main` branch.
 
 The site gets deployed to [https://kreuzungen.world](https://kreuzungen.world).
 
 ### Auth Backend - fly.io
 
-The python auth backend is hosted on fly.io. There is a github action in place to deploy the backend for the `main` branch in `.github/workflows/deply-webhooks-service`.
+The python auth backend is hosted on fly.io.  A github action deploys the backend for the `main` branch.
 
 Note: variables stored in the `.env` file must be set as fly secrets.
 
 ```bash
 # Ensure you set the correct values in the .env file
 source .env
+cd auth/
 fly secrets set FRONTEND_HOST_URL=$FRONTEND_HOST_URL
 fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
 fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
@@ -112,14 +114,30 @@ fly secrets set REDIS_URL=$REDIS_URL
 
 ## Strava Webhook Service - fly.io
 
-The node service is hosted on fly.io. There is a github action in place to build and deploy the app for the `main` branch in `.github/workflows/deply-webhooks-service`.
+The node service is hosted on fly.io. A github action will build and deploy the app for the `main` branch.
 
 Note: variables stored in the `.env` file must be set as fly secrets.
 
 ```bash
 # Ensure you set the correct values in the .env file
 source .env
+cd app/
 fly secrets set REDIS_URL=$REDIS_URL
+```
+
+## Analytics - fly.io
+
+[Umami](https://umami.is/) is used to track anonymized usage data. This is hosted on fly.io along with a postgres instance for persistent storage.
+
+This deployment can be managed using the `fly` cli.
+
+```bash
+# Ensure you set the correct values in the .env file
+source .env
+cd analytics/
+fly secrets set APP_SECRET=$APP_SECRET
+fly secrets set DATABASE_URL=$DATABASE_URL
+fly deploy
 ```
 
 ## Shout outs

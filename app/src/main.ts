@@ -26,7 +26,6 @@ import { updateStravaActivityDescription } from "./strava";
 import { library, dom, icon } from '@fortawesome/fontawesome-svg-core'
 import { faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { faStrava } from "@fortawesome/free-brands-svg-icons";
-// Add the icons to the library so you can use it in your page
 
 declare global {
   interface Window { umami: any; }
