@@ -14,16 +14,31 @@
   - [x] number page views
   - [x] number routes saved
   - [] number of registered users with webhook
+    - [] number with the "write" permission
   - [] number of saved routes
   - [] umber of manual strava updates
   - [] number of webhook strava updates
   - [] number of rivers
   - [] geojson of rivers
+  - [] number of countries
+  - [] length of activites
 - [] order river in info
 - [] optimize assets
 - [] self host maps
 - [] react
 - [] Add nice popups for controls.
 - [] add tour
-- [] increase font size
+- [x] increase font size
 - [] add demo data links
+- [] move umami webiste-id to a env var.
+- [x] ensure that umami does not block the rest of the site from loading
+- [x] favicon emoji flag
+- [] listen for description updates and update the message accordingly.... (check if message exists and if not append to the end of the message, if a manual update)
+- [] ensure the route layer is always on top
+- [] implement the class based approach for finding intersections and profile it [https://github.com/rowanwins/sweepline-intersections?tab=readme-ov-file#complex-use](https://github.com/rowanwins/sweepline-intersections?tab=readme-ov-file#complex-use)
+- [ ] fix email
+- [ ] add a way to delete routes
+- [x] dist analytics sctript with the build.
+- [ ] spin before the routes load...
+- [ ] Iphone river list empty line bug.
+- [ ] replace the auth.kreuungen.com with the actual link.
