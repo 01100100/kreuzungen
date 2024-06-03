@@ -49,6 +49,8 @@ Kreuzungen.world will no longer be able to update your activity descriptions.
 
 This could be due to the absence of the waterway you crossed in OpenStreetMaps. Kreuzungen only shows waterways in the OSM database.
 
+If you're using a route from Strava, kreuzungen will respect your privacy settings and ignore parts of the activity that are hidden. Any waterways that are crossed in these hidden parts will not be displayed or listed.
+
 Otherwise, you might have not fully crossed the waterway. Time to go back and finish the job!
 
 ## What is OpenStreetMaps? 🗺️
