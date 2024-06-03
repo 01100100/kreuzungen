@@ -128,4 +128,5 @@ def get_geojson_feature():
 
 
 if __name__ == "__main__":
+    logger.info("Starting server...")
     serve(app, listen="*:8080")
