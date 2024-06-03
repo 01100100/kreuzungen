@@ -1,22 +1,22 @@
-import requests
-from unique_names_generator import get_random_name
-from flask import Flask, request, redirect
-from waitress import serve
 import redis
+import requests
+from flask import Flask, jsonify, redirect, request
+from unique_names_generator import get_random_name
+from waitress import serve
 
 from config import get_config_values, get_logger
 
-### SET UP ENVIRONMENT ###
 logger = get_logger()
 CONFIG = get_config_values()
-
 redis_client = redis.from_url(CONFIG.REDIS_URL)
-
 app = Flask(__name__)
+
+STRAVA_AUTHORIZE_URL = f"https://www.strava.com/oauth/authorize?client_id={CONFIG.STRAVA_CLIENT_ID}&response_type=code&redirect_uri={CONFIG.FRONTEND_HOST_URL}/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write"
+STRAVA_TOKEN_URL = f"{CONFIG.STRAVA_API_URL}/oauth/token"
 
 
 @app.after_request
-def after_request(response):
+def add_cors_headers(response):
     response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
     response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     if request.headers.get("Origin") == CONFIG.FRONTEND_HOST_URL:
@@ -28,17 +28,20 @@ def after_request(response):
 
 @app.route("/")
 def oauth_redirect():
-    return redirect(
-        f"https://www.strava.com/oauth/authorize?client_id={CONFIG.STRAVA_CLIENT_ID}&response_type=code&redirect_uri={CONFIG.FRONTEND_HOST_URL}/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write",
-        code=302,
-    )
+    """Redirects user to Strava OAuth consent page."""
+    return redirect(STRAVA_AUTHORIZE_URL, code=302)
 
 
 @app.route("/oauth", methods=["POST"])
 def oauth_callback():
+    """Handles OAuth token exchange with Strava."""
     code = request.form.get("code")
+    if not code:
+        logger.error("Authorization code not provided in callback.")
+        return jsonify({"error": "Authorization code not provided."}), 400
+
     response = requests.post(
-        f"{CONFIG.STRAVA_API_URL}/oauth/token",
+        STRAVA_TOKEN_URL,
         data={
             "client_id": CONFIG.STRAVA_CLIENT_ID,
             "client_secret": CONFIG.STRAVA_API_CLIENT_SECRET,
@@ -46,23 +49,28 @@ def oauth_callback():
             "grant_type": "authorization_code",
         },
     )
-    if response.status_code != 200:
-        raise Exception(
-            f"Error fetching access token, status code {response.status_code}"
-        )
-    json_response = response.json()
 
+    if response.status_code != 200:
+        logger.error(f"Error fetching access token, status code {response.status_code}")
+        return jsonify({"error": "Error fetching access token."}), response.status_code
+    logger.info("Oauth token exchange successful.")
+    json_response = response.json()
     refresh_token = json_response.get("refresh_token")
     user_id = json_response.get("athlete").get("id")
     redis_client.set(user_id, refresh_token)
+    logger.info(f"Refresh token saved for user: {user_id}")
     return json_response
 
 
 @app.route("/reoauth", methods=["POST"])
 def refresh_token():
+    """Handles OAuth token refreshing with Strava."""
     refresh_token = request.form.get("refreshToken")
+    if not refresh_token:
+        logger.error("Refresh token not provided.")
+        return jsonify({"error": "Refresh token not provided."}), 400
     response = requests.post(
-        f"{CONFIG.STRAVA_API_URL}/oauth/token",
+        STRAVA_TOKEN_URL,
         data={
             "client_id": CONFIG.STRAVA_CLIENT_ID,
             "client_secret": CONFIG.STRAVA_API_CLIENT_SECRET,
@@ -71,20 +79,24 @@ def refresh_token():
         },
     )
     if response.status_code != 200:
-        raise Exception(
+        logger.error(
             f"Error refreshing access token, status code {response.status_code}"
         )
-    response.json()
-
+        return jsonify(
+            {"error": "Error refreshing access token."}
+        ), response.status_code
+    logger.info("Oauth token refresh successful.")
     return response.json()
 
 
 @app.route("/save_geojson_feature", methods=["POST"])
 def save_geojson_feature():
+    """Saves a geoJSON feature to Redis with a friendly name."""
     random_id = get_random_name(separator="_", style="lowercase")
     while redis_client.get(random_id):
         random_id = get_random_name(separator="_", style="lowercase")
     redis_client.set(random_id, request.data)
+    logger.info(f"Feature saved with ID: {random_id}")
     return {
         "id": random_id,
         "url": f"{CONFIG.FRONTEND_HOST_URL}/index.html?saved={random_id}",
@@ -93,10 +105,16 @@ def save_geojson_feature():
 
 @app.route("/get_geojson_feature", methods=["GET"])
 def get_geojson_feature():
+    """Retrieves a geoJSON feature from Redis."""
     feature_id = request.args.get("id")
+    if not feature_id:
+        logger.error("Feature ID not provided.")
+        return jsonify({"error": "Feature ID not provided."}), 400
     feature = redis_client.get(feature_id)
     if not feature:
-        return {"error": "Feature not found"}, 404
+        logger.error(f"Feature not found: {feature_id}")
+        return jsonify({"error": "Feature not found"}), 404
+    logger.info(f"Feature retrieved with ID: {feature_id}")
     return feature
 
 

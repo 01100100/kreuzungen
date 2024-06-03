@@ -1,9 +1,8 @@
 [tool.poetry]
-name = "kreuzungen"
+name = "auth"
 version = "0.1.0"
-description = ""
+description = "Lightweight authentication server for handling Strava OAuth2"
 authors = ["David Whittingham <davidwhittingham94@gmail.com>"]
-readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
