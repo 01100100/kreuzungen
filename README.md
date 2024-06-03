@@ -97,7 +97,8 @@ To locally serve the auth backend, ensure the Python environment is set up and r
 source .env
 cd auth/
 poetry install
-poetry run python src/auth.py
+source $(poetry env info --path)/bin/activate
+python src/auth.py
 ```
 
 ## Deployment
