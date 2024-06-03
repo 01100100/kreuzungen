@@ -31,9 +31,9 @@ Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube Riv
 
 ## How to enable automatic updates? 🚀
 
-Just select the "Upload your activities from Kreuzungen to Strava" checkbox when [authorizing with Strava](https://auth.kreuzungen.world/) and this feature will be enabled.
+Just select the "Upload your activities from Kreuzungen to Strava" checkbox when [authorizing with Strava](https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write) and this feature will be enabled.
 
-**[ENABLE STRAVA UPDATES](https://auth.kreuzungen.world/)**
+**[ENABLE STRAVA UPDATES](https://www.strava.com/oauth/authorize?client_id=56275&response_type=code&redirect_uri=https://kreuzungen.world/index.html?exchange_token&approval_prompt=force&scope=activity:read,activity:read_all,activity:write)**
 
 ## How to manually update a Strava activity 🪄
 
