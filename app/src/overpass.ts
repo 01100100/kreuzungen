@@ -66,7 +66,7 @@ export async function getAreaIdNominatim(areaName: string): Promise<number> {
 
 export async function getAreaIdPhoton(areaName: string): Promise<number> {
   // https://photon.komoot.io has a more liberal Terms of service then Nominatim 
-  const response = await fetch(`photon.komoot.io/api/?q=${areaName}&limit=1`);
+  const response = await fetch(`https://photon.komoot.io/api/?q=${areaName}&limit=1`);
   if (response.ok) {
     const data = await response.json();
     if (data.features.length > 0) {
