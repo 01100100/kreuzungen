@@ -59,7 +59,11 @@ def oauth_callback():
     user_id = json_response.get("athlete").get("id")
     redis_client.set(user_id, refresh_token)
     logger.info(f"Refresh token saved for user: {user_id}")
-    return json_response
+    return {
+        "expires_at": json_response.get("expires_at"),
+        "access_token": json_response.get("access_token"),
+        "refresh_token": json_response.get("refresh_token"),
+    }
 
 
 @app.route("/reoauth", methods=["POST"])
@@ -86,7 +90,12 @@ def refresh_token():
             {"error": "Error refreshing access token."}
         ), response.status_code
     logger.info("Oauth token refresh successful.")
-    return response.json()
+    json_response = response.json()
+    return {
+        "expires_at": json_response.get("expires_at"),
+        "access_token": json_response.get("access_token"),
+        "refresh_token": json_response.get("refresh_token"),
+    }
 
 
 @app.route("/save_geojson_feature", methods=["POST"])
