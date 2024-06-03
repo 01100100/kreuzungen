@@ -44,11 +44,8 @@ export async function fetchOverpassData(
     body: overpassQuery,
   });
   if (response.ok) {
-    const text = await response.json();
-    console.log(text);
-    // log the type of text
-    console.log(typeof text);
-    return text;
+    const osmData = await response.json();
+    return osmData;
   } else {
     throw new Error(`HTTP error! status: ${response.status}`);
   }

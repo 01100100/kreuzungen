@@ -1,27 +1,23 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { createClient } from "redis";
-import umami from '@umami/node';
 
 import {
   getStravaAccessTokenRedis,
   getStravaActivity,
   updateStravaActivityDescription,
 } from "./strava";
-import { calculateIntersectingWaterwaysPolyline, checkForCompletedCities, createWaterwaysMessage } from "./geo";
+import { calculateIntersectingWaterwaysPolyline, createWaterwaysMessage } from "./geo";
 
+// Create a new express application and redis client
 const app = express().use(bodyParser.json());
-
-umami.init({
-  websiteId: process.env.UMAMI_WEBSITE_ID,
-  hostUrl: process.env.STATS_HOST_URL,
-});
 const redisClient = createClient({ url: process.env.REDIS_URL });
 redisClient.on("error", (error) => {
   console.error(`Redis client error:`, error);
 });
+main();
 
-// The main asynchronous function
+// Connect to redis and start the express server
 async function main() {
   try {
     await redisClient.connect();
@@ -33,12 +29,9 @@ async function main() {
   }
 }
 
-// Run the async function
-main();
-
-// Define a GET route for '/webhook' to verify the webhook subscription with Strava
+// GET route for '/webhook' to verify the webhook subscription with Strava
 app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "STRAVA";
+  const VERIFY_TOKEN = process.env.STRAVA_VERIFY_TOKEN;
 
   let mode = req.query["hub.mode"];
   let token = req.query["hub.verify_token"];
@@ -54,13 +47,12 @@ app.get("/webhook", (req, res) => {
   }
 });
 
-// route for '/webhook' to receive and process incoming events
-// must acknowledge each new event with a status code of 200 OK within two seconds.
-// Event pushes are retried (up to a total of three attempts) if a 200 is not returned. If your application needs to do more processing of the received information, it should do so asynchronously.
+// Post route for '/webhook' to receive and process incoming events
+// Strava requires an acknowledgement (200 response) for each new event within two seconds.
+// Event pushes are retried (up to a total of three attempts) if a 200 is not returned. Any processing should therefor be done asynchronously.
 app.post("/webhook", async (req, res) => {
   console.log("webhook event received!", req.query, req.body);
   const event = req.body;
-
   // return a aknoledgment and process the event asynchronously
   res.status(200).send("EVENT_RECEIVED");
   if (event.aspect_type === "create" && event.object_type === "activity") {
@@ -70,20 +62,13 @@ app.post("/webhook", async (req, res) => {
   else if (event.aspect_type === "update" && event.object_type === "athlete" && event.updates && event.updates.authorized === "false") {
     deleteUser(event.owner_id)
   }
-  // const resp = await umami.track("webhook-strava-event-received", {
-  //   aspect_type: event.aspect_type,
-  //   object_type: event.object_type,
-  //   owner_id: event.owner_id,
-  //   object_id: event.object_id,
-  // });
-  // if (!resp.ok) {
-  //   console.error("Failed to track event", resp.status, resp.statusText);
-  // }
-  // // log the request for tracking debugging
-  // console.log("umami response", resp);
-
 });
 
+// Calcluate intersecting waterways for a Strava activity and update the activity description
+// NOTE: Uses map.summary_polyline instead of map.polyline to respect the users privacy settings
+// it is normal for users to "hide" the route within a small radius of their home or work
+// hence waterways will only be calculated for the "unhidden" part of the route represented by the summary_polyline
+// https://communityhub.strava.com/t5/strava-insider-journal/hiding-your-activity-map-from-others/ba-p/17755
 async function processAndUpdateStrava(owner_id, activity_id,) {
   try {
     const owner_access_token = await getStravaAccessTokenRedis(
@@ -99,11 +84,12 @@ async function processAndUpdateStrava(owner_id, activity_id,) {
       owner_access_token
     );
 
+    console.log(`Processing activity_id: ${activity_id}`);
+
     // check that the activity has a summary polyline
     if (!activityData.map || !activityData.map.summary_polyline) {
       console.error(
-        "Activity does not have a summary polyline:",
-        activityData
+        `Activity ${activity_id} does not have a summary polyline`
       );
       return;
     }
@@ -113,83 +99,37 @@ async function processAndUpdateStrava(owner_id, activity_id,) {
       activityData.map.summary_polyline
     );
 
+    // check if there are intersecting waterways
     if (intersectingWaterways.features.length === 0) {
       console.log("No intersecting waterways found");
       return;
     }
 
-    console.log(`${intersectingWaterways.features.length} intersecting waterways found`);
+    console.log(`${intersectingWaterways.features.length} intersecting waterways found for activity_id: ${activity_id}`);
 
-    // create a message with the intersecting waterways
+    // update the activity description with the waterways
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
-
-    // update the activity description with the waterways message if there are waterways
     const success = await updateStravaActivityDescription(
       activity_id,
       owner_access_token,
       waterwaysMessage
     );
     if (success) {
-      // track update
-      // track("webhook-strava-activity-update", {
-      //   athlete: owner_id,
-      //   activity: activity_id,
-      //   waterways: intersectingWaterways.features.length
-      // });
       console.log(`Updated activity https://www.strava.com/activities/${activity_id} with ${waterwaysMessage}`)
     } else {
-      //track failed update
-      // track("webhook-strava-activity-update-failed", {
-      //   athlete: owner_id,
-      //   activity: activity_id,
-      // });
-      console.error(`Failed to update activity description for activity_id: ${activity_id}`);
+      console.error(`Failed to update activity https://www.strava.com/activities/${activity_id}`);
     }
-    checkForCompletedCities(intersectingWaterways, activityData.map.summary_polyline);
-    
-
   } catch (error) {
-    console.error("Error updating activity description", error);
+    console.error(`Error updating activity ${activity_id} description`, error);
   }
 }
 
+// Delete the access token for a user
 async function deleteUser(owner_id) {
   try {
     await redisClient.del(owner_id.toString());
-    // track("webhook-strava-athlete-unauthorize", {
-    //   athlete: owner_id,
-    // });
     console.log(`Deleted access token for user_id: ${owner_id}`);
   } catch (error) {
     console.error("Error deleting access token", error);
-  }
-}
-
-async function track(name: string, data: any) {
-  const payload = {
-    hostname: "kreuzungen.world",
-    language: "en-US",
-    referrer: "",
-    screen: "",
-    title: "webhook",
-    url: "/",
-    website: process.env.UMAMI_WEBSITE_ID,
-    name: name,
-    data: data,
-  };
-
-  const response = await fetch(`${process.env.STATS_HOST_URL}/api/send`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      payload,
-      type: "event",
-    }),
-  });
-
-  if (!response.ok) {
-    console.error("Failed to track event", response.status, response.statusText);
   }
 }
