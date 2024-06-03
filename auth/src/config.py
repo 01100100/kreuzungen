@@ -7,28 +7,21 @@ import structlog
 
 
 @dataclass
-class Config:  # pylint: disable=too-many-instance-attributes
-    # pylint: disable=invalid-name
-    DEBUG_LEVEL: str
+class Config:
     STRAVA_API_CLIENT_SECRET: str
     STRAVA_API_URL: str
     STRAVA_CLIENT_ID: str
     FRONTEND_HOST_URL: str
-    STATS_HOST_URL: str
-    UMAMI_WEBSITE_ID: str
     REDIS_URL: str
 
 
 @lru_cache
 def get_config_values() -> Config:
     return Config(
-        DEBUG_LEVEL="INFO",
         STRAVA_API_CLIENT_SECRET=os.environ["STRAVA_API_CLIENT_SECRET"],
         STRAVA_API_URL="https://www.strava.com/api/v3",
         STRAVA_CLIENT_ID=os.environ["STRAVA_CLIENT_ID"],
         FRONTEND_HOST_URL=os.environ["FRONTEND_HOST_URL"],
-        STATS_HOST_URL=os.environ["STATS_HOST_URL"],
-        UMAMI_WEBSITE_ID=os.environ["UMAMI_WEBSITE_ID"],
         REDIS_URL=os.environ["REDIS_URL"],
     )
 
