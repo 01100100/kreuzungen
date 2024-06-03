@@ -50,10 +50,10 @@ export async function getStravaAccessTokenRedis(
   }
 }
 // Get a new Strava access token for a user from a refresh token
-export async function getStravaAccessToken(
+export async function refreshStravaAccessToken(
   refreshToken: string
 ): Promise<string> {
-  console.log("Getting Strava access token");
+  console.log("Refreshing Strava access token");
   try {
     const response = await fetch("https://auth.kreuzungen.world/reoauth", {
       method: "POST",
