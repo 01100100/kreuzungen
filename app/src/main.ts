@@ -15,16 +15,18 @@ import {
   ShareControl,
   UploadControl,
   StravaControl,
+  DemoRoutesControl,
   FAQControl,
   showInfo,
   displaySpinner,
   flashMessage,
+  loadDemoRoutes
 } from "./ui";
 import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, getMainWaterwaysForArea, getWaterwaysForArea, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 import { updateStravaActivityDescription } from "./strava";
 import { library, dom, icon } from '@fortawesome/fontawesome-svg-core'
-import { faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
+import { faGlobe, faRoute, faCloudArrowUp, faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { faStrava } from "@fortawesome/free-brands-svg-icons";
 
 declare global {
@@ -42,7 +44,8 @@ export let shareableUrl = "https://kreuzungen.world";
 export let shareableUrlEncoded = encodeURIComponent(shareableUrl);
 export let currentRoute: Feature<LineString>;
 export const mapInstance = createMap();
-library.add(faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes)
+loadDemoRoutes();
+library.add(faGlobe, faRoute, faCloudArrowUp, faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes)
 // Replace any existing <i> tags with <svg> and set up a MutationObserver to
 // continue doing this as the DOM changes.
 dom.watch();
@@ -183,6 +186,8 @@ function createMap() {
   map.addControl(uploadControl, "top-right");
   const stravaControl = new StravaControl();
   map.addControl(stravaControl, "top-right");
+  const demoRoutesControl = new DemoRoutesControl();
+  map.addControl(demoRoutesControl, "top-right");
   const faqControl = new FAQControl();
   map.addControl(faqControl, "bottom-right");
   const shareControl = new ShareControl();
@@ -259,12 +264,28 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
     sourceElement.appendChild(routeContainer);
   }
 
-  if (routeGeoJSON.properties.url) {
+  if (routeGeoJSON.properties.stravaUrl) {
     const routeElement = document.createElement("div")
     const routeLink = document.createElement("a")
     const stravaIcon = icon({ prefix: 'fab', iconName: 'strava' });
     routeElement.appendChild(stravaIcon.node[0]);
     routeLink.innerHTML += `View on Strava`;
+    routeLink.href = routeGeoJSON.properties.stravaUrl;
+    routeLink.target = "_blank";
+    routeLink.style.color = "#fff";
+    routeLink.style.textDecoration = "underline";
+    routeLink.style.cursor = "pointer";
+    routeElement.appendChild(routeLink)
+    const sourceElement = document.getElementById("source")
+    sourceElement.appendChild(routeElement);
+  }
+
+  if (routeGeoJSON.properties.upstreamUrl) {
+    const routeElement = document.createElement("div")
+    const routeLink = document.createElement("a")
+    const stravaIcon = icon({ prefix: 'fas', iconName: 'globe' });
+    routeElement.appendChild(stravaIcon.node[0]);
+    routeLink.innerHTML += `View route source`;
     routeLink.href = routeGeoJSON.properties.url;
     routeLink.target = "_blank";
     routeLink.style.color = "#fff";
@@ -273,8 +294,6 @@ function displayRouteMetadata(routeGeoJSON: Feature<LineString, GeoJsonPropertie
     routeElement.appendChild(routeLink)
     const sourceElement = document.getElementById("source")
     sourceElement.appendChild(routeElement);
-
-
   }
 }
 

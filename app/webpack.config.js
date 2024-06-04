@@ -1,8 +1,7 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const SaveRemoteFilePlugin = require('save-remote-file-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
-const { has } = require('lodash');
-
 
 module.exports = {
   mode: 'development',
@@ -55,6 +54,11 @@ module.exports = {
       template: './src/index.html',
       favicon: './src/assets/favicon.ico',
       inject: true,
+    }),
+    new CopyPlugin({
+      patterns: [
+        { from: 'src/routes.json', to: 'routes.json' },
+      ],
     }),
     new SaveRemoteFilePlugin([
       {
