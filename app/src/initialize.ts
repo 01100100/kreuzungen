@@ -76,8 +76,13 @@ async function handleStravaOauthRedirect(scopes: string, code: string) {
   if (!hasWriteScope(scopes)) {
     flashMessage('You have not granted Strava "Write" permissions to Kreuzungen.<br><p>Grant the permissions and enable Kreuzungen to Automagically update newly created Strava activities .</p><hr><p style="">Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube River | Ganges | River Thames 🌐 <a href="https://kreuzungen.world">https://kreuzungen.world</a> 🗺️</p>');
   }
-  const accessToken = await getAndStoreStravaAccessToken(code);
-  loadStravaActivities(accessToken);
+  try {
+    const accessToken = await getAndStoreStravaAccessToken(code);
+    loadStravaActivities(accessToken);
+  } catch (error) {
+    console.error()
+    return;
+  }
 }
 
 async function handleStravaAuthentication(stravaData: any) {
