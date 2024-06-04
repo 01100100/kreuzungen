@@ -92,7 +92,7 @@ async function handleStravaAuthentication(stravaData: any) {
   if (token_exists && new Date().getTime() / 1000 < expires_at) {
     console.log("Strava token exists and is still valid");
     const accessToken = stravaData.access_token;
-    await loadStravaActivities(accessToken);
+    loadStravaActivities(accessToken);
   }
   // Token exists but is expired
   else if (token_exists && new Date().getTime() / 1000 >= expires_at) {

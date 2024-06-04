@@ -12,10 +12,12 @@ import { feature } from "@turf/helpers";
 import { getStravaActivities } from "./strava";
 import polyline from "@mapbox/polyline";
 import { library, icon } from "@fortawesome/fontawesome-svg-core";
-import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faArrowUpRightFromSquare, faRoute, faCloudArrowUp, faCircleRight, faCircleLeft, faFileImport, faFileArrowUp } from "@fortawesome/free-solid-svg-icons";
+import { faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faGlobe, faRoute, faCloudArrowUp, faCircleRight, faCircleLeft, faFileImport, faFileArrowUp } from "@fortawesome/free-solid-svg-icons";
 import { faStrava } from "@fortawesome/free-brands-svg-icons";
 // Add the icons to the library so you can use it in your page
-library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faRoute, faArrowUpRightFromSquare, faCloudArrowUp, faCircleRight, faCircleLeft, faFileImport, faFileArrowUp);
+library.add(faUpload, faStrava, faQuestion, faLink, faFloppyDisk, faShareNodes, faSpinner, faRoute, faGlobe, faCloudArrowUp, faCircleRight, faCircleLeft, faFileImport, faFileArrowUp);
+
+let currentlyDisplayedContainer: 'activities' | 'demoRoutes' | null = null;
 
 export class CustomAttributionControl extends maplibregl.AttributionControl {
   _toggleAttribution = () => {
@@ -71,6 +73,7 @@ export class UploadControl {
     button.style.borderRadius = "4px";
     button.onclick = () => {
       hideActivitiesContainer();
+      hideDemoRoutesContainer();
       hideInfo();
       this._fileInput.click();
     };
@@ -148,11 +151,9 @@ export class UploadControl {
 export class StravaControl {
   _map: any;
   _container: HTMLDivElement;
-  _isActivitiesDisplayed: boolean;
   constructor() { }
   onAdd(map) {
     this._map = map;
-    this._isActivitiesDisplayed = false;
     this._container = document.createElement("div");
     this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
 
@@ -164,15 +165,15 @@ export class StravaControl {
     button.style.borderRadius = "4px";
     button.onclick = () => {
       // toggle the Activities-container
-      if (this._isActivitiesDisplayed) {
+      if (currentlyDisplayedContainer === 'activities') {
         showInfo();
         hideActivitiesContainer();
-        this._isActivitiesDisplayed = false;
+        currentlyDisplayedContainer = null;
       } else {
         hideInfo();
         hideFAQContainer();
+        hideDemoRoutesContainer();
         showActivitiesContainer();
-        this._isActivitiesDisplayed = true;
       }
     };
 
@@ -183,7 +184,7 @@ export class StravaControl {
     // Event to hide activities-container when map is interacted with
     this._map.on("mousedown", () => {
       hideActivitiesContainer();
-      this._isActivitiesDisplayed = false;
+      currentlyDisplayedContainer = null;
       showInfo();
     });
 
@@ -196,6 +197,58 @@ export class StravaControl {
     this._map = undefined;
   }
   hideActivitiesContainer(arg0: string, hideActivitiesContainer: any) {
+    throw new Error("Method not implemented.");
+  }
+}
+
+
+export class DemoRoutesControl {
+  _map: any;
+  _container: HTMLDivElement;
+  constructor() { }
+  onAdd(map) {
+    this._map = map;
+    this._container = document.createElement("div");
+    this._container.className = "maplibregl-ctrl maplibregl-ctrl-group";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.title = "Famous Routes";
+    button.style.borderRadius = "4px";
+    button.onclick = () => {
+      // toggle the demoRoutes-container
+      if (currentlyDisplayedContainer === 'demoRoutes') {
+        showInfo();
+        hideDemoRoutesContainer();
+        currentlyDisplayedContainer = null;
+      } else {
+        hideInfo();
+        hideFAQContainer();
+        hideActivitiesContainer();
+        showDemoRoutesContainer();
+      }
+    };
+
+    const stravaIcon = icon({ prefix: 'fas', iconName: 'route' });
+    button.appendChild(stravaIcon.node[0]);
+    this._container.appendChild(button);
+
+    // Event to hide DemoRoutes-container when map is interacted with
+    this._map.on("mousedown", () => {
+      hideDemoRoutesContainer();
+      showInfo();
+      currentlyDisplayedContainer = null;
+    });
+
+    return this._container;
+  }
+
+  onRemove() {
+    this._container.parentNode.removeChild(this._container);
+    this._map.off("mousedown", this.hideDemoRoutesContainer); // Remove the event listener
+    this._map = undefined;
+  }
+  hideDemoRoutesContainer(arg0: string, hideDemoRoutesContainer: any) {
     throw new Error("Method not implemented.");
   }
 }
@@ -410,6 +463,13 @@ export function hideActivitiesContainer() {
   }
 }
 
+export function hideDemoRoutesContainer() {
+  const demoRoutesContainer = document.getElementById("demoRoutes");
+  if (demoRoutesContainer) {
+    demoRoutesContainer.style.display = "none";
+  }
+}
+
 export function hideFAQContainer() {
   const faqContainer = document.getElementById("faq");
   if (faqContainer) {
@@ -417,9 +477,16 @@ export function hideFAQContainer() {
   }
 }
 
+export function showDemoRoutesContainer() {
+  const demoRoutesContainer = document.getElementById("demoRoutes");
+  demoRoutesContainer.style.display = "block";
+  currentlyDisplayedContainer = 'demoRoutes';
+}
+
 export function showActivitiesContainer() {
   const activitiesContainer = document.getElementById("activities");
   activitiesContainer.style.display = "block";
+  currentlyDisplayedContainer = 'activities';
 }
 
 export function showFAQContainer() {
@@ -478,8 +545,8 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   // add right arrow
   if (activities.length > startIndex + activitiesPerPage) {
     const nextLink = document.createElement("a");
-    const spinnerIcon = icon({ prefix: 'fas', iconName: 'circle-right' }, { classes: ['fa-2xl'] });
-    nextLink.appendChild(spinnerIcon.node[0]);
+    const rightIcon = icon({ prefix: 'fas', iconName: 'circle-right' }, { classes: ['fa-2xl'] });
+    nextLink.appendChild(rightIcon.node[0]);
     nextLink.style.float = "right";
     nextLink.style.cursor = "pointer";
     nextLink.addEventListener("click", function () {
@@ -491,13 +558,70 @@ function displayActivities(activities: any[], startIndex: number = 0) {
   // add left arrow
   if (startIndex >= activitiesPerPage) {
     const prevLink = document.createElement("a");
-    const spinnerIcon = icon({ prefix: 'fas', iconName: 'circle-left' }, { classes: ['fa-2xl'] });
-    prevLink.appendChild(spinnerIcon.node[0]);
+    const leftIcon = icon({ prefix: 'fas', iconName: 'circle-left' }, { classes: ['fa-2xl'] });
+    prevLink.appendChild(leftIcon.node[0]);
     prevLink.style.float = "right";
     prevLink.style.cursor = "pointer";
     prevLink.style.paddingRight = "5px"
     prevLink.addEventListener("click", function () {
       displayActivities(activities, startIndex - activitiesPerPage);
+    });
+    activitiesControl.appendChild(prevLink);
+  }
+}
+
+export async function loadDemoRoutes() {
+  displaySpinner("demoRoutesList");
+  // TODO: get routes from routes.json file and display them
+  const response = await fetch("routes.json");
+  const routes = await response.json();
+  displayDemoRoutes(routes);
+}
+
+function displayDemoRoutes(activities: any[], startIndex: number = 0) {
+  const activitiesPerPage = 5;
+  const currentPageActivities = activities.slice(
+    startIndex,
+    startIndex + activitiesPerPage
+  );
+  const activitiesList = document.getElementById("demoRoutesList");
+  activitiesList.style.width = "250px";
+  activitiesList.innerHTML = "";
+  currentPageActivities.forEach(function (activity) {
+    const activityElement = createDemoRouteElement(activity);
+    activityElement.addEventListener("click", function () {
+      console.log("Demo route clicked: ", activity.name);
+      loadDemoRouteOnMap(activity)
+    });
+    activitiesList.appendChild(activityElement);
+  });
+  activitiesList.style.cursor = "pointer";
+  const activitiesControl = document.getElementById("demoRoutesControl")
+  activitiesControl.innerHTML = ""
+  activitiesControl.style.paddingTop = "4px"
+  // add right arrow
+  if (activities.length > startIndex + activitiesPerPage) {
+    const nextLink = document.createElement("a");
+    const rightIcon = icon({ prefix: 'fas', iconName: 'circle-right' }, { classes: ['fa-2xl'] });
+    nextLink.appendChild(rightIcon.node[0]);
+    nextLink.style.float = "right";
+    nextLink.style.cursor = "pointer";
+    nextLink.addEventListener("click", function () {
+      displayDemoRoutes(activities, startIndex + activitiesPerPage);
+    });
+    activitiesControl.appendChild(nextLink);
+  }
+
+  // add left arrow
+  if (startIndex >= activitiesPerPage) {
+    const prevLink = document.createElement("a");
+    const leftIcon = icon({ prefix: 'fas', iconName: 'circle-left' }, { classes: ['fa-2xl'] });
+    prevLink.appendChild(leftIcon.node[0]);
+    prevLink.style.float = "right";
+    prevLink.style.cursor = "pointer";
+    prevLink.style.paddingRight = "5px"
+    prevLink.addEventListener("click", function () {
+      displayDemoRoutes(activities, startIndex - activitiesPerPage);
     });
     activitiesControl.appendChild(prevLink);
   }
@@ -510,8 +634,6 @@ function createActivityElement(activity) {
     "activity-item";
   activityElement.style.display = "flex";
   activityElement.style.flexDirection = "column";
-  activityElement.style.marginBottom = "3px";
-  activityElement.style.borderRadius = "3px";
   const nameElement = document.createElement("div");
   nameElement.innerHTML = activity.name;
   nameElement.style.fontWeight = "bold";
@@ -530,12 +652,47 @@ function createActivityElement(activity) {
   distanceElement.innerHTML = (activity.distance / 1000).toFixed(2) + " km";
   detailsElement.appendChild(distanceElement);
 
-  const dateElement = document.createElement("div");
-  const date = new Date(activity.start_date);
-  const formattedDate = date.toISOString().split("T")[0];
-  dateElement.innerHTML = formattedDate;
-  detailsElement.appendChild(dateElement);
+  if (activity.start_date) {
+    const dateElement = document.createElement("div");
+    const date = new Date(activity.start_date);
+    const formattedDate = date.toISOString().split("T")[0];
+    dateElement.innerHTML = formattedDate;
+    detailsElement.appendChild(dateElement);
+  }
+  return activityElement;
+}
 
+function createDemoRouteElement(activity) {
+  const activityElement = document.createElement("div");
+  activityElement.className =
+    "demo-route-item";
+  activityElement.style.display = "flex";
+  activityElement.style.flexDirection = "column";
+  const nameElement = document.createElement("div");
+  nameElement.innerHTML = activity.name;
+  nameElement.style.fontWeight = "bold";
+  nameElement.style.whiteSpace = "nowrap";
+  nameElement.style.overflow = "hidden";
+  nameElement.style.textOverflow = "ellipsis";
+  nameElement.style.maxWidth = "100%";
+  activityElement.appendChild(nameElement);
+
+  const detailsElement = document.createElement("div");
+  detailsElement.style.display = "flex";
+  detailsElement.style.justifyContent = "space-between";
+  activityElement.appendChild(detailsElement);
+
+  const distanceElement = document.createElement("div");
+  distanceElement.innerHTML = (activity.distance / 1000).toFixed(2) + " km";
+  detailsElement.appendChild(distanceElement);
+
+  if (activity.start_date) {
+    const dateElement = document.createElement("div");
+    const date = new Date(activity.start_date);
+    const formattedDate = date.toISOString().split("T")[0];
+    dateElement.innerHTML = formattedDate;
+    detailsElement.appendChild(dateElement);
+  }
   return activityElement;
 }
 
@@ -544,10 +701,27 @@ function loadActivityOnMap(activity) {
   const geojson = feature(polyline.toGeoJSON(activity.map.summary_polyline));
   geojson.properties = {
     name: activity.name,
-    url: `https://www.strava.com/activities/${activity.id}`,
+    stravaUrl: `https://www.strava.com/activities/${activity.id}`,
   };
   window.umami.track('processing-strava-activity', { user: activity.athlete.id, id: activity.id });
   processGeojson(geojson, true, activity.id);
+}
+
+function loadDemoRouteOnMap(demoRoute) {
+  hideDemoRoutesContainer();
+  const geojson = feature(polyline.toGeoJSON(demoRoute.summary_polyline));
+  geojson.properties = {
+    name: demoRoute.name,
+  };
+  if (demoRoute.stravaRouteId) {
+    geojson.properties.stravaUrl = `https://www.strava.com/route/${demoRoute.stravaRouteId}`;
+  }
+
+  if (demoRoute.rideWithGPSId) {
+    geojson.properties.rideWithGPSUrl = `https://ridewithgps.com/routes/${demoRoute.rideWithGPSId}`;
+  }
+  window.umami.track('loading-demo-route', { route: demoRoute.name });
+  processGeojson(geojson);
 }
 
 export function flashMessage(html: string) {

@@ -124,6 +124,10 @@
       max-width: 100%;
     }
 
+    #demoRoutesList {
+      max-width: 100%;
+    }
+
     .activity-item {
       font: 12px/16px Helvetica Neue, Arial, Helvetica, sans-serif;
       margin-bottom: 3px;
@@ -142,10 +146,33 @@
       --tw-gradient-to-position: ;
     }
 
+
     .activity-item:hover {
       background-image: linear-gradient(to left, var(--tw-gradient-stops));
     }
 
+
+    .demo-route-item {
+      font: 12px/16px Helvetica Neue, Arial, Helvetica, sans-serif;
+      margin-bottom: 3px;
+      border-radius: 3px;
+      padding-top: 0.25rem;
+      padding-bottom: 0.25rem;
+      padding-left: 0.25rem;
+      padding-right: 0.25rem;
+      --tw-gradient-to: #1c64f2 var(--tw-gradient-to-position);
+      --tw-gradient-from: #31c48d var(--tw-gradient-from-position);
+      --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+      background-image: linear-gradient(to right, var(--tw-gradient-stops));
+      --tw-gradient-from-position: ;
+      --tw-gradient-from-position: ;
+      --tw-gradient-via-position: ;
+      --tw-gradient-to-position: ;
+    }
+
+    .demo-route-item:hover {
+      background-image: linear-gradient(to left, var(--tw-gradient-stops));
+    }
 
     .help-message {
       max-height: 100%;
@@ -271,6 +298,13 @@
         <img src="<%= require('./assets/api_logo_pwrdBy_strava_horiz_white.svg') %>" width="100"
           alt="Powered by Strava">
       </div>
+
+    </div>
+    <div id="demoRoutes" class="activities-container">
+      <div id="demoRoutesList">
+
+      </div>
+      <div id="demoRoutesControl"></div>
 
     </div>
     <div id="source" class="source-container"></div>
