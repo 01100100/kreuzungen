@@ -588,7 +588,7 @@ function displayWaterwayNames(intersectingWaterways: FeatureCollection) {
 
   const infoElement = document.getElementById("info");
 
-  infoElement.innerHTML = `<strong>Waterways crossed: ${riverNames.length}</strong><br>`;
+  infoElement.innerHTML = `<strong>Waterways crossed: ${riverNames.length}</strong>`;
 
   // Create a separate container for the river names
   const riverNamesContainer = document.createElement("div");
