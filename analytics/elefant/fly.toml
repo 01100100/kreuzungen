@@ -7,7 +7,6 @@ app = 'elefant'
 primary_region = 'cdg'
 
 [env]
-  FLY_SCALE_TO_ZERO = '2m'
   PRIMARY_REGION = 'cdg'
 
 [[mounts]]
