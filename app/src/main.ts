@@ -119,6 +119,9 @@ export async function processGeojson(
       if (intersectingWaterways) {
         displayIntersectingWaterways(intersectingWaterways);
         addMapInteractions()
+        if (mapInstance.getLayer("route")) {
+          mapInstance.moveLayer("route");
+        }
         // TODO: order rivers by intersection index along route
         // const orderedIntersectingWaterways = orderAlongRoute(intersectingWaterways, routeGeoJSON)
         displayWaterwayNames(intersectingWaterways);
@@ -230,7 +233,7 @@ async function addRoute(routeGeoJSON: Feature<LineString>) {
     source: "route",
     layout: { "line-join": "round", "line-cap": "round" },
     paint: {
-      "line-color": "#fc03ca", "line-width": 4,
+      "line-color": "#fc03ca", "line-width": 5,
       //  "line-dasharray": [1, 2] 
     },
   });
