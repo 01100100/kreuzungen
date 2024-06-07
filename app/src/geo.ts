@@ -239,19 +239,18 @@ function firstIntersection(
   return null;
 }
 
-
 export function createWaterwaysMessage(
   featureCollection: FeatureCollection
 ): string {
   let names: string[] = [];
-  // For each feature in the feature collection, take the properties dot name value and add it to the names array. 
   featureCollection.features.forEach((feature) => {
-    let name: string;
-    name = feature.properties.name;
-    names.push(name);
+    names.push(feature.properties.name);
   });
-  return `Crossed ${names.length} waterways 🏞️ ${names.join(
-    " | "
-  )} 🌐 https://kreuzungen.world 🗺️`;
+  if (names.length > 1) {
+    return `Crossed ${names.length} waterways 🏞️ ${names.join(
+      " | "
+    )} 🌐 https://kreuzungen.world 🗺️`
+  } else {
+    return `Crossed ${names.length} waterway 🏞️ ${names[0]} 🌐 https://kreuzungen.world 🗺️`
+  }
 }
-
