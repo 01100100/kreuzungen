@@ -123,6 +123,7 @@ fly secrets set FRONTEND_HOST_URL=$FRONTEND_HOST_URL
 fly secrets set STRAVA_API_CLIENT_SECRET=$STRAVA_API_CLIENT_SECRET
 fly secrets set STRAVA_CLIENT_ID=$STRAVA_CLIENT_ID
 fly secrets set REDIS_URL=$REDIS_URL
+fly secrets set APP_SECRET=$APP_SECRET
 ```
 
 ### Strava Webhook Service - Fly.io
@@ -155,19 +156,31 @@ fly secrets set DATABASE_URL=$DATABASE_URL
 fly deploy
 ```
 
-There is a Postgres instance deployed on [fly.io](https://fly.io). To backup the database to a local file, run the following command:
+There is a Postgres instance deployed on [fly.io](https://fly.io). To backup the database to a local pg_dump file, run the following command:
 
 ```bash
-fly proxy 15432:5433 -a elefant
-pg_dump -p 15432 -h localhost -U umani -c -d umani -f db_backup
+# Ensure you set the correct values in the .env file
+source .env
+fly proxy 15432:5433 -a elefant &
+while ! nc -z localhost 15432; do
+  sleep 0.1
+done
+pg_dump "postgresql://postgres:${PG_PASSWORD}@localhost:15432/umani" -c -f db_backup_$(date '+%Y-%m-%d').sql &&
+echo "Database backed up to file: db_backup_$(date '+%Y-%m-%d').sql"
 ```
 
-To restore the database from a local file, run the following command:
+To restore the database from a local pg_dump file, run the following command:
 
 ```bash
+# Ensure you set the correct values in the .env file
 source .env
-fly proxy 15432:5433 -a elefant
-pg_restore -v -d postgresql://postgres:${PG_PASSWORD}@localhost:15432/myapp < db_backup
+# note: set the correct date in the pg_dump file name
+export PG_DUMP_FILE=db_backup_$(date '+%Y-%m-%d').sql
+fly proxy 15432:5433 -a elefant &
+while ! nc -z localhost 15432; do
+  sleep 0.1
+done
+psql -v -d postgresql://postgres:${PG_PASSWORD}@localhost:15432/umani < ${PG_DUMP_FILE}
 ```
 
 ## Shoutouts
