@@ -101,6 +101,13 @@ source $(poetry env info --path)/bin/activate
 python src/auth.py
 ```
 
+## Testing
+
+There are tests to ensure the waterway crossing logic works as expected. To run the tests, navigate to the `app/` directory and run the following command:
+
+```bash
+
+
 ## Deployment
 
 ### Frontend - GitHub Pages
@@ -136,6 +143,7 @@ Note: Variables stored in the `.env` file must be set as Fly secrets.
 # Ensure you set the correct values in the .env file
 source .env
 cd app/
+fly secrets set VERIFY_TOKEN=$VERIFY_TOKEN
 fly secrets set REDIS_URL=$REDIS_URL
 ```
 
