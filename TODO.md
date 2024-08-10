@@ -42,3 +42,4 @@
 - [ ] spin before the routes load...
 - [ ] Iphone river list empty line bug.
 - [ ] replace the auth.kreuungen.com with the actual link.
+- [ ] refactor umami to its on repo.

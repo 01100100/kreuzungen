@@ -1,5 +1,4 @@
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const SaveRemoteFilePlugin = require('save-remote-file-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
 
@@ -58,15 +57,9 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         { from: 'src/routes.json', to: 'routes.json' },
+        'src/assets/analytics.js'
       ],
     }),
-    new SaveRemoteFilePlugin([
-      {
-        url: 'https://stats.kreuzungen.world/script.js',
-        filepath: 'analytics.js',
-        hash: false,
-      },
-    ]),
   ],
   output: {
     filename: '[name].bundle.js',

@@ -143,11 +143,13 @@ fly secrets set REDIS_URL=$REDIS_URL
 
 The site uses [Umami](https://umami.is/) for privacy-focused analytics.
 
-A instance is hosted on [fly.io](https://fly.io). The configuration is defined in the `[https://github.com/01100100/analytics](https://github.com/01100100/analytics)` repo.
+An instance is hosted on [fly.io](https://fly.io). The configuration is defined in the [analytics](https://github.com/01100100/analytics) repository.
 
 A DNS record is set up such that the `stats.kreuzungen.world` subdomain points to the Umami instance.
 
-The analytics script is available at [https://stats.kreuzungen.world/script.js](https://stats.kreuzungen.world/script.js), which is downloaded and stored in this repo in `src/assets/analytics.js`. Webpack is configured to include this script in the build.
+The analytics script is available at [https://stats.kreuzungen.world/script.js](https://stats.kreuzungen.world/script.js), which is downloaded and stored in this repository in `src/assets/analytics.js`.
+
+Webpack is configured to include the analytics script in the build and it is used in the `index.html` file.
 
 To update the script, run the following command:
 
