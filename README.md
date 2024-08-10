@@ -139,48 +139,20 @@ cd app/
 fly secrets set REDIS_URL=$REDIS_URL
 ```
 
-### Analytics - Fly.io
+### Analytics
 
-[Umami](https://umami.is/) is used to track anonymized usage data. This is hosted on [fly.io](https://fly.io) along with a Postgres instance for persistent storage.
+The site uses [Umami](https://umami.is/) for privacy-focused analytics.
 
-Note: The Fly app name is `umami` and the Postgres instance is called `elefant`.
+A instance is hosted on [fly.io](https://fly.io). The configuration is defined in the `[https://github.com/01100100/analytics](https://github.com/01100100/analytics)` repo.
 
-The deployment can be managed using the `fly` CLI.
+A DNS record is set up such that the `stats.kreuzungen.world` subdomain points to the Umami instance.
 
-```bash
-# Ensure you set the correct values in the .env file
-source .env
-cd analytics/
-fly secrets set APP_SECRET=$APP_SECRET
-fly secrets set DATABASE_URL=$DATABASE_URL
-fly deploy
-```
+The analytics script is available at [https://stats.kreuzungen.world/script.js](https://stats.kreuzungen.world/script.js), which is downloaded and stored in this repo in `src/assets/analytics.js`. Webpack is configured to include this script in the build.
 
-There is a Postgres instance deployed on [fly.io](https://fly.io). To backup the database to a local pg_dump file, run the following command:
+To update the script, run the following command:
 
 ```bash
-# Ensure you set the correct values in the .env file
-source .env
-fly proxy 15432:5433 -a elefant &
-while ! nc -z localhost 15432; do
-  sleep 0.1
-done
-pg_dump "postgresql://postgres:${PG_PASSWORD}@localhost:15432/umani" -c -f db_backup_$(date '+%Y-%m-%d').sql &&
-echo "Database backed up to file: db_backup_$(date '+%Y-%m-%d').sql"
-```
-
-To restore the database from a local pg_dump file, run the following command:
-
-```bash
-# Ensure you set the correct values in the .env file
-source .env
-# note: set the correct date in the pg_dump file name
-export PG_DUMP_FILE=db_backup_$(date '+%Y-%m-%d').sql
-fly proxy 15432:5433 -a elefant &
-while ! nc -z localhost 15432; do
-  sleep 0.1
-done
-psql -v -d postgresql://postgres:${PG_PASSWORD}@localhost:15432/umani < ${PG_DUMP_FILE}
+curl https://stats.kreuzungen.world/script.js -o src/assets/analytics.js
 ```
 
 ## Shoutouts
