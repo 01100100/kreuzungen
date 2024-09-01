@@ -28,7 +28,7 @@ import {
 } from "./ui";
 import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, getMainWaterwaysForArea, getWaterwaysForArea, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
-import { updateStravaActivityDescription } from "./strava";
+import { appendWaterwaysToStravaActivityDescription } from "./strava";
 import { library, dom, icon } from '@fortawesome/fontawesome-svg-core'
 import { faGlobe, faRoute, faCloudArrowUp, faUpload, faQuestion, faLink, faFloppyDisk, faShareNodes } from "@fortawesome/free-solid-svg-icons";
 import { faStrava } from "@fortawesome/free-brands-svg-icons";
@@ -342,7 +342,7 @@ function displayManualUpdateButton(intersectingWaterways: FeatureCollection, act
     }
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
     // update the activity description with the waterways message if there are waterways
-    const success = await updateStravaActivityDescription(
+    const success = await appendWaterwaysToStravaActivityDescription(
       activity_id,
       owner_access_token,
       waterwaysMessage

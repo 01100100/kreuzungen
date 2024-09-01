@@ -21,6 +21,7 @@ import polyline from "@mapbox/polyline";
 import toGeoJSON from "@mapbox/togeojson";
 import { fetchOverpassData, waterwaysInBboxQuery, waterwaysInAreaQuery, waterwaysRelationsInAreaQuery, citiesInBboxQuery } from "./overpass";
 
+const waterwaysMessageRegex = /\n*Crossed \d+ waterways? 🏞️.*🌐 https:\/\/kreuzungen\.world 🗺️.*\n*/;
 
 export async function calculateIntersectingWaterwaysPolyline(polylineString: string): Promise<FeatureCollection | undefined> {
   const geojson = feature(polyline.toGeoJSON(polylineString));
@@ -253,4 +254,24 @@ export function createWaterwaysMessage(
   } else {
     return `Crossed ${names.length} waterway 🏞️ ${names[0]} 🌐 https://kreuzungen.world 🗺️`
   }
+}
+
+// Check if a string contains a waterways message using a regex
+export function doesStringContainWaterwaysMessage(
+  description: string
+): boolean {
+  return waterwaysMessageRegex.test(description);
+}
+
+// Remove a waterways message from a string using a regex, also remove any newline characters before the message
+export function removeWaterwaysMessage(description: string): string {
+  return description.replace(waterwaysMessageRegex, "");
+}
+
+// Append a waterways message to a description
+export function appendWaterwaysMessage(
+  description: string,
+  waterwaysMessage: string
+): string {
+  return `${description}\n\n${waterwaysMessage}`;
 }

@@ -1,5 +1,10 @@
 import fetch from "cross-fetch";
 import { createClient } from "redis";
+import {
+  doesStringContainWaterwaysMessage,
+  removeWaterwaysMessage,
+} from "./geo";
+import { rest } from "lodash";
 
 type RedisClientType = ReturnType<typeof createClient>;
 // Get a Strava refresh token for a user stored in redis
@@ -161,6 +166,64 @@ export async function getStravaActivities(
   } catch (error) {
     console.error("Error getting Strava activities:", error);
     throw new Error("Failed to get Strava activities");
+  }
+}
+
+// Check if a Strava activity has a description and append the waterway information to it.
+export async function appendWaterwaysToStravaActivityDescription(
+  activity_id: number,
+  owner_access_token: string,
+  waterways_summary: string
+): Promise<boolean> {
+  // Check if the activity has a description
+  let description: string;
+  try {
+    const activity = await getStravaActivity(activity_id, owner_access_token);
+    description = activity.description;
+  } catch (error) {
+    console.error(
+      `Error getting Strava activity ${activity_id} description:`,
+      error
+    );
+    return false;
+  }
+  // If it doesn't update with waterway information
+  if (!description) {
+    console.log("No description found for activity");
+    return await updateStravaActivityDescription(
+      activity_id,
+      owner_access_token,
+      waterways_summary
+    );
+  }
+  else {
+    if (doesStringContainWaterwaysMessage(description)) {
+      // If it does, check if it already has waterway information
+      const restOfDescription = removeWaterwaysMessage(description);
+      if (restOfDescription === "") {
+        // If there is no message in the description except the waterway information, update with new waterway information
+        return await updateStravaActivityDescription(
+          activity_id,
+          owner_access_token,
+          `${waterways_summary}`
+        );
+      } else {
+        // If there is a message in the description, append new waterway information to message
+        return await updateStravaActivityDescription(
+          activity_id,
+          owner_access_token,
+          `${restOfDescription}\n\n${waterways_summary}`
+        );
+      }
+    } else {
+      // If the activity description does not have waterway info, simply append waterway information
+      return await updateStravaActivityDescription(
+        activity_id,
+        owner_access_token,
+        `${description}\n\n${waterways_summary}`
+      );
+
+    }
   }
 }
 

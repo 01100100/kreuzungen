@@ -5,7 +5,7 @@ import { createClient } from "redis";
 import {
   getStravaAccessTokenRedis,
   getStravaActivity,
-  updateStravaActivityDescription,
+  appendWaterwaysToStravaActivityDescription,
 } from "./strava";
 import { calculateIntersectingWaterwaysPolyline, createWaterwaysMessage } from "./geo";
 
@@ -109,7 +109,7 @@ async function processAndUpdateStrava(owner_id, activity_id,) {
 
     // update the activity description with the waterways
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
-    const success = await updateStravaActivityDescription(
+    const success = await appendWaterwaysToStravaActivityDescription(
       activity_id,
       owner_access_token,
       waterwaysMessage

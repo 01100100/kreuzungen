@@ -1,4 +1,4 @@
-import { intersectingFeatures, createWaterwaysMessage } from "./geo";
+import { intersectingFeatures, createWaterwaysMessage, doesStringContainWaterwaysMessage, removeWaterwaysMessage } from "./geo";
 import { FeatureCollection, LineString, MultiLineString, Feature } from "geojson";
 
 
@@ -62126,3 +62126,105 @@ describe("intersectingFeatures", () => {
 
     });
 });
+
+describe("doesStringContainWaterwaysMessage", () => {
+  it("should return true if the string contains only a waterways message", () => {
+    const description = "Crossed 5 waterways 🏞️ Brenta | Torrente Mandola | Fiume Brenta | Canale di bonifica | Rio Vallone di S. Silvestro 🌐 https://kreuzungen.world 🗺️";
+    const result = doesStringContainWaterwaysMessage(description);
+    expect(result).toBe(true);
+  });
+
+  it("should return true if the string contains only a waterways message", () => {
+    const description = "Crossed 13 waterways 🏞️ Obere Havel-Wasserstraße | Havel | Vosskanal | Wentower Gewässer | Tornowfließ | Welsengrben | Wentow-Kanal | Schnelle Havel | Malzer Kanal | Welsengraben | Schönebecker Fließ | Vosskanal (Hauptstrom der Havel) | Voßkanal 🌐 https://kreuzungen.world 🗺️";
+    const result = doesStringContainWaterwaysMessage(description);
+    expect(result).toBe(true);
+  });
+  
+  it("should return true if the string contains a waterways message", () => {
+    const description = `Just bopping around. First 3 miles with K and the dog. Jogged down to fort Monroe, grabbed some coffee and jogged back.
+🎧 Listening to: When The Heavens Went On Sale by Ashlee Vance
+Crossed 1 waterway 🏞️ Mill Creek 🌐 https://kreuzungen.world 🗺️`;
+    const result = doesStringContainWaterwaysMessage(description);
+    expect(result).toBe(true);
+  });
+
+  it("should return true if the string contains a waterways message", () => {
+    const description = `⛰️ Egal | 🌐 summitbag.com
+
+foo bar yida yada
+
+Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 https://kreuzungen.world 🗺️`;
+    const result = doesStringContainWaterwaysMessage(description);
+    expect(result).toBe(true);
+  });
+
+  it("should return false if the string does not contain a waterways message", () => {
+    const description = "giberisch";
+    const result = doesStringContainWaterwaysMessage(description);
+    expect(result).toBe(false);
+  });
+});
+
+describe("removeWaterwaysMessage", () => {
+  it("should remove the waterways message from the description", () => {
+    const description = `⛰️ Egal | 🌐 summitbag.com
+
+foo bar yida yada
+
+Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 https://kreuzungen.world 🗺️`
+    const expected = `⛰️ Egal | 🌐 summitbag.com
+
+foo bar yida yada`
+    const result = removeWaterwaysMessage(description);
+    expect(result).toEqual(expected);
+  });
+
+  it("should remove the waterways message from the complicated description", () => {
+    const description = `Crossed 5 waterways 🏞️ Eschbach | Kalbach | Taunengraben | Seulbach | Rehlingsbach 🌐 https://kreuzungen.world 🗺️
+-- myWindsock.com Report --
+Weather Impact: -8.3%
+Headwind: 21% @ 2.2-7.7m/s
+Longest Headwind: 0m 0s
+Air Speed: 20.6km/h
+Temp: 26.9-27.5°C
+Precip: 0% @ 0 Inch/hr
+-- END --`
+    const expected = `-- myWindsock.com Report --
+Weather Impact: -8.3%
+Headwind: 21% @ 2.2-7.7m/s
+Longest Headwind: 0m 0s
+Air Speed: 20.6km/h
+Temp: 26.9-27.5°C
+Precip: 0% @ 0 Inch/hr
+-- END --`
+    const result = removeWaterwaysMessage(description);
+    expect(result).toEqual(expected);
+  });
+
+  it("should remove the waterways message from the complicated description", () => {
+    const description = `Crossed 3 waterways 🏞️ Schmerzbach | Sollnitzbach | Gräfenhainicher Mühlgraben 🌐 https://kreuzungen.world 🗺️　
+
+🎷🐛 18.54 new kilometers
+
+-- From Wandrer.earth`
+    const expected = `🎷🐛 18.54 new kilometers
+
+-- From Wandrer.earth`
+    const result = removeWaterwaysMessage(description);
+    expect(result).toEqual(expected);
+  });
+
+  it("should remove the waterways message from the basic", () => {
+    const description = `Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 https://kreuzungen.world 🗺️`
+    const expected = ``
+    const result = removeWaterwaysMessage(description);
+    expect(result).toEqual(expected);
+  });
+
+  it("should not remove anything if the description does not contain a waterways message", () => {
+    const description = "This is a description without a waterways message";
+    const result = removeWaterwaysMessage(description);
+    expect(result).toEqual(description);
+  });
+});
+
