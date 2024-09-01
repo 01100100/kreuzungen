@@ -4,7 +4,7 @@ import { length } from "@turf/length";
 import { lineIntersect } from "@turf/line-intersect";
 import { lineSlice } from "@turf/line-slice";
 import { feature, point, featureCollection } from "@turf/helpers";
-import { booleanIntersects } from "./durf"
+import { booleanIntersects } from "@turf/boolean-intersects";
 import osmtogeojson from "osmtogeojson";
 import { groupBy } from "lodash";
 import {
@@ -137,7 +137,7 @@ export function intersectingFeatures(
 ): FeatureCollection {
   const intersectingFeatures = [];
   for (const feature of fc.features) {
-    if (booleanIntersects(feature, routeLineString)) {
+    if (booleanIntersects(feature, routeLineString, { ignoreSelfIntersections: true})) {
       intersectingFeatures.push(feature);
     }
   }
