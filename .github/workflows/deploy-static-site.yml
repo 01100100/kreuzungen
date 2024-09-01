@@ -1,4 +1,4 @@
-name: Build and Deploy static site to GitHub Pages
+name: Build, Test and Deploy static site to GitHub Pages
 
 on:
   push:
@@ -27,9 +27,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Setup Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
       - name: Install dependencies
-        run: npm install
+        run: npm install 
+        working-directory: app/
+      - name: Run tests
+        run: npm run test
         working-directory: app/
       - name: Build site
         run: npm run build

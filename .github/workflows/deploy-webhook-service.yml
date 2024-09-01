@@ -1,4 +1,4 @@
-name: Build and Deploy Webhook service to Fly.io
+name: Build, Test and Deploy Webhook service to Fly.io
 
 on:
   push:
@@ -15,22 +15,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
-        with:
-          node-version: 20.12.1
-      - name: Install dependencies and build
-        run: |
-          cd app
-          npm install
-          npm run build
+      - name: Install dependencies
+        run: npm install
+        working-directory: app/
+      - name: Run tests
+        run: npm run test
+        working-directory: app/
+      - name: Build backend
+        run: npm run build
+        working-directory: app/
       - name: Setup flyctl
         uses: superfly/flyctl-actions/setup-flyctl@master
-
       - name: Deploy to Fly.io
-        run: |
-          cd app
-          flyctl deploy --remote-only
+        run: flyctl deploy --remote-only
+        working-directory: app/
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}

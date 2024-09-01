@@ -68,6 +68,14 @@ npm install
 npm run build
 ```
 
+The project is set up with some basic tests using `jest`. To run the tests use the command:
+
+```bash
+cd app
+npm install --save-dev
+npm run test
+```
+
 ### Webhook Service
 
 The webhook service listens to events from Strava and updates newly created activity descriptions automatically.
@@ -105,9 +113,9 @@ python src/auth.py
 
 ### Frontend - GitHub Pages
 
-The site is hosted using [GitHub Pages](https://pages.github.com/). A GitHub action bundles the site and deploys all content in the `app/dist` subdir for the `main` branch.
+The site is hosted using [GitHub Pages](https://pages.github.com/). A GitHub action tests the code, bundles the site and deploys all content in the `app/dist` subdir for the `main` branch.
 
-The site gets deployed to [https://kreuzungen.world](https://kreuzungen.world).
+DNS records are set up, such the that the site is served from [https://kreuzungen.world](https://kreuzungen.world).
 
 ### Auth Backend - Fly.io
 
