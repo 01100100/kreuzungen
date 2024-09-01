@@ -1,9 +1,9 @@
-import {
-  bbox,
-  combine,
-  featureCollection, length, lineIntersect, lineSlice
-} from "@turf/turf";
-import { feature, point } from "@turf/helpers";
+import { bbox } from "@turf/bbox";
+import { combine } from "@turf/combine";
+import { length } from "@turf/length";
+import { lineIntersect } from "@turf/line-intersect";
+import { lineSlice } from "@turf/line-slice";
+import { feature, point, featureCollection } from "@turf/helpers";
 import { booleanIntersects } from "./durf"
 import osmtogeojson from "osmtogeojson";
 import { groupBy } from "lodash";

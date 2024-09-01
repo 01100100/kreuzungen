@@ -5,7 +5,7 @@ import {
   refreshStravaAccessToken,
 } from "./strava";
 import { flashMessage, loadStravaActivities } from "./ui";
-import { feature } from "@turf/turf";
+import { feature } from "@turf/helpers"
 import { getSavedRoute } from "./stash";
 
 export async function setUp() {

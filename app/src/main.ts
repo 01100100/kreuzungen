@@ -2,7 +2,11 @@ import {
   Map, FullscreenControl, MapMouseEvent, MapGeoJSONFeature, Popup
 } from "maplibre-gl";
 import polyline from "@mapbox/polyline";
-import { area, bbox, bboxPolygon, feature, nearestPointOnLine, point } from "@turf/turf";
+import { area } from "@turf/area";
+import { bbox } from "@turf/bbox";
+import { bboxPolygon } from "@turf/bbox-polygon";
+import { feature, point } from "@turf/helpers";
+import { nearestPointOnLine } from "@turf/nearest-point-on-line";
 import {
   FeatureCollection,
   Feature,

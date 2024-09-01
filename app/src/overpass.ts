@@ -1,5 +1,7 @@
 import { BBox } from "geojson";
-import { area, bboxPolygon } from "@turf/turf";
+import { area } from "@turf/area";
+import { bboxPolygon } from "@turf/bbox-polygon";
+
 import { flashMessage } from "./ui"
 
 // Define Constants
