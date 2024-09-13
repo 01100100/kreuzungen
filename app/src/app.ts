@@ -1,6 +1,8 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { createClient } from "redis";
+import { Tigris } from "@tigrisdata/core";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   getStravaAccessTokenRedis,
@@ -9,8 +11,14 @@ import {
 } from "./strava";
 import { calculateIntersectingWaterwaysPolyline, createWaterwaysMessage } from "./geo";
 
-// Create a new express application and redis client
+// Create a new express application, tigris and redis client
 const app = express().use(bodyParser.json());
+
+const tigris = new Tigris({
+  clientId: process.env.AWS_ACCESS_KEY_ID,
+  clientSecret: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
 const redisClient = createClient({ url: process.env.REDIS_URL });
 redisClient.on("error", (error) => {
   console.error(`Redis client error:`, error);
@@ -106,6 +114,23 @@ async function processAndUpdateStrava(owner_id, activity_id,) {
     }
 
     console.log(`${intersectingWaterways.features.length} intersecting waterways found for activity_id: ${activity_id}`);
+
+        // store in Tigris bucket
+        const waterwaysCollection = tigris.getDatabase().getCollection("waterways");
+        const datetime = new Date().toISOString();
+    
+        for (const feature of intersectingWaterways.features) {
+          const waterway = {
+            id: uuidv4(),
+            datetime,
+            osm_way_id: feature.properties.osm_way_id,
+            waterway_name: feature.properties.name,
+            strava_activity_id: activity_id,
+            strava_owner_id: owner_id,
+          };
+          await waterwaysCollection.insertOne(waterway);
+        }
+    
 
     // update the activity description with the waterways
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
