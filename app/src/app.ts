@@ -1,6 +1,11 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { createClient } from "redis";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { v4 as uuidv4 } from "uuid";
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 import {
   getStravaAccessTokenRedis,
@@ -9,8 +14,18 @@ import {
 } from "./strava";
 import { calculateIntersectingWaterwaysPolyline, createWaterwaysMessage } from "./geo";
 
-// Create a new express application and redis client
+// Create a new express application, S3 and redis client
 const app = express().use(bodyParser.json());
+
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  endpoint: process.env.AWS_ENDPOINT_URL_S3,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
 const redisClient = createClient({ url: process.env.REDIS_URL });
 redisClient.on("error", (error) => {
   console.error(`Redis client error:`, error);
@@ -106,6 +121,29 @@ async function processAndUpdateStrava(owner_id, activity_id,) {
     }
 
     console.log(`${intersectingWaterways.features.length} intersecting waterways found for activity_id: ${activity_id}`);
+
+    // store in S3
+    const datetime = new Date().toISOString();
+    const waterwaysData = {
+      datetime,
+      strava_activity_id: activity_id,
+      strava_owner_id: owner_id,
+      intersecting_waterways: intersectingWaterways,
+    };
+
+    const params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: `waterways/${uuidv4()}.json`,
+      Body: JSON.stringify(waterwaysData),
+      ContentType: "application/json",
+    };
+
+    try {
+      await s3Client.send(new PutObjectCommand(params));
+      console.log(`Stored intersecting waterways in S3`);
+    } catch (error) {
+      console.error(`Error storing intersecting waterways in S3:`, error);
+    }
 
     // update the activity description with the waterways
     const waterwaysMessage = createWaterwaysMessage(intersectingWaterways);
