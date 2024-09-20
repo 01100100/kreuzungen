@@ -22,6 +22,14 @@ export function waterwaysInBboxQuery(bbox: BBox): string {
   return waterwaysQuery;
 }
 
+export function waterwaysRelationsInBboxQuery(bbox: BBox): string {
+  return `[out:json];rel["waterway"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
+}
+
+export function waterwaysWaysInBboxQuery(bbox: BBox): string {
+  return `[out:json];way["waterway"]["name"](${bbox[1]},${bbox[0]},${bbox[3]},${bbox[2]});out geom;`;
+}
+
 export async function waterwaysInAreaQuery(areaName: string): Promise<string> {
   const areaId = await getAreaIdPhoton(areaName);
   return `[out:json];(rel(area:${areaId + 3600000000})["waterway"];way(area:${areaId + 3600000000})["waterway"];)->._;out geom;`;

@@ -26,7 +26,7 @@ import {
   flashMessage,
   loadDemoRoutes
 } from "./ui";
-import { calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, getMainWaterwaysForArea, getWaterwaysForArea, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
+import { calculateAllIntersectingWaterways, calculateIntersectingWaterwaysGeojson, createWaterwaysMessage, getMainWaterwaysForArea, getWaterwaysForArea, orderAlongRoute, parseGPXToGeoJSON } from "./geo";
 import { setUp } from "./initialize";
 import { appendWaterwaysToStravaActivityDescription } from "./strava";
 import { library, dom, icon } from '@fortawesome/fontawesome-svg-core'
@@ -118,7 +118,7 @@ export async function processGeojson(
   if (bboxArea > 50000000000) {
     flashMessage("The the route is a big one 🔥 This may take a while...");
   }
-  calculateIntersectingWaterwaysGeojson(routeGeoJSON)
+  calculateAllIntersectingWaterways(routeGeoJSON)
     .then(intersectingWaterways => {
       if (intersectingWaterways) {
         displayIntersectingWaterways(intersectingWaterways);
