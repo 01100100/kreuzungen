@@ -1,0 +1,20 @@
+factory:
+  target: dev
+  outputs:
+    dev:
+      threads: 4
+      type: duckdb
+      extensions: ['httpfs', 'spatial']
+      path: dbt.duckdb
+      secrets:
+        - type: s3
+          region: "{{ env_var('AWS_REGION') }}"
+          key_id: "{{ env_var('AWS_ACCESS_KEY_ID') }}"
+          secret: "{{ env_var('AWS_SECRET_ACCESS_KEY') }}"
+          endpoint: "{{ env_var('AWS_ENDPOINT_URL_S3') | replace('https://', '') }}"
+      external_root: s3://hydro-xpid/modelled
+      default:
+
+
+config:
+  send_anonymous_usage_stats: False
