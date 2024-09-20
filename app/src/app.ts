@@ -3,9 +3,6 @@ import bodyParser from "body-parser";
 import { createClient } from "redis";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 import {
   getStravaAccessTokenRedis,
@@ -128,12 +125,13 @@ async function processAndUpdateStrava(owner_id, activity_id,) {
       datetime,
       strava_activity_id: activity_id,
       strava_owner_id: owner_id,
+      polyline: activityData.map.summary_polyline,
       intersecting_waterways: intersectingWaterways,
     };
 
     const params = {
       Bucket: process.env.BUCKET_NAME,
-      Key: `waterways/${uuidv4()}.json`,
+      Key: `events/${uuidv4()}.json`,
       Body: JSON.stringify(waterwaysData),
       ContentType: "application/json",
     };

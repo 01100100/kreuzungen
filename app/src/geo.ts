@@ -19,13 +19,13 @@ import {
 } from "geojson";
 import polyline from "@mapbox/polyline";
 import toGeoJSON from "@mapbox/togeojson";
-import { fetchOverpassData, waterwaysInBboxQuery, waterwaysInAreaQuery, waterwaysRelationsInAreaQuery, citiesInBboxQuery } from "./overpass";
+import { fetchOverpassData, waterwaysInBboxQuery, waterwaysInAreaQuery, waterwaysRelationsInAreaQuery, citiesInBboxQuery, waterwaysRelationsInBboxQuery, waterwaysWaysInBboxQuery } from "./overpass";
 
 const waterwaysMessageRegex = /\n*Crossed \d+ waterways? 🏞️.*🌐 https:\/\/kreuzungen\.world 🗺️.*\n*/;
 
 export async function calculateIntersectingWaterwaysPolyline(polylineString: string): Promise<FeatureCollection | undefined> {
   const geojson = feature(polyline.toGeoJSON(polylineString));
-  return calculateIntersectingWaterwaysGeojson(geojson);
+  return calculateAllIntersectingWaterways(geojson);
 }
 
 
@@ -54,6 +54,109 @@ export async function checkForCompletedCities(intersectingWaterways: FeatureColl
   // update the activity description with the completed cities and a crown and city emoji
 }
 
+
+export async function calculateAllIntersectingWaterways(
+  routeGeoJSON: Feature<LineString>
+): Promise<FeatureCollection | undefined> {
+  // this works in 3 parts, to accommodate the OSM data model.
+  // First it calculates at which relations have bee intersected
+  // Second it calculates at all the named ways that has been intersected
+  // Third it joins up the named ways, making a sort of synthetic relation for each of the waterways
+  // It returns both a array of ways crossed and relations which are made up of these ways and the rest of the combined waterways.
+  const crossedRelations = await calculateIntersectingWaterwayRelations(routeGeoJSON)
+  // log number of crossed relations
+  console.log(`crossed ${crossedRelations.features.length} OSM relations`)
+  console.log(crossedRelations)
+  const surroundingWaterways = await calculateSurroundingWays(routeGeoJSON)
+  const crossedWays = await calculateIntersectingWaterwayWays(routeGeoJSON)
+  console.log(`crossed ${crossedWays.features.length} OSM ways`)
+  let syntheticRelations: Feature[] = []
+  // for the crossed ways, we want to create a synthetic relation. A synthetic relation is a multilineString made up of the ways that share the same name.
+  for (const way of crossedWays.features) {
+    const name = way.properties.name
+    const waysWithSameName = surroundingWaterways.features.filter((feature) => feature.properties.name === name)
+    const combinedFeatureCollection = combine(featureCollection(waysWithSameName as Feature<LineString | MultiLineString>[]));
+    syntheticRelations.push(...combinedFeatureCollection.features);
+  }
+  const syntheticRelationsFeatureCollection = featureCollection(syntheticRelations)
+  console.log(`syntheticRelations ${syntheticRelationsFeatureCollection.features.length} relations crossed`)
+  console.log(syntheticRelationsFeatureCollection)
+  // then we mix the featureCollections together
+  // first we must get the synthetic relations that are not already in the crossedRelations and set the id to be syntheticRelation/{id} where id is a incremental number
+  const newRelations = syntheticRelationsFeatureCollection.features.filter((syntheticRelation) => {
+    // add the id and set it the the index of the array
+    syntheticRelation.id = `syntheticRelation/${syntheticRelationsFeatureCollection.features.indexOf(syntheticRelation)}`
+    syntheticRelation.properties.name = syntheticRelation.properties.collectedProperties[0].name
+    syntheticRelation.properties.id = syntheticRelation.id
+    return !crossedRelations.features.some((crossedRelation) => crossedRelation.properties.name === syntheticRelation.properties.collectedProperties[0].name)
+  })
+  console.log(`newRelations ${newRelations.length} relations that are not on OSM`)
+  console.log(newRelations)
+  const allRelations = crossedRelations.features.concat(newRelations)
+  console.log(`allRelations crossed in total is ${allRelations.length} relations`)
+  
+  const allRelationsFeatureCollection = featureCollection(allRelations)
+  return featureCollection(allRelations)
+}
+
+export async function calculateIntersectingWaterwayRelations(
+  routeGeoJSON: Feature<LineString>): Promise<FeatureCollection | undefined> {
+  const routeBoundingBox: BBox = bbox(routeGeoJSON);
+  const query = waterwaysRelationsInBboxQuery(routeBoundingBox);
+  const osmData = await fetchOverpassData(query);
+  if (!osmData) {
+    console.error(
+      `No osm features returned for Overpass query: ${query}`
+    );
+    return;
+  }
+  const relationsGeoJSON = parseOSMToGeoJSON(osmData);
+  const lineStringFeatures = relationsGeoJSON.features.filter(
+    (feature) => feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString"
+  ) as Feature<LineString | MultiLineString>[];
+  const intersectingWaterways = intersectingFeatures(
+    featureCollection(lineStringFeatures),
+    routeGeoJSON
+  );
+  return intersectingWaterways;
+}
+
+
+export async function calculateIntersectingWaterwayWays(
+  routeGeoJSON: Feature<LineString>): Promise<FeatureCollection | undefined> {
+  const routeBoundingBox: BBox = bbox(routeGeoJSON);
+  const query = waterwaysWaysInBboxQuery(routeBoundingBox);
+  const osmData = await fetchOverpassData(query);
+  if (!osmData) {
+    console.error(
+      `No osm features returned for Overpass query: ${query}`
+    );
+    return;
+  }
+  const relationsGeoJSON = parseOSMToGeoJSON(osmData);
+  const lineStringFeatures = relationsGeoJSON.features.filter(
+    (feature) => feature.geometry.type === "LineString" || feature.geometry.type === "MultiLineString"
+  ) as Feature<LineString | MultiLineString>[];
+  const intersectingWaterways = intersectingFeatures(
+    featureCollection(lineStringFeatures),
+    routeGeoJSON
+  );
+  return intersectingWaterways;
+}
+
+export async function calculateSurroundingWays(
+  routeGeoJSON: Feature<LineString>): Promise<FeatureCollection | undefined> {
+  const routeBoundingBox: BBox = bbox(routeGeoJSON);
+  const query = waterwaysWaysInBboxQuery(routeBoundingBox);
+  const osmData = await fetchOverpassData(query);
+  if (!osmData) {
+    console.error(
+      `No osm features returned for Overpass query: ${query}`
+    );
+    return;
+  }
+  return parseOSMToGeoJSON(osmData)
+}
 
 export async function calculateIntersectingWaterwaysGeojson(
   routeGeoJSON: Feature<LineString>
@@ -138,7 +241,7 @@ export function intersectingFeatures(
 ): FeatureCollection {
   const intersectingFeatures = [];
   for (const feature of fc.features) {
-    if (booleanIntersects(feature, routeLineString, { ignoreSelfIntersections: true})) {
+    if (booleanIntersects(feature, routeLineString, { ignoreSelfIntersections: true })) {
       intersectingFeatures.push(feature);
     }
   }
@@ -161,7 +264,7 @@ function combineSameNameFeatures(
   const combinedFeatures: Feature[] = Object.values(groupedFeatures).map(
     (group) => {
       if (group.length > 1) {
-        const combined = combine(featureCollection(group));
+        const combined = combine(featureCollection(group as Feature<LineString | MultiLineString>[]));
 
         const combinedFeature = combined.features[0] as any;
         if (combined.features.length > 1) {
