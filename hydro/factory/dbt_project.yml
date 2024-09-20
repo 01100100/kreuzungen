@@ -1,0 +1,25 @@
+name: 'factory'
+version: '1.0.0'
+profile: 'factory'
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+# Configuring models
+# Full documentation: https://docs.getdbt.com/docs/configuring-models
+models:
+  factory:
+    +materialized: external
+    +format: json
+    borders:
+      +enabled: false
+      +materialized: table
+      post-hook: "CREATE INDEX rtree_index ON {{ this }} USING rtree(geom)"
+on-run-start:
+  - "{{ register_upstream_external_models() }}"
