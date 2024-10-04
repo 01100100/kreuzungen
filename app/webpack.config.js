@@ -1,3 +1,4 @@
+// FILE: webpack.config.js
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
@@ -7,6 +8,12 @@ module.exports = {
   devtool: 'inline-source-map',
   devServer: {
     static: './dist',
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/globe/, to: '/globe.html' },
+        { from: /./, to: '/index.html' },
+      ],
+    },
   },
   optimization: {
     runtimeChunk: 'single',
@@ -52,6 +59,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './src/index.html',
       favicon: './src/assets/favicon.ico',
+      inject: true,
+    }),
+    new HtmlWebpackPlugin({
+      template: './src/globe.html',
+      filename: 'globe.html',
       inject: true,
     }),
     new CopyPlugin({
