@@ -1,4 +1,3 @@
-// FILE: webpack.config.js
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 const path = require('path');
@@ -15,10 +14,9 @@ module.exports = {
       ],
     },
   },
-  optimization: {
-    runtimeChunk: 'single',
+  entry: {
+    main: './src/main.ts',
   },
-  entry: { main: './src/main.ts' },
   module: {
     rules: [
       {
@@ -58,12 +56,15 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       template: './src/index.html',
+      filename: 'index.html',
+      chunks: ['main'],
       favicon: './src/assets/favicon.ico',
       inject: true,
     }),
     new HtmlWebpackPlugin({
       template: './src/globe.html',
       filename: 'globe.html',
+      chunks: [], // No specific chunks for globe.html
       inject: true,
     }),
     new CopyPlugin({
