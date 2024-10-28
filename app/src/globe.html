@@ -2,9 +2,36 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MapLibre Demo</title>
+  <title>Kreuzungen 🗺️</title>
+  <!-- Metadata -->
+  <meta name="description"
+    content="kreuzungen.world Reveal the waterways that shape your adventures! 🌍 Upload a .gpx file or sync with strava. OSM ❤️ ">
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:url" content="https://kreuzungen.world">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Kreuzungen 🗺️">
+  <meta property="og:description" content="Reveal the waterways that shape your adventures!">
+  <meta property="og:image" content="<%= 'https://kreuzungen.world/' + require('./assets/screenshot.png') %>" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image" content="<%= 'https://kreuzungen.world/' + require('./assets/smallscreenshot.jpg') %>" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="kreuzungen.world">
+  <meta property="twitter:url" content="https://kreuzungen.world">
+  <meta name="twitter:title" content="Kreuzungen 🗺️">
+  <meta name="twitter:description" content="Reveal the waterways that shape your adventures!">
+  <meta name="twitter:image" content="<%= 'https://kreuzungen.world/' + require('./assets/screenshot.png') %>">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Analytics -->
+  <!-- The following script is used for cookie-less, GDPR compliant analytics. You can disable it at any time, e.g. using the NoScript or PrivacyBadger browser extensions, and the website will still work 100% fine. Check https://umami.is/docs/faq -->
+  <script async src="analytics.js" data-website-id="a8bb61a3-65fb-404b-9a30-1bed3812b291"
+    data-host-url="https://stats.kreuzungen.world"></script>
+
   <link href="https://unpkg.com/maplibre-gl@5.0.0-pre.1/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
     body {
