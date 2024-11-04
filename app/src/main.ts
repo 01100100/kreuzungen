@@ -175,7 +175,7 @@ function createMap() {
   const map = new ExtendedMap({
     container: "map",
     style:
-      "https://api.maptiler.com/maps/topo-v2/style.json?key=ykqGqGPMAYuYgedgpBOY",
+      "https://tiles.openfreemap.org/styles/bright",
     center: [0, 51.4769], // Greenwich meridian
     zoom: 10,
     maxZoom: 18,
