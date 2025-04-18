@@ -25,7 +25,7 @@ You can enable Kreuzungen to Automagically update the description of newly creat
 
 ---
 
-Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube River | Ganges | River Thames 🌐 Powered by Kreuzungen World 🗺️
+Crossed 5 waterways 🏞️ Nile | Amazon River | Mississippi River | Danube River | Ganges | River Thames 🌐 [https://kreuzungen.world](https://kreuzungen.world) 🗺️
 
 ---
 

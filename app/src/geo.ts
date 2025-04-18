@@ -21,7 +21,7 @@ import polyline from "@mapbox/polyline";
 import toGeoJSON from "@mapbox/togeojson";
 import { fetchOverpassData, waterwaysInBboxQuery, waterwaysInAreaQuery, waterwaysRelationsInAreaQuery, citiesInBboxQuery, waterwaysRelationsInBboxQuery, waterwaysWaysInBboxQuery } from "./overpass";
 
-const waterwaysMessageRegex = /\n*Crossed \d+ waterways? 🏞️.*🌐 Powered by Kreuzungen World 🗺️.*\n*/;
+const waterwaysMessageRegex = /\n*Crossed \d+ waterways? 🏞️.*🌐 https:\/\/kreuzungen\.world 🗺️.*\n*/;
 
 export async function calculateIntersectingWaterwaysPolyline(polylineString: string): Promise<FeatureCollection | undefined> {
   const geojson = feature(polyline.toGeoJSON(polylineString));
@@ -353,23 +353,22 @@ export function createWaterwaysMessage(
   if (names.length > 1) {
     return `Crossed ${names.length} waterways 🏞️ ${names.join(
       " | "
-    )} 🌐 Powered by Kreuzungen World 🗺️`
+    )} 🌐 https://kreuzungen.world 🗺️`
   } else {
-    return `Crossed ${names.length} waterway 🏞️ ${names[0]} 🌐 Powered by Kreuzungen World 🗺️`
+    return `Crossed ${names.length} waterway 🏞️ ${names[0]} 🌐 https://kreuzungen.world 🗺️`
   }
 }
 
 // Check if a string contains a waterways message using a regex
-export function doesStringContainWaterwaysMessage(description: string): boolean {
-    // Match pattern: "Crossed X waterway(s)" followed by waterway names and ending with "Powered by Kreuzungen World"
-    const pattern = /Crossed \d+ waterways? 🏞️.*🌐 Powered by Kreuzungen World 🗺️/;
-    return pattern.test(description);
+export function doesStringContainWaterwaysMessage(
+  description: string
+): boolean {
+  return waterwaysMessageRegex.test(description);
 }
 
 // Remove a waterways message from a string using a regex, also remove any newline characters before the message
 export function removeWaterwaysMessage(description: string): string {
-    const pattern = /Crossed \d+ waterways? 🏞️.*?🌐 Powered by Kreuzungen World 🗺️[\s\n]*/g;
-    return description.replace(pattern, '').trim();
+  return description.replace(waterwaysMessageRegex, "");
 }
 
 // Append a waterways message to a description

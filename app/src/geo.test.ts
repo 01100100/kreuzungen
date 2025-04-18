@@ -59879,7 +59879,7 @@ describe("createWaterwaysMessageNew", () => {
         const result = createWaterwaysMessage(featureCollection);
 
         expect(result).toBe(
-            "Crossed 8 waterways 🏞️ Ziller | Inn | Salzach | Sill | Vomperbach | Gerlosbach | Achenseekraftwerk | Arzler Bach 🌐 Powered by Kreuzungen World 🗺️"
+            "Crossed 8 waterways 🏞️ Ziller | Inn | Salzach | Sill | Vomperbach | Gerlosbach | Achenseekraftwerk | Arzler Bach 🌐 https://kreuzungen.world 🗺️"
         );
     });
 
@@ -62129,13 +62129,13 @@ describe("intersectingFeatures", () => {
 
 describe("doesStringContainWaterwaysMessage", () => {
   it("should return true if the string contains only a waterways message", () => {
-    const description = "Crossed 5 waterways 🏞️ Brenta | Torrente Mandola | Fiume Brenta | Canale di bonifica | Rio Vallone di S. Silvestro 🌐 Powered by Kreuzungen World 🗺️";
+    const description = "Crossed 5 waterways 🏞️ Brenta | Torrente Mandola | Fiume Brenta | Canale di bonifica | Rio Vallone di S. Silvestro 🌐 https://kreuzungen.world 🗺️";
     const result = doesStringContainWaterwaysMessage(description);
     expect(result).toBe(true);
   });
 
   it("should return true if the string contains only a waterways message", () => {
-    const description = "Crossed 13 waterways 🏞️ Obere Havel-Wasserstraße | Havel | Vosskanal | Wentower Gewässer | Tornowfließ | Welsengrben | Wentow-Kanal | Schnelle Havel | Malzer Kanal | Welsengraben | Schönebecker Fließ | Vosskanal (Hauptstrom der Havel) | Voßkanal 🌐 Powered by Kreuzungen World 🗺️";
+    const description = "Crossed 13 waterways 🏞️ Obere Havel-Wasserstraße | Havel | Vosskanal | Wentower Gewässer | Tornowfließ | Welsengrben | Wentow-Kanal | Schnelle Havel | Malzer Kanal | Welsengraben | Schönebecker Fließ | Vosskanal (Hauptstrom der Havel) | Voßkanal 🌐 https://kreuzungen.world 🗺️";
     const result = doesStringContainWaterwaysMessage(description);
     expect(result).toBe(true);
   });
@@ -62143,7 +62143,7 @@ describe("doesStringContainWaterwaysMessage", () => {
   it("should return true if the string contains a waterways message", () => {
     const description = `Just bopping around. First 3 miles with K and the dog. Jogged down to fort Monroe, grabbed some coffee and jogged back.
 🎧 Listening to: When The Heavens Went On Sale by Ashlee Vance
-Crossed 1 waterway 🏞️ Mill Creek 🌐 Powered by Kreuzungen World 🗺️`;
+Crossed 1 waterway 🏞️ Mill Creek 🌐 https://kreuzungen.world 🗺️`;
     const result = doesStringContainWaterwaysMessage(description);
     expect(result).toBe(true);
   });
@@ -62153,7 +62153,7 @@ Crossed 1 waterway 🏞️ Mill Creek 🌐 Powered by Kreuzungen World 🗺️`;
 
 foo bar yida yada
 
-Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 Powered by Kreuzungen World 🗺️`;
+Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 https://kreuzungen.world 🗺️`;
     const result = doesStringContainWaterwaysMessage(description);
     expect(result).toBe(true);
   });
@@ -62171,7 +62171,7 @@ describe("removeWaterwaysMessage", () => {
 
 foo bar yida yada
 
-Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 Powered by Kreuzungen World 🗺️`
+Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 https://kreuzungen.world 🗺️`
     const expected = `⛰️ Egal | 🌐 summitbag.com
 
 foo bar yida yada`
@@ -62180,7 +62180,7 @@ foo bar yida yada`
   });
 
   it("should remove the waterways message from the complicated description", () => {
-    const description = `Crossed 5 waterways 🏞️ Eschbach | Kalbach | Taunengraben | Seulbach | Rehlingsbach 🌐 Powered by Kreuzungen World 🗺️
+    const description = `Crossed 5 waterways 🏞️ Eschbach | Kalbach | Taunengraben | Seulbach | Rehlingsbach 🌐 https://kreuzungen.world 🗺️
 -- myWindsock.com Report --
 Weather Impact: -8.3%
 Headwind: 21% @ 2.2-7.7m/s
@@ -62202,7 +62202,7 @@ Precip: 0% @ 0 Inch/hr
   });
 
   it("should remove the waterways message from the complicated description", () => {
-    const description = `Crossed 3 waterways 🏞️ Schmerzbach | Sollnitzbach | Gräfenhainicher Mühlgraben 🌐 Powered by Kreuzungen World 🗺️　
+    const description = `Crossed 3 waterways 🏞️ Schmerzbach | Sollnitzbach | Gräfenhainicher Mühlgraben 🌐 https://kreuzungen.world 🗺️　
 
 🎷🐛 18.54 new kilometers
 
@@ -62215,7 +62215,7 @@ Precip: 0% @ 0 Inch/hr
   });
 
   it("should remove the waterways message from the basic", () => {
-    const description = `Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 Powered by Kreuzungen World 🗺️`
+    const description = `Crossed 20 waterways 🏞️ Adige | Sarca | Canale industriale Camuzzoni | Canale Biffis | Canale Alto Agro Veronese (diramazione di San Giovanni) | Adigetto | Varone | Albola | Galleria Adige-Garda | Rio Cameras | Torrente Aviana | Collettore Santi Girelli | Rio Fontana - Vaio dei Fo - Vaio di Valnasse - Rio Secco | Torrente Tasso | Torrente Tezze | Valdonega | Fitta | Rio Bissole | Canale della Rocca | Fiume Sarca 🌐 https://kreuzungen.world 🗺️`
     const expected = ``
     const result = removeWaterwaysMessage(description);
     expect(result).toEqual(expected);
