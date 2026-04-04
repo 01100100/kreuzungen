@@ -47,6 +47,18 @@ The project is structured as follows:
 - `analytics/`: [Umami](https://umami.is/) deployment config.
 - `.github/`: CI config.
 - `.env`: Variables to be set as secrets.
+- `.pre-commit-config.yaml`: Pre-commit hooks for linting, formatting and type checking.
+
+### Setup
+
+To set up the project locally, follow these steps to clone the repository, install dependencies, and set up pre-commit hooks:
+
+```bash
+git clone git@github.com:01100100/kreuzungen.git
+cd kreuzungen
+pre-commit install
+cd app && npm install
+```
 
 ### Frontend
 
