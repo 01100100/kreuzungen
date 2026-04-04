@@ -140,8 +140,6 @@ export async function calculateAllIntersectingWaterways(
 	console.log(
 		`allRelations crossed in total is ${allRelations.length} relations`,
 	);
-
-	const allRelationsFeatureCollection = featureCollection(allRelations);
 	return featureCollection(allRelations);
 }
 
@@ -336,10 +334,10 @@ export function orderAlongRoute(
 			return null;
 		})
 		.filter((enrichedFeature) => enrichedFeature !== null) as {
-		feature: Feature<LineString | MultiLineString>;
-		intersection: Feature<Point>;
-		distance: number;
-	}[];
+			feature: Feature<LineString | MultiLineString>;
+			intersection: Feature<Point>;
+			distance: number;
+		}[];
 	console.log(enrichedFeatures);
 
 	// return the orderedFeatureCollection as a FeatureCollection of LineStrings or MultiLineStrings with a property intersection which is the first intersection point, they should be ordered by the distance
