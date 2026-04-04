@@ -473,14 +473,14 @@ export class ShareControl {
 	}
 }
 
-export function hideInfo() {
+function hideInfo() {
 	const infoContainer = document.getElementById("info");
 	if (infoContainer) {
 		infoContainer.style.display = "none";
 	}
 }
 
-export function hideSourceInfo() {
+function hideSourceInfo() {
 	const sourceContainer = document.getElementById("source");
 	if (sourceContainer) {
 		sourceContainer.style.display = "none";
@@ -492,47 +492,47 @@ export function showInfo() {
 	infoContainer.style.display = "flex";
 }
 
-export function showSourceInfo() {
+function showSourceInfo() {
 	const sourceContainer = document.getElementById("source");
 	if (mapInstance.isSourceLoaded("route")) {
 		sourceContainer.style.display = "block";
 	}
 }
 
-export function hideActivitiesContainer() {
+function hideActivitiesContainer() {
 	const activitiesContainer = document.getElementById("activities");
 	if (activitiesContainer) {
 		activitiesContainer.style.display = "none";
 	}
 }
 
-export function hideDemoRoutesContainer() {
+function hideDemoRoutesContainer() {
 	const demoRoutesContainer = document.getElementById("demoRoutes");
 	if (demoRoutesContainer) {
 		demoRoutesContainer.style.display = "none";
 	}
 }
 
-export function hideFAQContainer() {
+function hideFAQContainer() {
 	const faqContainer = document.getElementById("faq");
 	if (faqContainer) {
 		faqContainer.style.display = "none";
 	}
 }
 
-export function showDemoRoutesContainer() {
+function showDemoRoutesContainer() {
 	const demoRoutesContainer = document.getElementById("demoRoutes");
 	demoRoutesContainer.style.display = "block";
 	currentlyDisplayedContainer = "demoRoutes";
 }
 
-export function showActivitiesContainer() {
+function showActivitiesContainer() {
 	const activitiesContainer = document.getElementById("activities");
 	activitiesContainer.style.display = "block";
 	currentlyDisplayedContainer = "activities";
 }
 
-export function showFAQContainer() {
+function showFAQContainer() {
 	const activitiesContainer = document.getElementById("faq");
 	activitiesContainer.style.display = "block";
 	currentlyDisplayedContainer = "faq";

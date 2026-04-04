@@ -64,7 +64,7 @@ export async function fetchOverpassData(
 }
 
 // Fetch data from Nominatim API
-export async function getAreaIdNominatim(areaName: string): Promise<number> {
+async function getAreaIdNominatim(areaName: string): Promise<number> {
 	const response = await fetch(
 		`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${areaName}`,
 	);
@@ -78,7 +78,7 @@ export async function getAreaIdNominatim(areaName: string): Promise<number> {
 	}
 }
 
-export async function getAreaIdPhoton(areaName: string): Promise<number> {
+async function getAreaIdPhoton(areaName: string): Promise<number> {
 	// https://photon.komoot.io has a more liberal Terms of service then Nominatim
 	const response = await fetch(
 		`https://photon.komoot.io/api/?q=${areaName}&limit=1`,

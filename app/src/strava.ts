@@ -8,7 +8,7 @@ import {
 
 type RedisClientType = ReturnType<typeof createClient>;
 // Get a Strava refresh token for a user stored in redis
-export async function getStravaRefreshToken(
+async function getStravaRefreshToken(
 	user_id: number,
 	redisClient: RedisClientType,
 ): Promise<string> {
@@ -228,7 +228,7 @@ export async function appendWaterwaysToStravaActivityDescription(
 }
 
 // Update the description of a Strava activity and return true if success
-export async function updateStravaActivityDescription(
+async function updateStravaActivityDescription(
 	activity_id: number,
 	owner_access_token: string,
 	description: string,

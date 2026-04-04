@@ -39,7 +39,7 @@ export async function calculateIntersectingWaterwaysPolyline(
 	return calculateAllIntersectingWaterways(geojson);
 }
 
-export async function checkForCompletedCities(
+async function checkForCompletedCities(
 	intersectingWaterways: FeatureCollection,
 	routeGeoJSON: Feature<LineString>,
 ) {
@@ -145,7 +145,7 @@ export async function calculateAllIntersectingWaterways(
 	return featureCollection(allRelations);
 }
 
-export async function calculateIntersectingWaterwayRelations(
+async function calculateIntersectingWaterwayRelations(
 	routeGeoJSON: Feature<LineString>,
 ): Promise<FeatureCollection | undefined> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
@@ -168,7 +168,7 @@ export async function calculateIntersectingWaterwayRelations(
 	return intersectingWaterways;
 }
 
-export async function calculateIntersectingWaterwayWays(
+async function calculateIntersectingWaterwayWays(
 	routeGeoJSON: Feature<LineString>,
 ): Promise<FeatureCollection | undefined> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
@@ -191,7 +191,7 @@ export async function calculateIntersectingWaterwayWays(
 	return intersectingWaterways;
 }
 
-export async function calculateSurroundingWays(
+async function calculateSurroundingWays(
 	routeGeoJSON: Feature<LineString>,
 ): Promise<FeatureCollection | undefined> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
@@ -265,7 +265,7 @@ export async function getMainWaterwaysForArea(
 	return combined;
 }
 
-export async function getCityAdTownAreaIds(
+async function getCityAdTownAreaIds(
 	routeGeoJSON: Feature<
 		LineString,
 		{
@@ -281,7 +281,7 @@ export async function getCityAdTownAreaIds(
 	return cityIds;
 }
 
-export function parseOSMToGeoJSON(
+function parseOSMToGeoJSON(
 	osmData: string,
 ): FeatureCollection<Geometry, GeoJsonProperties> {
 	return osmtogeojson(osmData);
@@ -448,7 +448,7 @@ export function removeWaterwaysMessage(description: string): string {
 }
 
 // Append a waterways message to a description
-export function appendWaterwaysMessage(
+function appendWaterwaysMessage(
 	description: string,
 	waterwaysMessage: string,
 ): string {
