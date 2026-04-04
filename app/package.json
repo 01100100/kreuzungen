@@ -22,6 +22,7 @@
 		"webpack-dev-server": "^5.0.4"
 	},
 	"scripts": {
+		"knip": "knip",
 		"test": "jest --verbose",
 		"build": "webpack",
 		"serve": "webpack serve --open",
