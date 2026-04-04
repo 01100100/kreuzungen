@@ -1,17 +1,17 @@
 import polyline from "@mapbox/polyline";
+import { feature } from "@turf/helpers";
 import {
-	processGeojson,
-	mapInstance,
-	loadWaterwaysForArea,
 	loadMainWaterwaysForArea,
+	loadWaterwaysForArea,
+	mapInstance,
+	processGeojson,
 } from "./main";
+import { getSavedRoute } from "./stash";
 import {
 	getAndStoreStravaAccessToken,
 	refreshStravaAccessToken,
 } from "./strava";
 import { flashMessage, loadStravaActivities } from "./ui";
-import { feature } from "@turf/helpers";
-import { getSavedRoute } from "./stash";
 
 export async function setUp() {
 	const urlParams = new URLSearchParams(window.location.search);
@@ -38,7 +38,7 @@ export async function setUp() {
 }
 
 async function loadPolylineEncodedRoute(pl: string) {
-	let geojson = feature(polyline.toGeoJSON(pl));
+	const geojson = feature(polyline.toGeoJSON(pl));
 	geojson.properties = { name: "✨ Route shared with magic link ✨" };
 	if (mapInstance.isStyleLoaded()) {
 		processGeojson(geojson);
@@ -98,8 +98,8 @@ async function handleStravaOauthRedirect(scopes: string, code: string) {
 }
 
 async function handleStravaAuthentication(stravaData: any) {
-	let token_exists = stravaData !== null;
-	let expires_at = token_exists ? stravaData.expires_at : 0;
+	const token_exists = stravaData !== null;
+	const expires_at = token_exists ? stravaData.expires_at : 0;
 	// Token exists and is still valid
 	if (token_exists && new Date().getTime() / 1000 < expires_at) {
 		console.log("Strava token exists and is still valid");
@@ -110,7 +110,7 @@ async function handleStravaAuthentication(stravaData: any) {
 	else if (token_exists && new Date().getTime() / 1000 >= expires_at) {
 		console.log("Strava token exists but is expired");
 		const refreshToken = stravaData.refresh_token;
-		let newAccessToken = await refreshStravaAccessToken(refreshToken);
+		const newAccessToken = await refreshStravaAccessToken(refreshToken);
 		loadStravaActivities(newAccessToken);
 	}
 	// Token does not exist

@@ -1,4 +1,4 @@
-import { Feature, LineString } from "geojson";
+import type { Feature, LineString } from "geojson";
 
 // Get a saved route
 export async function getSavedRoute(

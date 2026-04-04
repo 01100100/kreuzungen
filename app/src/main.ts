@@ -1,10 +1,15 @@
+import { dom, icon, library } from "@fortawesome/fontawesome-svg-core";
+import { faStrava } from "@fortawesome/free-brands-svg-icons";
 import {
-	Map,
-	FullscreenControl,
-	MapMouseEvent,
-	MapGeoJSONFeature,
-	Popup,
-} from "maplibre-gl";
+	faCloudArrowUp,
+	faFloppyDisk,
+	faGlobe,
+	faLink,
+	faQuestion,
+	faRoute,
+	faShareNodes,
+	faUpload,
+} from "@fortawesome/free-solid-svg-icons";
 import polyline from "@mapbox/polyline";
 import { area } from "@turf/area";
 import { bbox } from "@turf/bbox";
@@ -12,24 +17,19 @@ import { bboxPolygon } from "@turf/bbox-polygon";
 import { feature, point } from "@turf/helpers";
 import { nearestPointOnLine } from "@turf/nearest-point-on-line";
 import {
-	FeatureCollection,
-	Feature,
-	LineString,
-	GeoJsonProperties,
 	BBox,
+	type Feature,
+	type FeatureCollection,
+	type GeoJsonProperties,
+	type LineString,
 } from "geojson";
 import {
-	CustomAttributionControl,
-	ShareControl,
-	UploadControl,
-	StravaControl,
-	DemoRoutesControl,
-	FAQControl,
-	showInfo,
-	displaySpinner,
-	flashMessage,
-	loadDemoRoutes,
-} from "./ui";
+	FullscreenControl,
+	Map,
+	type MapGeoJSONFeature,
+	type MapMouseEvent,
+	Popup,
+} from "maplibre-gl";
 import {
 	calculateAllIntersectingWaterways,
 	calculateIntersectingWaterwaysGeojson,
@@ -41,18 +41,18 @@ import {
 } from "./geo";
 import { setUp } from "./initialize";
 import { appendWaterwaysToStravaActivityDescription } from "./strava";
-import { library, dom, icon } from "@fortawesome/fontawesome-svg-core";
 import {
-	faGlobe,
-	faRoute,
-	faCloudArrowUp,
-	faUpload,
-	faQuestion,
-	faLink,
-	faFloppyDisk,
-	faShareNodes,
-} from "@fortawesome/free-solid-svg-icons";
-import { faStrava } from "@fortawesome/free-brands-svg-icons";
+	CustomAttributionControl,
+	DemoRoutesControl,
+	displaySpinner,
+	FAQControl,
+	flashMessage,
+	loadDemoRoutes,
+	ShareControl,
+	StravaControl,
+	showInfo,
+	UploadControl,
+} from "./ui";
 
 declare global {
 	interface Window {
@@ -64,7 +64,7 @@ declare global {
 export let isMapCenteredToRoute = false;
 let hoveredFeatureId: string | number | null | undefined = null;
 let selectedFeatureId: string | number | null | undefined = null;
-export let shareableTitle = "Kreuzungen 🗺️";
+export const shareableTitle = "Kreuzungen 🗺️";
 export let shareableDescription =
 	"Reveal the waterways that shape your adventures!";
 export let shareableUrl = "https://kreuzungen.world";
@@ -124,7 +124,7 @@ function processFileUpload(e: Event) {
 	}
 	const fileReader = new FileReader();
 	fileReader.readAsText(selectedFile);
-	fileReader.onload = async function (e) {
+	fileReader.onload = async (e) => {
 		const fileContents = e.target?.result?.toString();
 		if (fileContents) {
 			const routeGeoJSON = await parseGPXToGeoJSON(fileContents);
@@ -444,7 +444,7 @@ function displayIntersectingWaterways(
 function nearbyFeature(e: MapMouseEvent, layer: string): any {
 	// return the single closest feature to the mouse pointer, if there is none then return null
 	const pixelDistance = 15;
-	let nearbyFeatures = mapInstance.queryRenderedFeatures(
+	const nearbyFeatures = mapInstance.queryRenderedFeatures(
 		[
 			[e.point.x - pixelDistance / 2, e.point.y - pixelDistance / 2],
 			[e.point.x + pixelDistance / 2, e.point.y + pixelDistance / 2],

@@ -1,5 +1,4 @@
-!(function () {
-	"use strict";
+!(() => {
 	((t) => {
 		const {
 				screen: { width: e, height: a },

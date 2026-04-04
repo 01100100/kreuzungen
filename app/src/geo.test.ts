@@ -62139,7 +62139,7 @@ describe("doesStringContainWaterwaysMessage", () => {
     const result = doesStringContainWaterwaysMessage(description);
     expect(result).toBe(true);
   });
-  
+
   it("should return true if the string contains a waterways message", () => {
     const description = `Just bopping around. First 3 miles with K and the dog. Jogged down to fort Monroe, grabbed some coffee and jogged back.
 🎧 Listening to: When The Heavens Went On Sale by Ashlee Vance
@@ -62227,4 +62227,3 @@ Precip: 0% @ 0 Inch/hr
     expect(result).toEqual(description);
   });
 });
-

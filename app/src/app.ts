@@ -1,18 +1,17 @@
-import express from "express";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import bodyParser from "body-parser";
+import express from "express";
 import { createClient } from "redis";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
-
-import {
-	getStravaAccessTokenRedis,
-	getStravaActivity,
-	appendWaterwaysToStravaActivityDescription,
-} from "./strava";
 import {
 	calculateIntersectingWaterwaysPolyline,
 	createWaterwaysMessage,
 } from "./geo";
+import {
+	appendWaterwaysToStravaActivityDescription,
+	getStravaAccessTokenRedis,
+	getStravaActivity,
+} from "./strava";
 
 // Create a new express application, S3 and redis client
 const app = express().use(bodyParser.json());
@@ -48,9 +47,9 @@ async function main() {
 app.get("/webhook", (req, res) => {
 	const VERIFY_TOKEN = process.env.STRAVA_VERIFY_TOKEN;
 
-	let mode = req.query["hub.mode"];
-	let token = req.query["hub.verify_token"];
-	let challenge = req.query["hub.challenge"];
+	const mode = req.query["hub.mode"];
+	const token = req.query["hub.verify_token"];
+	const challenge = req.query["hub.challenge"];
 
 	if (mode && token) {
 		if (mode === "subscribe" && token === VERIFY_TOKEN) {

@@ -1,30 +1,30 @@
+import polyline from "@mapbox/polyline";
+import toGeoJSON from "@mapbox/togeojson";
 import { bbox } from "@turf/bbox";
+import { booleanIntersects } from "@turf/boolean-intersects";
 import { combine } from "@turf/combine";
+import { feature, featureCollection, point } from "@turf/helpers";
 import { length } from "@turf/length";
 import { lineIntersect } from "@turf/line-intersect";
 import { lineSlice } from "@turf/line-slice";
-import { feature, point, featureCollection } from "@turf/helpers";
-import { booleanIntersects } from "@turf/boolean-intersects";
-import osmtogeojson from "osmtogeojson";
-import { groupBy } from "lodash";
-import {
-	FeatureCollection,
-	Geometry,
-	GeoJsonProperties,
-	Feature,
-	LineString,
+import type {
 	BBox,
+	Feature,
+	FeatureCollection,
+	GeoJsonProperties,
+	Geometry,
+	LineString,
 	MultiLineString,
 	Point,
 } from "geojson";
-import polyline from "@mapbox/polyline";
-import toGeoJSON from "@mapbox/togeojson";
+import { groupBy } from "lodash";
+import osmtogeojson from "osmtogeojson";
 import {
-	fetchOverpassData,
-	waterwaysInBboxQuery,
-	waterwaysInAreaQuery,
-	waterwaysRelationsInAreaQuery,
 	citiesInBboxQuery,
+	fetchOverpassData,
+	waterwaysInAreaQuery,
+	waterwaysInBboxQuery,
+	waterwaysRelationsInAreaQuery,
 	waterwaysRelationsInBboxQuery,
 	waterwaysWaysInBboxQuery,
 } from "./overpass";
@@ -96,7 +96,7 @@ export async function calculateAllIntersectingWaterways(
 	const surroundingWaterways = await calculateSurroundingWays(routeGeoJSON);
 	const crossedWays = await calculateIntersectingWaterwayWays(routeGeoJSON);
 	console.log(`crossed ${crossedWays.features.length} OSM ways`);
-	let syntheticRelations: Feature[] = [];
+	const syntheticRelations: Feature[] = [];
 	// for the crossed ways, we want to create a synthetic relation. A synthetic relation is a multilineString made up of the ways that share the same name.
 	for (const way of crossedWays.features) {
 		const name = way.properties.name;
@@ -422,7 +422,7 @@ function firstIntersection(
 export function createWaterwaysMessage(
 	featureCollection: FeatureCollection,
 ): string {
-	let names: string[] = [];
+	const names: string[] = [];
 	featureCollection.features.forEach((feature) => {
 		names.push(feature.properties.name);
 	});

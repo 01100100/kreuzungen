@@ -1,33 +1,34 @@
-import maplibregl from "maplibre-gl";
+import { icon, library } from "@fortawesome/fontawesome-svg-core";
+import { faStrava } from "@fortawesome/free-brands-svg-icons";
 import {
-	mapInstance,
-	shareableUrl,
-	shareableDescription,
-	shareableTitle,
-	processGeojson,
-	currentRoute,
-} from "./main";
-import { saveRoute } from "./stash";
-import { feature } from "@turf/helpers";
-import { getStravaActivities } from "./strava";
-import polyline from "@mapbox/polyline";
-import { library, icon } from "@fortawesome/fontawesome-svg-core";
-import {
-	faUpload,
-	faQuestion,
-	faLink,
+	faCircleLeft,
+	faCircleRight,
+	faCloudArrowUp,
+	faFileArrowUp,
+	faFileImport,
 	faFloppyDisk,
+	faGlobe,
+	faLink,
+	faQuestion,
+	faRoute,
 	faShareNodes,
 	faSpinner,
-	faGlobe,
-	faRoute,
-	faCloudArrowUp,
-	faCircleRight,
-	faCircleLeft,
-	faFileImport,
-	faFileArrowUp,
+	faUpload,
 } from "@fortawesome/free-solid-svg-icons";
-import { faStrava } from "@fortawesome/free-brands-svg-icons";
+import polyline from "@mapbox/polyline";
+import { feature } from "@turf/helpers";
+import maplibregl from "maplibre-gl";
+import {
+	currentRoute,
+	mapInstance,
+	processGeojson,
+	shareableDescription,
+	shareableTitle,
+	shareableUrl,
+} from "./main";
+import { saveRoute } from "./stash";
+import { getStravaActivities } from "./strava";
+
 // Add the icons to the library so you can use it in your page
 library.add(
 	faUpload,
@@ -576,9 +577,9 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 	const activitiesList = document.getElementById("activitiesList");
 	activitiesList.style.width = "250px";
 	activitiesList.innerHTML = "";
-	currentPageActivities.forEach(function (activity) {
+	currentPageActivities.forEach((activity) => {
 		const activityElement = createActivityElement(activity);
-		activityElement.addEventListener("click", function () {
+		activityElement.addEventListener("click", () => {
 			console.log("Activity clicked: ", activity.name);
 			loadActivityOnMap(activity);
 		});
@@ -598,7 +599,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 		nextLink.appendChild(rightIcon.node[0]);
 		nextLink.style.float = "right";
 		nextLink.style.cursor = "pointer";
-		nextLink.addEventListener("click", function () {
+		nextLink.addEventListener("click", () => {
 			displayActivities(activities, startIndex + activitiesPerPage);
 		});
 		activitiesControl.appendChild(nextLink);
@@ -615,7 +616,7 @@ function displayActivities(activities: any[], startIndex: number = 0) {
 		prevLink.style.float = "right";
 		prevLink.style.cursor = "pointer";
 		prevLink.style.paddingRight = "5px";
-		prevLink.addEventListener("click", function () {
+		prevLink.addEventListener("click", () => {
 			displayActivities(activities, startIndex - activitiesPerPage);
 		});
 		activitiesControl.appendChild(prevLink);
@@ -639,9 +640,9 @@ function displayDemoRoutes(activities: any[], startIndex: number = 0) {
 	const activitiesList = document.getElementById("demoRoutesList");
 	activitiesList.style.width = "250px";
 	activitiesList.innerHTML = "";
-	currentPageActivities.forEach(function (activity) {
+	currentPageActivities.forEach((activity) => {
 		const activityElement = createDemoRouteElement(activity);
-		activityElement.addEventListener("click", function () {
+		activityElement.addEventListener("click", () => {
 			console.log("Demo route clicked: ", activity.name);
 			loadDemoRouteOnMap(activity);
 		});
@@ -661,7 +662,7 @@ function displayDemoRoutes(activities: any[], startIndex: number = 0) {
 		nextLink.appendChild(rightIcon.node[0]);
 		nextLink.style.float = "right";
 		nextLink.style.cursor = "pointer";
-		nextLink.addEventListener("click", function () {
+		nextLink.addEventListener("click", () => {
 			displayDemoRoutes(activities, startIndex + activitiesPerPage);
 		});
 		activitiesControl.appendChild(nextLink);
@@ -678,7 +679,7 @@ function displayDemoRoutes(activities: any[], startIndex: number = 0) {
 		prevLink.style.float = "right";
 		prevLink.style.cursor = "pointer";
 		prevLink.style.paddingRight = "5px";
-		prevLink.addEventListener("click", function () {
+		prevLink.addEventListener("click", () => {
 			displayDemoRoutes(activities, startIndex - activitiesPerPage);
 		});
 		activitiesControl.appendChild(prevLink);

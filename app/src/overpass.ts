@@ -1,6 +1,6 @@
-import { BBox } from "geojson";
 import { area } from "@turf/area";
 import { bboxPolygon } from "@turf/bbox-polygon";
+import type { BBox } from "geojson";
 
 import { flashMessage } from "./ui";
 

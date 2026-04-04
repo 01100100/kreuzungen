@@ -1,10 +1,10 @@
 import fetch from "cross-fetch";
-import { createClient } from "redis";
+import { rest } from "lodash";
+import type { createClient } from "redis";
 import {
 	doesStringContainWaterwaysMessage,
 	removeWaterwaysMessage,
 } from "./geo";
-import { rest } from "lodash";
 
 type RedisClientType = ReturnType<typeof createClient>;
 // Get a Strava refresh token for a user stored in redis
@@ -157,9 +157,11 @@ export async function getStravaActivities(
 		} else {
 			const data = await response.json();
 			// filter out the activities that do not have coordinates
-			const stravaActivities = [].concat(data).filter(function (x) {
-				return x.map.summary_polyline && x.map.summary_polyline.length > 0;
-			});
+			const stravaActivities = []
+				.concat(data)
+				.filter(
+					(x) => x.map.summary_polyline && x.map.summary_polyline.length > 0,
+				);
 
 			return stravaActivities;
 		}
