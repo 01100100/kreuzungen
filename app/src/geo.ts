@@ -18,16 +18,16 @@ import type {
 	Point,
 } from "geojson";
 import { groupBy } from "lodash";
-import osmtogeojson from "osmtogeojson";
 import {
 	citiesInBboxQuery,
-	fetchOverpassData,
+	fetchPostpassData,
+	normalizePostpassFeatures,
 	waterwaysInAreaQuery,
 	waterwaysInBboxQuery,
 	waterwaysRelationsInAreaQuery,
 	waterwaysRelationsInBboxQuery,
 	waterwaysWaysInBboxQuery,
-} from "./overpass";
+} from "./postpass";
 
 const waterwaysMessageRegex =
 	/\n*Crossed \d+ waterways? 🏞️.*🌐 https:\/\/kreuzungen\.world 🗺️.*\n*/;
@@ -150,13 +150,8 @@ async function calculateIntersectingWaterwayRelations(
 ): Promise<FeatureCollection | undefined> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
 	const query = waterwaysRelationsInBboxQuery(routeBoundingBox);
-	const osmData = await fetchOverpassData(query);
-	if (!osmData) {
-		console.error(`No osm features returned for Overpass query: ${query}`);
-		return;
-	}
-	const relationsGeoJSON = parseOSMToGeoJSON(osmData);
-	const lineStringFeatures = relationsGeoJSON.features.filter(
+	const geoJSON = normalizePostpassFeatures(await fetchPostpassData(query));
+	const lineStringFeatures = geoJSON.features.filter(
 		(feature) =>
 			feature.geometry.type === "LineString" ||
 			feature.geometry.type === "MultiLineString",
@@ -173,13 +168,8 @@ async function calculateIntersectingWaterwayWays(
 ): Promise<FeatureCollection | undefined> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
 	const query = waterwaysWaysInBboxQuery(routeBoundingBox);
-	const osmData = await fetchOverpassData(query);
-	if (!osmData) {
-		console.error(`No osm features returned for Overpass query: ${query}`);
-		return;
-	}
-	const relationsGeoJSON = parseOSMToGeoJSON(osmData);
-	const lineStringFeatures = relationsGeoJSON.features.filter(
+	const geoJSON = normalizePostpassFeatures(await fetchPostpassData(query));
+	const lineStringFeatures = geoJSON.features.filter(
 		(feature) =>
 			feature.geometry.type === "LineString" ||
 			feature.geometry.type === "MultiLineString",
@@ -196,12 +186,7 @@ async function calculateSurroundingWays(
 ): Promise<FeatureCollection | undefined> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
 	const query = waterwaysWaysInBboxQuery(routeBoundingBox);
-	const osmData = await fetchOverpassData(query);
-	if (!osmData) {
-		console.error(`No osm features returned for Overpass query: ${query}`);
-		return;
-	}
-	return parseOSMToGeoJSON(osmData);
+	return normalizePostpassFeatures(await fetchPostpassData(query));
 }
 
 export async function calculateIntersectingWaterwaysGeojson(
@@ -210,14 +195,9 @@ export async function calculateIntersectingWaterwaysGeojson(
 	try {
 		const routeBoundingBox: BBox = bbox(routeGeoJSON);
 		const waterwaysQuery = waterwaysInBboxQuery(routeBoundingBox);
-		const osmData = await fetchOverpassData(waterwaysQuery);
-		if (!osmData) {
-			console.error(
-				`No osm features returned for Overpass query: ${waterwaysQuery}`,
-			);
-			return;
-		}
-		const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
+		const waterwaysGeoJSON = normalizePostpassFeatures(
+			await fetchPostpassData(waterwaysQuery),
+		);
 		const combined = combineSameNameFeatures(
 			waterwaysGeoJSON,
 		) as FeatureCollection<LineString | MultiLineString>;
@@ -233,14 +213,9 @@ export async function getWaterwaysForArea(
 	areaName: string,
 ): Promise<FeatureCollection | undefined> {
 	const waterwaysQuery = await waterwaysInAreaQuery(areaName);
-	const osmData = await fetchOverpassData(waterwaysQuery);
-	if (!osmData) {
-		console.error(
-			`No osm features returned for Overpass query: ${waterwaysQuery}`,
-		);
-		return;
-	}
-	const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
+	const waterwaysGeoJSON = normalizePostpassFeatures(
+		await fetchPostpassData(waterwaysQuery),
+	);
 	const combined = combineSameNameFeatures(
 		waterwaysGeoJSON,
 	) as FeatureCollection<LineString | MultiLineString>;
@@ -251,14 +226,9 @@ export async function getMainWaterwaysForArea(
 	areaName: string,
 ): Promise<FeatureCollection | undefined> {
 	const waterwaysQuery = await waterwaysRelationsInAreaQuery(areaName);
-	const osmData = await fetchOverpassData(waterwaysQuery);
-	if (!osmData) {
-		console.error(
-			`No osm features returned for Overpass query: ${waterwaysQuery}`,
-		);
-		return;
-	}
-	const waterwaysGeoJSON = parseOSMToGeoJSON(osmData);
+	const waterwaysGeoJSON = normalizePostpassFeatures(
+		await fetchPostpassData(waterwaysQuery),
+	);
 	const combined = combineSameNameFeatures(
 		waterwaysGeoJSON,
 	) as FeatureCollection<LineString | MultiLineString>;
@@ -274,17 +244,8 @@ async function getCityAdTownAreaIds(
 	>,
 ): Promise<number[]> {
 	const routeBoundingBox: BBox = bbox(routeGeoJSON);
-	const overpassQuery = citiesInBboxQuery(routeBoundingBox);
-	const response = await fetchOverpassData(overpassQuery);
-	const data = JSON.parse(response);
-	const cityIds = data.elements.map((element: any) => element.id);
-	return cityIds;
-}
-
-function parseOSMToGeoJSON(
-	osmData: string,
-): FeatureCollection<Geometry, GeoJsonProperties> {
-	return osmtogeojson(osmData);
+	const fc = await fetchPostpassData(citiesInBboxQuery(routeBoundingBox));
+	return fc.features.map((f) => f.properties.osm_id);
 }
 
 export async function parseGPXToGeoJSON(GPXContents: string) {
