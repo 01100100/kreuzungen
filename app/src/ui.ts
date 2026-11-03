@@ -329,6 +329,18 @@ export class FAQControl {
 		const questionIcon = icon({ prefix: "fas", iconName: "question" });
 		button.appendChild(questionIcon.node[0]);
 		this._container.appendChild(button);
+		const hallOfFameLink = document.getElementById("hall-of-fame-link");
+		hallOfFameLink?.addEventListener("click", (event) => {
+			event.preventDefault();
+			hideInfo();
+			hideSourceInfo();
+			hideActivitiesContainer();
+			hideDemoRoutesContainer();
+			showFAQContainer();
+			const heading = document.getElementById("hall-of-fame");
+			heading?.scrollIntoView({ block: "start" });
+			heading?.focus({ preventScroll: true });
+		});
 		this._map.on("mousedown", () => {
 			hideFAQContainer();
 			currentlyDisplayedContainer = null;

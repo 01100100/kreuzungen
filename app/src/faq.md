@@ -92,6 +92,14 @@ Reach out by sending an email to [info@kreuzungen.world](info@kreuzungen.world).
 
 The name "Kreuzungen" is the German word for "crossings" or "intersections".
 
+<h2 id="hall-of-fame" tabindex="-1">Hall of Fame ❤️</h2>
+
+Help keep Kreuzungen and the river crossing fun flowing by financially supporting the project. In return, you’ll get eternal gratitude and your name in the hall of fame.
+
+- **ARMIN**
+
+[Support Kreuzungen](mailto:info@kreuzungen.world?subject=Support%20Kreuzungen)
+
 ## Open Source Software 💚
 
 Big shoutout to the open-source projects that make Kreuzungen.world possible
