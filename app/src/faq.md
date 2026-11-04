@@ -100,6 +100,7 @@ Help keep Kreuzungen and the river crossing fun flowing by financially supportin
 - **ARMIN**
 - **Vitor (CTO)**
 - **Kinga (CDO)**
+- **Rui**
 
 <p><a class="support-button" href="https://ko-fi.com/davidwhittingham" target="_blank" rel="noopener noreferrer">Invest in the love of crossing waterways ❤️</a></p>
 
