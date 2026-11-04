@@ -330,6 +330,10 @@ export class FAQControl {
 		button.appendChild(questionIcon.node[0]);
 		this._container.appendChild(button);
 		const hallOfFameLink = document.getElementById("hall-of-fame-link");
+		// Keep interactions with FAQ links and the support panel from closing it.
+		document.getElementById("faq")?.addEventListener("mousedown", (event) => {
+			event.stopPropagation();
+		});
 		hallOfFameLink?.addEventListener("click", (event) => {
 			event.preventDefault();
 			hideInfo();

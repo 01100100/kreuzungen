@@ -94,11 +94,18 @@ The name "Kreuzungen" is the German word for "crossings" or "intersections".
 
 <h2 id="hall-of-fame" tabindex="-1">Hall of Fame ❤️</h2>
 
-Help keep Kreuzungen and the river crossing fun flowing by financially supporting the project. In return, you’ll get eternal gratitude and your name in the hall of fame.
+Help keep Kreuzungen and the river crossing fun flowing by financially supporting the project. In return, you’ll get eternal gratitude and your name in the hall of fame. Great splash for little cash!
 
 - **ARMIN**
 
-[Support Kreuzungen](mailto:info@kreuzungen.world?subject=Support%20Kreuzungen)
+<p><a class="support-button" href="https://ko-fi.com/davidwhittingham" target="_blank" rel="noopener noreferrer">Invest in the love of crossing waterways ❤️</a></p>
+
+<details class="support-embed">
+  <summary>Or leave a tip right here</summary>
+  <iframe id="kofiframe" src="https://ko-fi.com/davidwhittingham/?hidefeed=true&amp;widget=true&amp;embed=true" loading="lazy" height="712" title="Support Kreuzungen on Ko-fi"></iframe>
+</details>
+
+Want your name in the hall of fame? Leave your preferred name or nickname with your tip. Anonymous support is welcome too.
 
 ## Open Source Software 💚
 

@@ -178,13 +178,98 @@
       overflow-y: auto;
     }
 
-    .support-credit {
+    .hall-of-fame-card {
+      margin: 16px 10px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.25);
       text-align: center;
-      font-size: 12px;
     }
 
-    .support-credit a {
-      color: inherit;
+    .hall-of-fame-card h3 {
+      margin: 0 0 6px;
+      font-size: 17px;
+    }
+
+    .hall-of-fame-card p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.5;
+      color: #e5e5e5;
+    }
+
+    .hall-of-fame-supporters {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      margin: 14px 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .hall-of-fame-supporters li {
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      overflow-wrap: anywhere;
+    }
+
+    .hall-of-fame-card a {
+      display: inline-block;
+      padding: 6px 0;
+      color: #fff;
+      font-size: 13px;
+      text-underline-offset: 3px;
+    }
+
+    .hall-of-fame-card a:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .fundraising-notice {
+      max-width: 360px;
+      padding: 0 10px;
+      text-align: center;
+    }
+
+    .support-button {
+      display: inline-block;
+      padding: 10px 14px;
+      border-radius: 4px;
+      background: #34c6eb;
+      color: #102128;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .support-button:hover {
+      background: #78d9f2;
+    }
+
+    .support-button:focus-visible,
+    .support-embed summary:focus-visible {
+      outline: 2px solid #fff;
+      outline-offset: 3px;
+    }
+
+    .support-embed summary {
+      cursor: pointer;
+      padding: 8px 0;
+    }
+
+    .support-embed iframe {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+      border: none;
+      border-radius: 4px;
+      background: #f9f9f9;
     }
 
     .river-names-container {
@@ -266,8 +351,40 @@
     </div>
     <div id="info" class="info-container">
       <div class="help-message">
-        <h2 style="text-align: center">Welcome! 🌍🚴‍♂️</h2>
-        <p>
+        <section class="fundraising-notice" aria-labelledby="fundraising-title">
+          <h2 id="fundraising-title">There is a bridge I can't cross alone</h2>
+          <p>
+            The Strava integration for Kreuzungen.world no working.
+          </p>
+          <p>
+            Strava changed there API terms so I need to do a fundraiser to cover operating costs.
+            The rivers are still running, and the bridges can be rebuilt with your help.
+          </p>
+          <p>
+            Help the flow return! As soon as I reach our fundraising goal,
+            Kreuzungen will be back to counting your river crossings. 🏞️
+          </p>
+          <p>
+            <a class="support-button" href="https://ko-fi.com/davidwhittingham" target="_blank"
+              rel="noopener noreferrer">Invest in the love of crossing waterways ❤️</a>
+          </p>
+          <p>In return you will get eternal gratitude, and a spot in the hall of fame. Great splash for little cash.</p>
+        </section>
+
+        <section class="hall-of-fame-card" aria-labelledby="supporters-title">
+          <h3 id="supporters-title">Hall of Fame:</h3>
+          <ul class="hall-of-fame-supporters" aria-label="Project supporters">
+            <li>ARMIN</li>
+          </ul>
+          <p>There's the chance your name could be here too.</p>
+          <a id="hall-of-fame-link" href="#hall-of-fame">Join the hall of fame →</a>
+        </section>
+
+        <h5 style="text-align: center">
+          ❤️ Powered by data from
+          <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
+          ❤️
+        </h5>
         <ol>
           <li>Select a route by using the <strong>buttons on the right ↝</strong>
 
@@ -283,17 +400,6 @@
             For <strong>more information</strong> click on FAQ button <i class="fas fa-question"></i>
           </li>
         </ol>
-        </p>
-
-        <h5 style="text-align: center">
-          ❤️ Powered by data from
-          <a href="https://www.openstreetmap.org/about" target="_blank">OpenStreetMap</a>
-          ❤️
-        </h5>
-        <p class="support-credit">
-          Supported by <strong>ARMIN</strong> ❤️ ·
-          <a id="hall-of-fame-link" href="#hall-of-fame">Join the hall of fame</a>
-        </p>
       </div>
     </div>
     <div id="activities" class="activities-container">
