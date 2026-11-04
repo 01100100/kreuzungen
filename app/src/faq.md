@@ -97,9 +97,9 @@ The name "Kreuzungen" is the German word for "crossings" or "intersections".
 Help keep Kreuzungen and the river crossing fun flowing by financially supporting the project. In return, you’ll get eternal gratitude and your name in the hall of fame. Great splash for little cash!
 
 - **Excelsior**
+- **Armin (working student)**
 - **Thomas (Extremely hot looking)**
 - **The Redon**
-- **Armin (working student)**
 - **Vitor (CTO)**
 - **Secret Döner**
 - **Kinga (CDO)**
