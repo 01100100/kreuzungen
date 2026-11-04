@@ -105,6 +105,7 @@ Help keep Kreuzungen and the river crossing fun flowing by financially supportin
 - **Kinga (CDO)**
 - **Rui**
 - **Majdical colleague**
+- **anonymous maestro**
 
 <p><a class="support-button" href="https://ko-fi.com/davidwhittingham" target="_blank" rel="noopener noreferrer">Invest in the love of crossing waterways ❤️</a></p>
 
