@@ -101,6 +101,7 @@ Help keep Kreuzungen and the river crossing fun flowing by financially supportin
 - **The Redon**
 - **ARMIN**
 - **Vitor (CTO)**
+- **Secret Döner**
 - **Kinga (CDO)**
 - **Rui**
 - **Majdical colleague**
