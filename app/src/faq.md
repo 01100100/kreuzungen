@@ -98,6 +98,7 @@ Help keep Kreuzungen and the river crossing fun flowing by financially supportin
 
 - **Excelsior**
 - **Thomas (Extremely hot looking)**
+- **The Redon**
 - **ARMIN**
 - **Vitor (CTO)**
 - **Kinga (CDO)**
