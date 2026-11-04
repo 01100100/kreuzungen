@@ -99,7 +99,7 @@ Help keep Kreuzungen and the river crossing fun flowing by financially supportin
 - **Excelsior**
 - **Thomas (Extremely hot looking)**
 - **The Redon**
-- **ARMIN**
+- **Armin (working student)**
 - **Vitor (CTO)**
 - **Secret Döner**
 - **Kinga (CDO)**
