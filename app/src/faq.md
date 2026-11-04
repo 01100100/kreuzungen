@@ -97,6 +97,7 @@ The name "Kreuzungen" is the German word for "crossings" or "intersections".
 Help keep Kreuzungen and the river crossing fun flowing by financially supporting the project. In return, you’ll get eternal gratitude and your name in the hall of fame. Great splash for little cash!
 
 - **ARMIN**
+- **Vitor (CTO)**
 
 <p><a class="support-button" href="https://ko-fi.com/davidwhittingham" target="_blank" rel="noopener noreferrer">Invest in the love of crossing waterways ❤️</a></p>
 
