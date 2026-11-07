@@ -103,6 +103,8 @@ Help keep Kreuzungen and the river crossing fun flowing by financially supportin
 - **Vitor (CTO)**
 - **Secret Döner**
 - **Kinga (CDO)**
+- **Shredmaster Jannes**
+- **Dennis**
 - **Rui**
 - **Majdical colleague**
 - **anonymous maestro**
